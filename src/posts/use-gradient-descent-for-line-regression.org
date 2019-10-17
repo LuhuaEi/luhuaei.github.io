@@ -1,0 +1,155 @@
+#+TITLE: 使用梯度下降求解线性回归问题
+#+DATE: [2019-10-17 17:35]
+
+* 梯度下降
+梯度下降为一种优化方法，其原理在于：通过对损失函数(凸函数)进行求导，寻找极小值所
+在的方向，沿着该方向前进，直到其达到极小值(可能是全局极小值、也有可能为局部极小
+值)。
+
+在一个凸函数中，假设其仅有一个极小值点，当某点位于极小值点左边时，模型需要朝右边
+前进才是正确的方向，当位于右边时，模型需要往左边前进，才可能找到极小值点。
+
+在数学上，梯度表示成一个多变量函数的全导数(即所有可能的偏导数的组合)。具有一个参
+数的函数，在二维空间上表示成一条线，而具有两个参数的函数，在三维空间上表示成一
+个平面，而梯度下降就是要找到其中的极小值，对于一个凸曲线来说，极小值处于导数为0
+的地方，而对于一个凸面来说，极小值就是处于所有曲线的极小值交点处。
+** 数值法
+使用导数的定义方法进行求导。即在控制其他变量不变的情况下，对x点求梯度为：\(g =
+\frac{f(x + h) - f(x -h)}{2h}\)。这是使用\(2h\)主要是2h带来的误差比\(h\)误差小，
+可以通过泰勒公式验证。
+** 解析法
+用解析法，求解梯度的速度很快，其主要是，先计算出损失函数求导后的表达式，直接用公
+式计算。
+** 反向传播
+方向传播的主要原理在于使用链式法则。通过前向传播的步骤，一步一步反推。
+*** 加载数据
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  import numpy as np
+  import matplotlib.pyplot as plt
+  from matplotlib.animation import FuncAnimation
+
+  plt.style.use('ggplot')
+  DATA = np.array(np.genfromtxt("data/gd-line-regression.csv", delimiter=','))
+#+END_SRC
+*** 数据预览
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/use-gradient-descent-for-line-regression-945387.png :exports both
+  x = DATA[:, 0]
+  y = DATA[:, 1]
+  plt.figure(figsize=(9.0, 6.0))
+  plt.plot(x, y, 'o')
+  plt.xlabel('x')
+  plt.ylabel('y')
+  plt.tight_layout(pad=0.0)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/use-gradient-descent-for-line-regression-945387.png]]
+*** 梯度下降函数
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  class LinearRegression():
+      def __init__(self):
+          self.weights_list = []
+
+      def model(self, x_train, y_train):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - x_train: (N, D)
+          - y_train: (N, 1)
+          '''
+          self.x_train = x_train
+          self.y_train = y_train
+
+      def train(self, weights, learning_rate=0.0001, iter_count=1000):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - weights: (D, 1)
+          - learning_rate: (float)
+          - iter_count: (integer)
+          Outputs:
+          ------------------------------------------------------------
+          update the weights on self weights.
+          '''
+          for i in range(0, iter_count):
+              gw = self.gradient_descent(weights)
+              weights -= learning_rate * gw
+              # if don't copy will lead all values will the last update value.
+              self.weights_list.append(weights.copy())
+          self.weights = weights
+
+
+      def gradient_descent(self, w):
+          '''
+          use forward and backward pass computer the gradient
+
+          Inputs:
+          ------------------------------------------------------------
+          - w: (D, 1) weights
+          Outputs:
+          ------------------------------------------------------------
+          - dw: (D, 1) gradient weights
+          '''
+          # forward pass
+          w_mul_x = self.x_train.dot(w)                           # 1 (N, 1)
+          w_mul_x_sub_y = w_mul_x - self.y_train                  # 2 (N, 1)
+          w_mul_x_sub_y_square = np.square(w_mul_x_sub_y)         # 3 (N, 1)
+          sum_w_mul_x_sub_y_square = np.sum(w_mul_x_sub_y_square) # 4 (1, 1)
+          mse = sum_w_mul_x_sub_y_square / self.x_train.shape[0]  # 5 (1, 1)
+
+          # backward pass
+          dsum_w_mul_x_sub_y_square = 1 / self.x_train.shape[0] # 5
+          # 4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]
+          dw_mul_x_sub_y_square = 1
+          dw_mul_x_sub_y = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square # 3 (N, 1)
+          dw_mul_x = dw_mul_x_sub_y                                  # 2 (N, 1)
+          dw = self.x_train.T.dot(dw_mul_x)                          # 1 (D, 1)
+          return dw
+
+      def MSE(self):
+          '''computer the mean square error'''
+          y_pred = np.dot(self.x_train, self.weights)
+          return np.mean(np.square(self.y_train - y_pred))
+
+      def plot(self, w):
+          plt.figure(figsize=(9.0, 6.0))
+          plt.plot(self.x_train[:, 1], self.y_train, 'bo')
+          plt.plot(self.x_train[:, 1], np.dot(self.x_train, w), 'r-')
+          plt.xlabel('x')
+          plt.ylabel('y')
+          plt.tight_layout(pad=0.0)
+          plt.show()
+#+END_SRC
+*** 求解
+这里已经将截距项合并到x中以及weights中。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/use-gradient-descent-for-line-regression-134697.png :exports both
+  # 在数据前面添加一列，用来计算截距项
+  xt = np.c_[np.ones((x.shape[0])), x]
+  yt = y.reshape(y.shape[0], -1)
+  # 两个系数，一个截距项，一个系数
+  weights = np.zeros((2, 1))
+
+  linear = LinearRegression()
+  linear.model(xt, yt)
+  linear.train(weights.copy(), learning_rate=0.000001, iter_count=10)
+  linear.plot(linear.weights)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/use-gradient-descent-for-line-regression-134697.png]]
+*** 优化过程
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  fig, ax = plt.subplots(figsize=(9.0, 6.0))
+  ax.scatter(x, y)
+  line, = ax.plot(x, np.dot(xt, weights), 'r-', lw=3)
+
+  def update(i):
+      y_pred = np.dot(xt, linear.weights_list[i])
+      line.set_ydata(y_pred)
+      return line,
+
+  anim = FuncAnimation(fig, update, frames=list(range(10)), interval=500)
+  anim.save('./images/update-line-for-gradient-descent.gif', fps=60, writer='imagemagick')
+#+END_SRC
+
+[[file:./images/update-line-for-gradient-descent.gif]]

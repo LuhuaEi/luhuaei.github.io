@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2019-10-17 Thu 21:42 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>使用梯度下降求解线性回归问题</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="luhuaei">
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div class="content-wrapper container">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+<div id="preamble" class="status">
+<div class="">
+    <a href="/"> Luhuaei </a>
+  </div>
+  <ul class="">
+    <li><a href="/about.html"> About Me </a> </li>
+    <li><a href="/archive.html"> Posts </a> </li>
+  </ul>
+  <hr>
+</div>
+<div id="content">
+<header>
+<h1 class="title">使用梯度下降求解线性回归问题</h1>
+</header>
+<div id="outline-container-org25d0998" class="outline-2">
+<h2 id="org25d0998">梯度下降</h2>
+<div class="outline-text-2" id="text-org25d0998">
+<p>
+梯度下降为一种优化方法，其原理在于：通过对损失函数(凸函数)进行求导，寻找极小值所
+在的方向，沿着该方向前进，直到其达到极小值(可能是全局极小值、也有可能为局部极小
+值)。
+</p>
+
+<p>
+在一个凸函数中，假设其仅有一个极小值点，当某点位于极小值点左边时，模型需要朝右边
+前进才是正确的方向，当位于右边时，模型需要往左边前进，才可能找到极小值点。
+</p>
+
+<p>
+在数学上，梯度表示成一个多变量函数的全导数(即所有可能的偏导数的组合)。具有一个参
+数的函数，在二维空间上表示成一条线，而具有两个参数的函数，在三维空间上表示成一
+个平面，而梯度下降就是要找到其中的极小值，对于一个凸曲线来说，极小值处于导数为0
+的地方，而对于一个凸面来说，极小值就是处于所有曲线的极小值交点处。
+</p>
+</div>
+<div id="outline-container-org2ec8fd5" class="outline-3">
+<h3 id="org2ec8fd5">数值法</h3>
+<div class="outline-text-3" id="text-org2ec8fd5">
+<p>
+使用导数的定义方法进行求导。即在控制其他变量不变的情况下，对x点求梯度为：\(g =
+\frac{f(x + h) - f(x -h)}{2h}\)。这是使用\(2h\)主要是2h带来的误差比\(h\)误差小，
+可以通过泰勒公式验证。
+</p>
+</div>
+</div>
+<div id="outline-container-org3417cf3" class="outline-3">
+<h3 id="org3417cf3">解析法</h3>
+<div class="outline-text-3" id="text-org3417cf3">
+<p>
+用解析法，求解梯度的速度很快，其主要是，先计算出损失函数求导后的表达式，直接用公
+式计算。
+</p>
+</div>
+</div>
+<div id="outline-container-org0132df4" class="outline-3">
+<h3 id="org0132df4">反向传播</h3>
+<div class="outline-text-3" id="text-org0132df4">
+<p>
+方向传播的主要原理在于使用链式法则。通过前向传播的步骤，一步一步反推。
+</p>
+</div>
+<div id="outline-container-org9cf20c9" class="outline-4">
+<h4 id="org9cf20c9">加载数据</h4>
+<div class="outline-text-4" id="text-org9cf20c9">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">import</span> numpy <span style="color: #859900;">as</span> np
+<span style="color: #859900;">import</span> matplotlib.pyplot <span style="color: #859900;">as</span> plt
+<span style="color: #859900;">from</span> matplotlib.animation <span style="color: #859900;">import</span> FuncAnimation
+
+plt.style.use(<span style="color: #2aa198;">'ggplot'</span>)
+<span style="color: #6c71c4;">DATA</span> = np.array(np.genfromtxt(<span style="color: #2aa198;">"data/gd-line-regression.csv"</span>, delimiter=<span style="color: #2aa198;">','</span>))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf7a2530" class="outline-4">
+<h4 id="orgf7a2530">数据预览</h4>
+<div class="outline-text-4" id="text-orgf7a2530">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">x</span> = DATA[:, 0]
+<span style="color: #6c71c4;">y</span> = DATA[:, 1]
+plt.figure(figsize=(9.0, 6.0))
+plt.plot(x, y, <span style="color: #2aa198;">'o'</span>)
+plt.xlabel(<span style="color: #2aa198;">'x'</span>)
+plt.ylabel(<span style="color: #2aa198;">'y'</span>)
+plt.tight_layout(pad=0.0)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/use-gradient-descent-for-line-regression-945387.png" alt="use-gradient-descent-for-line-regression-945387.png">
+
+</figure>
+</div>
+</div>
+<div id="outline-container-orgefe8be6" class="outline-4">
+<h4 id="orgefe8be6">梯度下降函数</h4>
+<div class="outline-text-4" id="text-orgefe8be6">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">LinearRegression</span>():
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>):
+        <span style="color: #859900;">self</span>.weights_list = []
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">model</span>(<span style="color: #859900;">self</span>, x_train, y_train):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - x_train: (N, D)</span>
+<span style="color: #35a69c;">        - y_train: (N, 1)</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #859900;">self</span>.x_train = x_train
+        <span style="color: #859900;">self</span>.y_train = y_train
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, weights, learning_rate=0.0001, iter_count=1000):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - weights: (D, 1)</span>
+<span style="color: #35a69c;">        - learning_rate: (float)</span>
+<span style="color: #35a69c;">        - iter_count: (integer)</span>
+<span style="color: #35a69c;">        Outputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        update the weights on self weights.</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, iter_count):
+            <span style="color: #6c71c4;">gw</span> = <span style="color: #859900;">self</span>.gradient_descent(weights)
+            <span style="color: #6c71c4;">weights</span> -= learning_rate * gw
+            <span style="color: #405A61;"># </span><span style="color: #405A61;">if don't copy will lead all values will the last update value.</span>
+            <span style="color: #859900;">self</span>.weights_list.append(weights.copy())
+        <span style="color: #859900;">self</span>.weights = weights
+
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">gradient_descent</span>(<span style="color: #859900;">self</span>, w):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        use forward and backward pass computer the gradient</span>
+
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - w: (D, 1) weights</span>
+<span style="color: #35a69c;">        Outputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - dw: (D, 1) gradient weights</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">forward pass</span>
+        <span style="color: #6c71c4;">w_mul_x</span> = <span style="color: #859900;">self</span>.x_train.dot(w)                           <span style="color: #405A61;"># </span><span style="color: #405A61;">1 (N, 1)</span>
+        <span style="color: #6c71c4;">w_mul_x_sub_y</span> = w_mul_x - <span style="color: #859900;">self</span>.y_train                  <span style="color: #405A61;"># </span><span style="color: #405A61;">2 (N, 1)</span>
+        <span style="color: #6c71c4;">w_mul_x_sub_y_square</span> = np.square(w_mul_x_sub_y)         <span style="color: #405A61;"># </span><span style="color: #405A61;">3 (N, 1)</span>
+        <span style="color: #6c71c4;">sum_w_mul_x_sub_y_square</span> = np.<span style="color: #268bd2;">sum</span>(w_mul_x_sub_y_square) <span style="color: #405A61;"># </span><span style="color: #405A61;">4 (1, 1)</span>
+        <span style="color: #6c71c4;">mse</span> = sum_w_mul_x_sub_y_square / <span style="color: #859900;">self</span>.x_train.shape[0]  <span style="color: #405A61;"># </span><span style="color: #405A61;">5 (1, 1)</span>
+
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">backward pass</span>
+        <span style="color: #6c71c4;">dsum_w_mul_x_sub_y_square</span> = 1 / <span style="color: #859900;">self</span>.x_train.shape[0] <span style="color: #405A61;"># </span><span style="color: #405A61;">5</span>
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]</span>
+        <span style="color: #6c71c4;">dw_mul_x_sub_y_square</span> = 1
+        <span style="color: #6c71c4;">dw_mul_x_sub_y</span> = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square <span style="color: #405A61;"># </span><span style="color: #405A61;">3 (N, 1)</span>
+        <span style="color: #6c71c4;">dw_mul_x</span> = dw_mul_x_sub_y                                  <span style="color: #405A61;"># </span><span style="color: #405A61;">2 (N, 1)</span>
+        <span style="color: #6c71c4;">dw</span> = <span style="color: #859900;">self</span>.x_train.T.dot(dw_mul_x)                          <span style="color: #405A61;"># </span><span style="color: #405A61;">1 (D, 1)</span>
+        <span style="color: #859900;">return</span> dw
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">MSE</span>(<span style="color: #859900;">self</span>):
+        <span style="color: #35a69c;">'''computer the mean square error'''</span>
+        <span style="color: #6c71c4;">y_pred</span> = np.dot(<span style="color: #859900;">self</span>.x_train, <span style="color: #859900;">self</span>.weights)
+        <span style="color: #859900;">return</span> np.mean(np.square(<span style="color: #859900;">self</span>.y_train - y_pred))
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">plot</span>(<span style="color: #859900;">self</span>, w):
+        plt.figure(figsize=(9.0, 6.0))
+        plt.plot(<span style="color: #859900;">self</span>.x_train[:, 1], <span style="color: #859900;">self</span>.y_train, <span style="color: #2aa198;">'bo'</span>)
+        plt.plot(<span style="color: #859900;">self</span>.x_train[:, 1], np.dot(<span style="color: #859900;">self</span>.x_train, w), <span style="color: #2aa198;">'r-'</span>)
+        plt.xlabel(<span style="color: #2aa198;">'x'</span>)
+        plt.ylabel(<span style="color: #2aa198;">'y'</span>)
+        plt.tight_layout(pad=0.0)
+        plt.show()
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc8505fb" class="outline-4">
+<h4 id="orgc8505fb">求解</h4>
+<div class="outline-text-4" id="text-orgc8505fb">
+<p>
+这里已经将截距项合并到x中以及weights中。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#22312;&#25968;&#25454;&#21069;&#38754;&#28155;&#21152;&#19968;&#21015;&#65292;&#29992;&#26469;&#35745;&#31639;&#25130;&#36317;&#39033;</span>
+<span style="color: #6c71c4;">xt</span> = np.c_[np.ones((x.shape[0])), x]
+<span style="color: #6c71c4;">yt</span> = y.reshape(y.shape[0], -1)
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20004;&#20010;&#31995;&#25968;&#65292;&#19968;&#20010;&#25130;&#36317;&#39033;&#65292;&#19968;&#20010;&#31995;&#25968;</span>
+<span style="color: #6c71c4;">weights</span> = np.zeros((2, 1))
+
+<span style="color: #6c71c4;">linear</span> = LinearRegression()
+linear.model(xt, yt)
+linear.train(weights.copy(), learning_rate=0.000001, iter_count=10)
+linear.plot(linear.weights)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/use-gradient-descent-for-line-regression-134697.png" alt="use-gradient-descent-for-line-regression-134697.png">
+
+</figure>
+</div>
+</div>
+<div id="outline-container-org2f7ad39" class="outline-4">
+<h4 id="org2f7ad39">优化过程</h4>
+<div class="outline-text-4" id="text-org2f7ad39">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+ax.scatter(x, y)
+line, = ax.plot(x, np.dot(xt, weights), <span style="color: #2aa198;">'r-'</span>, lw=3)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">update</span>(i):
+    <span style="color: #6c71c4;">y_pred</span> = np.dot(xt, linear.weights_list[i])
+    line.set_ydata(y_pred)
+    <span style="color: #859900;">return</span> line,
+
+<span style="color: #6c71c4;">anim</span> = FuncAnimation(fig, update, frames=<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(10)), interval=500)
+anim.save(<span style="color: #2aa198;">'./images/update-line-for-gradient-descent.gif'</span>, fps=60, writer=<span style="color: #2aa198;">'imagemagick'</span>)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/update-line-for-gradient-descent.gif" alt="update-line-for-gradient-descent.gif">
+
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer class="footer">
+      <!-- Footer Definition -->
+   </footer>
+
+  <!-- Google Analytics Js --><!-- Disqua JS -->
+</div>
+
+</div>
+<div class="col"></div></div>
+</div>
+</body>
+</html>
