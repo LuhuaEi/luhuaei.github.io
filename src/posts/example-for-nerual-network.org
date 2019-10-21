@@ -1,0 +1,233 @@
+#+title: 神经网络拟合“玩具数据”
+#+date: [2019-10-21 19:23]
+
+* 预加载
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  import numpy as np
+  import matplotlib.pyplot as plt
+
+  COLOR = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
+             'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+#+END_SRC
+
+* 生成数据
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/example-for-nerual-network-945052.png :exports both
+  N = 100
+  D = 2
+  K = 3
+  X = np.zeros((N*K, D))
+  y = np.zeros(N*K, dtype='uint8')
+  learning_rate = 0.00001
+  reg_lambda = 0.0001
+  for j in range(K):
+      # 确定每一个类的行范围
+      ix = range(N*j, N*(j+1))
+      r = np.linspace(0.0, 1, N)
+      t = np.linspace(j*4, (j+1)*4, N) + np.random.randn(N)*0.2
+      # C_将两个数组按列进行连接(合并)
+      X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+      y[ix] = j
+
+
+  fig, ax = plt.subplots(figsize=(9.0, 6.0))
+  ax.scatter(X[:, 0], X[:, 1],
+             c=list(map(lambda x: COLOR[x], y)),
+             s=40, cmap=plt.cm.Spectral)
+  plt.tight_layout(pad=0.0)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/example-for-nerual-network-945052.png]]
+* 初始化参数
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  W = 0.01 * np.random.randn(D, K)
+  B = np.zeros((1, K))
+#+END_SRC
+
+* 线性分类器计算得分
+将所有输入乘以权重累加后，再加上偏差。计算出每一个样本，对应3个类的得分，直观上，
+渴望正确的类获得更高的得分，换句话说，就是正确的类在三个类的占比应该最大。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def f_scores(X, W, B):
+      return np.dot(X, W) + B
+#+END_SRC
+
+* 计算损失
+使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
+\)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
+为0,而 log(1) = 0 这是取log的原因。在得分中，所在比例越少，说明损失越大，但从log
+函数的性质看，在(0, 1)区间中，越接近0,越接近负无穷，所以取负号。
+
+这个数据集的损失等于\(L = \frac{1}{N} \sum_i L_i + \frac{1}{2}\lambda \sum_k
+\sum_l W_{k,i}^{2} \)，表示为样本的平均损失加上正规损失。
+
+下面例子中，y代表着正确类别，同时也是下标。这里由于权重矩阵是随机生成的，所以预
+测正确的概率应该为1/3,因此损失值大约为 -log(1/3) = 1.09，跟计算出来的一样。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def f_exp_scores(scores, y):
+      height = scores.shape[0]
+      exp_scores = np.exp(scores)
+      probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+      correct_logprobs = -np.log(probs[range(height), y])
+      return probs, correct_logprobs
+
+  def f_loss(correct_logprobs, W, reg_lambda):
+      data_loss = np.mean(correct_logprobs)
+      regularztion_loss = 1/2 * reg_lambda * np.sum(W*W)
+      loss = data_loss + regularztion_loss
+      return loss
+#+END_SRC
+
+* 计算梯度
+根据公式计算得到，可以直接得出损失函数的梯度。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def f_gradient(X, W, probs, y, reg_lambda):
+      dscores = probs.copy()
+
+      height = probs.shape[0]
+      dscores[range(height), y] -= 1
+      dscores /= height
+
+      dW = np.dot(X.T, dscores) + reg_lambda * W
+      dB = np.sum(dscores, axis=0, keepdims=True)
+      return dW, dB
+#+END_SRC
+
+* 更新权重
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def f_update(W, B, dW, dB, learning_rate):
+      weights = W.copy()
+      bias = B.copy()
+      weights -= learning_rate * dW
+      bias -= learning_rate * dB
+      return weights, bias
+#+END_SRC
+
+* 迭代更新
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def main(X, W, B, y, reg_lambda, learning_rate, iter_num=100, verbose=False):
+      for i in range(iter_num):
+          scores = f_scores(X, W, B)
+          probs, correct_logprobs = f_exp_scores(scores, y)
+          loss = f_loss(correct_logprobs, W, reg_lambda)
+          dW, dB = f_gradient(X, W, probs, y, reg_lambda)
+          W, B = f_update(W, B, dW, dB, learning_rate)
+          if verbose:
+              print("iter_num: %d, loss: %f" %(i, loss))
+      return W, B, loss
+
+  res_w, res_b, res_loss = main(X, W, B, y, 1e-3, 1e-0, iter_num=200, verbose=True)
+#+END_SRC
+得到线性模型的损失函数为0.73多。
+
+* 决策边界
+
+* 神经网络
+从上面的线性分类器中，看到准确率仅仅51%。采用神经网络对数据进行拟合，设定一个两
+层的网络，其中第一层网络具有100个节点，而第二层即最后一层具有3个(节点)分类。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  h = 100
+  W = 0.01 * np.random.randn(D, h)
+  B = np.zeros((1, h))
+
+  W2 = 0.01 * np.random.randn(h, K)
+  B2 = np.zeros((1, K))
+
+  learning_rate = 1e-0
+  reg_lambda = 1e-3
+#+END_SRC
+
+** 计算得分
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def n_scores(X, W, W2, B, B1):
+      hidden_layer_scores = np.dot(X, W) + B # (300, 100)
+      # 激励函数 ReLU
+      hidden_layer_scores = np.maximum(0, hidden_layer_scores)
+
+      # 输出层
+      output_scores = np.dot(hidden_layer_scores, W2) + B2 # (300, 3)
+      return hidden_layer_scores, output_scores
+#+END_SRC
+** 计算损失
+损失函数同样是使用上面的softmax。根据反向传播算法。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def n_data_loss(output_scores, y):
+      height = y.shape[0]
+      exp_scores = np.exp(output_scores)
+      # 得分在各类中的占比
+      exp_scores_percent = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+      corr_scores = exp_scores_percent[list(range(height)), y]
+      data_loss = np.mean(-np.log(corr_scores))
+      return data_loss, exp_scores_percent
+
+  def n_regularztion_loss(W, W2, reg_lambda):
+      return 0.5 * reg_lambda * (np.sum(W * W) + np.sum(W2 * W2))
+
+  # n_loss = n_data_loss(output_scores, y) + n_regularztion_loss(W, W2, reg_lambda)
+#+END_SRC
+
+** 计算梯度
+对损失函数求导。
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def n_gradient(X, W2, exp_scores_percent, y, hidden_layer_scores):
+      # 对softmax函数求导部分，前面已经用公式证明，
+      height = y.shape[0]
+      doutput_scores = exp_scores_percent.copy()
+      doutput_scores[list(range(height)), y] -= 1
+      doutput_scores /= height
+
+      # output_scores = np.dot(hidden_layer_scores, W2) + B2
+      # dw2 = hidden_layer_scores.T * doutput_scores
+      dW2 = np.dot(hidden_layer_scores.T, doutput_scores) # (100, 3)
+      dB2 = np.sum(doutput_scores, axis=0, keepdims=True) # (1, 3)
+
+      # output_scores = np.dot(hidden_layer_scores, W2) + B2
+      # 先计算output_scores对hidden_layer_scores的导数
+      dhidden_layer_scores = np.dot(doutput_scores, W2.T) # (300, 100)
+      # Relu求导得，仅仅当x大于0，求导得1
+      dhidden_layer_scores[hidden_layer_scores <= 0] = 0
+
+      dW = np.dot(X.T, dhidden_layer_scores)
+      dB = np.sum(dhidden_layer_scores, axis=0, keepdims=True)
+      return dW, dB, dW2, dB2
+#+END_SRC
+
+** 更新函数
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def n_main(X, y, h, W, B, W2, B2, learning_rate=1e-0, reg_lambda=1e-3, iter_num=500, verbose=False):
+      W = W.copy()
+      B = B.copy()
+      W2 = W2.copy()
+      B2 = B2.copy()
+      for i in range(iter_num):
+          hidden_ls, output_scores = n_scores(X, W, W2, B, B2)
+          data_loss, exp_scores_percent = n_data_loss(output_scores, y)
+          reg_loss = n_regularztion_loss(W, W2, reg_lambda)
+          loss = data_loss + reg_loss
+
+          d_w, d_b, d_w2, d_b2 = n_gradient(X, W2, exp_scores_percent, y, hidden_ls)
+          d_w += reg_lambda * W
+          d_w2 += reg_lambda * W2
+
+          # update
+          W    -= learning_rate * d_w
+          B    -= learning_rate * d_b
+          W2   -= learning_rate * d_w2
+          B2   -= learning_rate * d_b2
+
+          if verbose and i % 100 == 0:
+              print("iter: %d, loss: %f" %(i, loss))
+      return W, B, W2, B2, loss
+
+  nres_W, nres_B, nres_W2, nres_B2, nres_loss = n_main(X, y, h, W, B, W2, B2, iter_num=10000, verbose=True)
+
+  # 计算准确率
+  _, n_s = n_scores(X, nres_W, nres_W2, nres_B, nres_B2)
+  n_pred = np.argmax(n_s, axis=1)
+  np.mean(n_pred == y)
+#+END_SRC
+线性分类器，得到的损失函数值为0.78,而神经网络得到的损失值为0.24，神经网络的准确
+率达到98%。
+
+* 参考
+[[https://cs231n.github.io/neural-networks-case-study/][CS231n]]
