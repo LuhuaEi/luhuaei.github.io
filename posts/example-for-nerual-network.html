@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-21 Mon 19:46 -->
+<!-- 2019-10-21 Mon 21:16 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>神经网络拟合“玩具数据”</title>
@@ -130,9 +130,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org9e400c3" class="outline-2">
-<h2 id="org9e400c3">计算损失</h2>
-<div class="outline-text-2" id="text-org9e400c3">
+<div id="outline-container-org656f073" class="outline-2">
+<h2 id="org656f073">计算损失</h2>
+<div class="outline-text-2" id="text-org656f073">
 <p>
 使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
 \)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
@@ -167,9 +167,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgb5047c9" class="outline-2">
-<h2 id="orgb5047c9">计算梯度</h2>
-<div class="outline-text-2" id="text-orgb5047c9">
+<div id="outline-container-orgdf53e71" class="outline-2">
+<h2 id="orgdf53e71">计算梯度</h2>
+<div class="outline-text-2" id="text-orgdf53e71">
 <p>
 根据公式计算得到，可以直接得出损失函数的梯度。
 </p>
@@ -228,10 +228,6 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org47b2eb9" class="outline-2">
-<h2 id="org47b2eb9">决策边界</h2>
-</div>
-
 <div id="outline-container-org0db52b1" class="outline-2">
 <h2 id="org0db52b1">神经网络</h2>
 <div class="outline-text-2" id="text-org0db52b1">
@@ -269,9 +265,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 </div>
-<div id="outline-container-org36b4277" class="outline-3">
-<h3 id="org36b4277">计算损失</h3>
-<div class="outline-text-3" id="text-org36b4277">
+<div id="outline-container-org1b1c5c9" class="outline-3">
+<h3 id="org1b1c5c9">计算损失</h3>
+<div class="outline-text-3" id="text-org1b1c5c9">
 <p>
 损失函数同样是使用上面的softmax。根据反向传播算法。
 </p>
@@ -294,9 +290,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org0c4acff" class="outline-3">
-<h3 id="org0c4acff">计算梯度</h3>
-<div class="outline-text-3" id="text-org0c4acff">
+<div id="outline-container-orgefef9e0" class="outline-3">
+<h3 id="orgefef9e0">计算梯度</h3>
+<div class="outline-text-3" id="text-orgefef9e0">
 <p>
 对损失函数求导。
 </p>
@@ -368,6 +364,78 @@ np.mean(n_pred == y)
 线性分类器，得到的损失函数值为0.78,而神经网络得到的损失值为0.24，神经网络的准确
 率达到98%。
 </p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org47b2eb9" class="outline-2">
+<h2 id="org47b2eb9">决策边界</h2>
+<div class="outline-text-2" id="text-org47b2eb9">
+</div>
+<div id="outline-container-org6cb0e77" class="outline-3">
+<h3 id="org6cb0e77">线性函数决策边界</h3>
+<div class="outline-text-3" id="text-org6cb0e77">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">step</span> = 0.02
+<span style="color: #6c71c4;">xmin</span>, <span style="color: #6c71c4;">xmax</span> = X[:, 0].<span style="color: #268bd2;">min</span>() - 1, X[:, 0].<span style="color: #268bd2;">max</span>() + 1
+<span style="color: #6c71c4;">ymin</span>, <span style="color: #6c71c4;">ymax</span> = X[:, 1].<span style="color: #268bd2;">min</span>() - 1, X[:, 1].<span style="color: #268bd2;">max</span>() + 1
+
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20551;&#35774;  xx&#65292;yy&#37117;&#20026; (196, 191)</span>
+<span style="color: #6c71c4;">xx</span>, <span style="color: #6c71c4;">yy</span> = np.meshgrid(np.arange(xmin, xmax, step),
+                     np.arange(ymin, ymax, step))
+
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#30697;&#38453;&#25289;&#24179;&#21518;&#65292;&#22312;&#21512;&#24182;&#25104;(196x191, 2)</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">(196x191, 2) &#20877;&#19982;W&#26435;&#37325;&#30697;&#38453;&#30456;&#20056;W(2, 3)&#65292;&#24471;&#21040;&#19968;&#20010;</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">(196x191, 3)&#20854;&#20013;&#27599;&#19968;&#34892;&#20195;&#34920;&#19968;&#20010;&#26679;&#26412;3&#20010;&#31867;&#21508;&#33258;&#30340;&#24471;&#20998;&#12290;</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">Z&#30456;&#31561;&#19982;&#21518;&#38754;&#30340;&#24471;&#20998;&#65292;&#21482;&#19981;&#36807;&#36825;&#37324;&#19981;&#26159;&#29992;X&#65292;&#32780;&#26159;&#29992;xx&#65292;yy</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#22240;&#27492;&#21487;&#20197;&#20351;&#29992;&#19978;&#38754;&#30340;&#35745;&#31639;&#24471;&#20998;&#30340;&#20989;&#25968;&#36827;&#34892;&#35745;&#31639;</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">Z = f_scores(np.c_[xx.ravel(), yy.ravel()], res_w, res_b)</span>
+<span style="color: #6c71c4;">Z</span> = np.dot(np.c_[xx.ravel(), yy.ravel()], res_w) + res_b
+
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20174;&#20013;&#36873;&#25321;&#26368;&#22823;&#30340;&#27010;&#29575;&#30340;&#31867;&#12290;</span>
+<span style="color: #6c71c4;">Z</span> = np.argmax(Z, axis=1)        <span style="color: #405A61;"># </span><span style="color: #405A61;">(196x191, 1)</span>
+<span style="color: #6c71c4;">Z</span> = Z.reshape(xx.shape)
+
+<span style="color: #6c71c4;">fig</span> = plt.figure(figsize=(9.0, 6.0))
+plt.contourf(xx, yy, Z, cmap=plt.cm.RdPu, alpha=0.5)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors=<span style="color: #2aa198;">'black'</span>)
+plt.xlim(xx.<span style="color: #268bd2;">min</span>(), xx.<span style="color: #268bd2;">max</span>())
+plt.ylim(yy.<span style="color: #268bd2;">min</span>(), yy.<span style="color: #268bd2;">max</span>())
+plt.tight_layout(pad=0.0)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/example-for-nerual-network-480812.png" alt="example-for-nerual-network-480812.png">
+
+</figure>
+</div>
+</div>
+<div id="outline-container-orgd4ff3e2" class="outline-3">
+<h3 id="orgd4ff3e2">神经网络决策边界</h3>
+<div class="outline-text-3" id="text-orgd4ff3e2">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#22312;xx&#65292;yy&#19979;&#30340;&#24471;&#20998;</span>
+<span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">Z</span> = n_scores(np.c_[xx.ravel(), yy.ravel()], nres_W, nres_W2, nres_B, nres_B2)
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20174;&#20013;&#36873;&#25321;&#26368;&#22823;&#30340;&#27010;&#29575;&#30340;&#31867;&#12290;</span>
+<span style="color: #6c71c4;">Z</span> = np.argmax(Z, axis=1)
+<span style="color: #6c71c4;">Z</span> = Z.reshape(xx.shape)
+
+<span style="color: #6c71c4;">fig</span> = plt.figure(figsize=(9.0, 6.0))
+plt.contourf(xx, yy, Z, cmap=plt.cm.RdPu, alpha=0.5)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors=<span style="color: #2aa198;">'black'</span>)
+plt.xlim(xx.<span style="color: #268bd2;">min</span>(), xx.<span style="color: #268bd2;">max</span>())
+plt.ylim(yy.<span style="color: #268bd2;">min</span>(), yy.<span style="color: #268bd2;">max</span>())
+plt.tight_layout(pad=0.0)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/example-for-nerual-network-959414.png" alt="example-for-nerual-network-959414.png">
+
+</figure>
 </div>
 </div>
 </div>

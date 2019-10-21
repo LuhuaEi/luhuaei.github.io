@@ -2,5 +2,6 @@
 
 
 #+begin_archive
+@@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 21, 2019 @@html:</span>@@ [[file:posts/example-for-nerual-network.org][神经网络拟合“玩具数据”]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 17, 2019 @@html:</span>@@ [[file:posts/use-gradient-descent-for-line-regression.org][使用梯度下降求解线性回归问题]] @@html:</span>@@ @@html:</li>@@
 #+end_archive
