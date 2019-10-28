@@ -1,0 +1,3 @@
+#+BEGIN_QUOTE
+"…everything became much clearer when I started writing code."
+#+END_QUOTE
