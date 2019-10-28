@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-21 Mon 21:16 -->
+<!-- 2019-10-29 Tue 00:50 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>神经网络拟合“玩具数据”</title>
@@ -130,9 +130,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org656f073" class="outline-2">
-<h2 id="org656f073">计算损失</h2>
-<div class="outline-text-2" id="text-org656f073">
+<div id="outline-container-org1b1c5c9" class="outline-2">
+<h2 id="org1b1c5c9">计算损失</h2>
+<div class="outline-text-2" id="text-org1b1c5c9">
 <p>
 使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
 \)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
@@ -167,9 +167,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgdf53e71" class="outline-2">
-<h2 id="orgdf53e71">计算梯度</h2>
-<div class="outline-text-2" id="text-orgdf53e71">
+<div id="outline-container-orgefef9e0" class="outline-2">
+<h2 id="orgefef9e0">计算梯度</h2>
+<div class="outline-text-2" id="text-orgefef9e0">
 <p>
 根据公式计算得到，可以直接得出损失函数的梯度。
 </p>
@@ -265,9 +265,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 </div>
-<div id="outline-container-org1b1c5c9" class="outline-3">
-<h3 id="org1b1c5c9">计算损失</h3>
-<div class="outline-text-3" id="text-org1b1c5c9">
+<div id="outline-container-org13e6d9d" class="outline-3">
+<h3 id="org13e6d9d">计算损失</h3>
+<div class="outline-text-3" id="text-org13e6d9d">
 <p>
 损失函数同样是使用上面的softmax。根据反向传播算法。
 </p>
@@ -290,9 +290,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgefef9e0" class="outline-3">
-<h3 id="orgefef9e0">计算梯度</h3>
-<div class="outline-text-3" id="text-orgefef9e0">
+<div id="outline-container-orgf2b33b0" class="outline-3">
+<h3 id="orgf2b33b0">计算梯度</h3>
+<div class="outline-text-3" id="text-orgf2b33b0">
 <p>
 对损失函数求导。
 </p>

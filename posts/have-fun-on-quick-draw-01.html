@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2019-10-29 Tue 00:50 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>用AI画出手写风格的图</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="luhuaei">
+
+<meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+<div class="content-wrapper container">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+<div id="preamble" class="status">
+
+<div class="">
+    <a href="/"> Luhua.ei </a>
+</div>
+<ul class="">
+  <li><a href="/about.html"> About Me </a> </li>
+  <li><a href="https://github.com/luhuaei"> Github </a> </li>
+  <li><a href="/archive.html"> Posts </a> </li>
+</ul>
+  <hr>
+</div>
+<div id="content">
+<header>
+<h1 class="title">用AI画出手写风格的图</h1>
+</header><div id="outline-container-org76bd29c" class="outline-2">
+<h2 id="org76bd29c">整体概要</h2>
+<div class="outline-text-2" id="text-org76bd29c">
+<ul class="org-ul">
+<li>目标：
+<ul class="org-ul">
+<li>使用AI生成具有手写风格的图片。</li>
+<li>可以将人们手写图片的风格记录下来，用来生成一些独特的图片。</li>
+</ul></li>
+<li>思路：
+<ul class="org-ul">
+<li>使用QuickDraw的数据训练模型。</li>
+<li>对神经网络具有更加深入的了解。</li>
+</ul></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgae0b89a" class="outline-2">
+<h2 id="orgae0b89a">依赖加载</h2>
+<div class="outline-text-2" id="text-orgae0b89a">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">import</span> numpy <span style="color: #859900;">as</span> np
+<span style="color: #859900;">import</span> pandas <span style="color: #859900;">as</span> pd
+<span style="color: #859900;">import</span> matplotlib.pyplot <span style="color: #859900;">as</span> plt
+<span style="color: #859900;">from</span> matplotlib.animation <span style="color: #859900;">import</span> FuncAnimation
+
+<span style="color: #859900;">import</span> ndjson                   <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35299;&#26512;ndjson&#25991;&#20214;</span>
+<span style="color: #859900;">import</span> json
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org205697a" class="outline-2">
+<h2 id="org205697a">加载数据</h2>
+<div class="outline-text-2" id="text-org205697a">
+<p>
+先尝试使用baseball<sub>bat数据集</sub>，后面可以只需改变数据集就可以了。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">with</span> <span style="color: #268bd2;">open</span>(<span style="color: #2aa198;">"/home/luhuaei/Data/google-quickdarw/baseball_bat.ndjson"</span>, <span style="color: #2aa198;">'r'</span>) <span style="color: #859900;">as</span> f:
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">pandas provice many utils function</span>
+    <span style="color: #6c71c4;">DATA_BASEBALL</span> = pd.DataFrame(ndjson.load(f))
+    <span style="color: #6c71c4;">DATA_BASEBALL.drawing</span> = DATA_BASEBALL.drawing.<span style="color: #268bd2;">apply</span>(<span style="color: #859900;">lambda</span> x: np.array(x))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org820a85b" class="outline-2">
+<h2 id="org820a85b">实用函数</h2>
+<div class="outline-text-2" id="text-org820a85b">
+<p>
+这里定义一些经常调用的函数。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">bar_annotate</span>(draw_rect):
+    <span style="color: #859900;">for</span> rect <span style="color: #859900;">in</span> draw_rect:
+        <span style="color: #6c71c4;">height</span> = rect.get_height()
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">textcoords is determine the annotate text coords, here `offset points' is represented</span>
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">offset points from xy values.</span>
+        ax.annotate(<span style="color: #2aa198;">'%.2f'</span> %(height, ), xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3), textcoords=<span style="color: #2aa198;">'offset points'</span>, ha=<span style="color: #2aa198;">'center'</span>, va=<span style="color: #2aa198;">'bottom'</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge05785f" class="outline-2">
+<h2 id="orge05785f">描述信息</h2>
+<div class="outline-text-2" id="text-orge05785f">
+<p>
+描述分析，好像我也经习惯了，每拿到一个数据，首先进行描述分析，当我看别人做的分析
+报告时，才发现简单的描述分析对于了解整个数据集还是不够的。
+</p>
+</div>
+<div id="outline-container-orgfd6f38e" class="outline-3">
+<h3 id="orgfd6f38e">baseball<sub>bat</sub></h3>
+<div class="outline-text-3" id="text-orgfd6f38e">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">count_country</span> = DATA_BASEBALL.countrycode.value_counts()
+
+plt.style.use(<span style="color: #2aa198;">'ggplot'</span>)
+<span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+<span style="color: #6c71c4;">rect</span> = ax.bar(count_country[:10].index, count_country[:10].values)
+bar_annotate(rect)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/have-fun-on-quick-draw-01-923979.png" alt="have-fun-on-quick-draw-01-923979.png">
+
+</figure>
+
+<p>
+从上面的图中可以了解到，在Google平台上进行QuickDraw的用户中，属于US的占最多，其
+中属于baseball<sub>bat这一项目中就具有56779个用户</sub>。可能的原因是：Google建立于美国
+本地，用户量大。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">DATA_BASEBALL</span>[<span style="color: #2aa198;">'count_strokes'</span>] = DATA_BASEBALL.drawing.<span style="color: #268bd2;">apply</span>(<span style="color: #859900;">lambda</span> x: np.array(x).shape[0])
+
+<span style="color: #6c71c4;">mean_strokes</span> = DATA_BASEBALL.count_strokes.groupby(DATA_BASEBALL.countrycode).mean()
+<span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+<span style="color: #6c71c4;">bar</span> = ax.bar(count_country[:10].index, mean_strokes[count_country[:10].index])
+bar_annotate(bar)
+ax.set_ylim(0, 5)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/have-fun-on-quick-draw-01-104983.png" alt="have-fun-on-quick-draw-01-104983.png">
+
+</figure>
+
+
+<p>
+从上面的图中，在参与人数最多前10的国家中，每一个国家的描绘一个baseball<sub>bat的平均</sub>
+笔划都是集中在2.0附近。其中最高的是GB(Great Britain)，最低的是DE(Germany).
+</p>
+
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(3, 3, figsize=(9.0, 6.0))
+<span style="color: #6c71c4;">index</span> = np.random.choice(DATA_BASEBALL.index, 9)
+<span style="color: #859900;">for</span> i, a <span style="color: #859900;">in</span> <span style="color: #268bd2;">zip</span>(index, ax.flatten()):
+    <span style="color: #6c71c4;">drawing</span> = DATA_BASEBALL.drawing[i]
+    <span style="color: #859900;">for</span> draw_line <span style="color: #859900;">in</span> drawing:
+        a.plot(draw_line[0], draw_line[1], <span style="color: #2aa198;">'-'</span>)
+        a.set_axis_off()
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/have-fun-on-quick-draw-01-115375.png" alt="have-fun-on-quick-draw-01-115375.png">
+
+</figure>
+
+<p>
+生成一个动态的gif图，快速浏览100张图片的形状。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+<span style="color: #6c71c4;">index</span> = np.random.choice(DATA_BASEBALL.index, 100)
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">gif_update</span>(iter_count):
+    <span style="color: #6c71c4;">drawing</span> = DATA_BASEBALL.drawing[iter_count]
+    ax.clear()
+    <span style="color: #859900;">for</span> draw_line <span style="color: #859900;">in</span> drawing:
+        ax.plot(draw_line[0], draw_line[1])
+        ax.set_axis_off()
+<span style="color: #6c71c4;">anim</span> = FuncAnimation(fig, gif_update, frames=index, interval=5000)
+anim.save(path, fps=60, writer=<span style="color: #2aa198;">'imagemagick'</span>)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/have-fun-on-quick-draw-01-221760.gif" alt="have-fun-on-quick-draw-01-221760.gif">
+
+</figure>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2c798b5" class="outline-2">
+<h2 id="org2c798b5">切割数据</h2>
+<div class="outline-text-2" id="text-org2c798b5">
+<div class="org-src-container">
+<pre class="src src-jupyter-python">
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer class="footer">
+      <!-- Footer Definition -->
+   </footer>
+
+  <!-- Google Analytics Js --><!-- Disqua JS -->
+</div>
+
+</div>
+<div class="col"></div></div>
+</div>
+</body>
+</html>
