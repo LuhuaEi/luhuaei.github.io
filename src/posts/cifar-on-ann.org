@@ -1,0 +1,159 @@
+#+title: 使用神经网络训练CIFAR-10
+#+date: [2019-10-29 13:11]
+
+* 激励函数
+** 为什么需要激励函数？
+因为在现实中，有很多的数据都不是可以使用一个线或者一个平面进行分割的，而根据维基
+百科的定义，线性函数是指：线性函数是只拥有一个参数的一阶多项式函数。所以需要引进
+非线性函数用来解决线性函数的不足。这种位于层中的非线性函数被称为激励函数。
+
+从另一个角度，如果没有激励函数，那该网络仅仅能表达线性处理，这样即使具有更多的隐
+藏层，其功能都可以用单层的神经网络进行实现，表明，如果没有激励函数为模型提供非线
+性转化，那隐藏层是没有作用的。
+
+激励函数与损失函数：激励函数用于提供非线性功能，而损失函数用于计算预测结果与实际
+结果之间的差异。
+
+激励函数作为一个神经元，用于对输入变量进行处理，事实上任何数学函数都可以作为激励函数。
+常见的激活函数有以下几个：
+** Sigmoid
+非线性函数，取值范围为[0, 1], \(\sigma(x) = \frac{1}{1 + exp(-x)}\) 主要将一个值
+归一化，即压缩到0与1之间，根据公式可以看出，大的负数值将会被求值为0，而大的正数
+值将会被求值为1。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-393527.png :exports both
+  f_sigmoid = lambda x: 1.0 / (1.0 + np.exp(-x))
+  def f_plot(f, x):
+      y = list(map(f, x))
+      plt.style.use('ggplot')
+      plt.plot(x, y, 'r-')
+      plt.plot([0.0, 0.0], [min(y) -1, max(y)+1], 'b-')
+      plt.plot([-10.0, 10.0], [0.0, 0.0], 'b-')
+      plt.xlabel('x')
+      plt.ylabel('y')
+
+  x = np.arange(-10, 10, 0.001)
+  f_plot(f_sigmoid, x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-393527.png]]
+*** 缺点：
+在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
+的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
+是为大于0。
+** tanh(logistic)
+非线性函数，取值范围为[-1, 1]，Sigmod变体，但是为0中心化的，\(tanh(x) =
+2\sigma(2x) - 1\)
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-891349.png :exports both
+  f_tanh = lambda x: 2.0 * f_sigmoid(2.0 * x) - 1.0
+  f_plot(f_tanh, x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-891349.png]]
+
+** 修正线性单元(ReLU)
+ReLU(Rectified Linear Unit)函数表示成\(ReLU(x) = max(0, x)\)。从斜率的角度看就是，
+当x大于0,斜率为1,否则为0。因为ReLU的缺点，所以在使用时，需要小心模型学习速率，如
+果很关心学习的速率，可以尝试Leaky ReLU或者Maxout。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-723822.png :exports both
+  f_relu = lambda x: x if x > 0 else 0
+  f_plot(f_relu, x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-723822.png]]
+
+*** 优点：
+在随机梯度下降中，比tanh/Sigmod的收敛速度更快，并由于其是线性的，不会出现饱和现
+象(指当达到一定的阀值后，值不会发生改变，如Sigmod中的，当达到一定程度后，很大的
+数求值为1,很小的数求值为0，位于两点的梯度都为0，造成梯度消失(kill gradient)。与
+tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计算指数。
+*** 缺点：
+ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
+掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。
+** 泄漏ReLU(leaky ReLU)
+为了解决ReLU“死掉”问题而设计，当 x<0 时，将给予一个微小的数，而不是0。就如，当
+\(x<0 f(x) = ax\) 当 \(x>=0 f(x)=x\), 其中a代表一个常数，在一些方面可以取得很好
+的结果，但一些方面结果并不令人满意。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-495479.png :exports both
+  f_leaky_relu = lambda x: x if x >= 0 else 0.25*x
+  f_plot(f_leaky_relu, x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-495479.png]]
+
+** Maxout
+将多个激励函数进行合并，表达式为: \(max(F_1, F_2, ...)\) ，当后面的\(F_2, ...,
+F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的缺点(因为梯度过大导致
+神经元“死掉”)，但这样，其对于每一个神经元必须需要传递两个参数以上的变量。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-890421.png :exports both
+  f_maxout = lambda x: f_sigmoid(x) if f_sigmoid(x) > f_relu(x) else f_relu(x)
+  f_plot(f_maxout, x)
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-890421.png]]
+* 前向传播
+前向传播就是平时看到的传播模式，就是一个一个接着往下传播。简单的前向传播实现，主
+要用于理解前向传播的思想。
+** 前向传播算法
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def forward_pass(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
+      '''input_array(num, channel, width, height) 分别对应图片的数量，图片的层数，宽度，高度
+      input_weights(num, channel, width, height) 分别对应过滤器的个数，channel，宽度，高度
+      channel 与 depth 并不一样，前者代表单个样本中的Z轴，而depth代
+      表卷积层的Z轴，即采集器的个数也称为内核的个数。
+      '''
+      x_num, x_channel, x_height, x_width = input_volumes.shape
+      f_num, _, f_height, f_width = input_weights.shape
+      out_height = (x_height - f_height + 2*zero_padding) // stride + 1
+      out_width = (x_width - f_width + 2*zero_padding) // stride + 1
+
+      X = np.pad(input_volumes, ((0, 0), (0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
+                 "constant", constant_values=0)
+
+      # 每一个采集器只会产生一个二维的数组
+      dout = np.zeros((x_num, f_num, out_height, out_width))
+      # 对样本迭代，即对每一张图片进行迭代
+      for n in range(x_num):
+          # 对多个采集器进行迭代采集
+          for f in range(f_num):
+              for y in range(0, out_height):
+                  for x in range(0, out_width):
+                      # 利用输出的维度，反推采集的区域
+                      dout[n, f, y, x] = np.sum(
+                          X[n, :, y*stride : y*stride + f_height, x*stride : x*stride + f_width] * input_weights[f]
+                      ) + input_biases[f]
+      cache = (input_volumes, input_weights, input_biases, stride, zero_padding)
+      return dout, cache
+#+END_SRC
+** 测试数据
+#+BEGIN_SRC jupyter-python :session py :results output :exports both
+  x_shape = (2, 3, 4, 4)
+  w_shape = (3, 3, 4, 4)
+  x = np.linspace(-0.1, 0.5, num=np.prod(x_shape)).reshape(x_shape)
+  w = np.linspace(-0.2, 0.3, num=np.prod(w_shape)).reshape(w_shape)
+  b = np.linspace(-0.1, 0.2, num=3)
+
+  # 正确的答案
+  correct_out = np.array([[[[-0.08759809, -0.10987781],
+                            [-0.18387192, -0.2109216 ]],
+                           [[ 0.21027089,  0.21661097],
+                            [ 0.22847626,  0.23004637]],
+                           [[ 0.50813986,  0.54309974],
+                            [ 0.64082444,  0.67101435]]],
+                          [[[-0.98053589, -1.03143541],
+                            [-1.19128892, -1.24695841]],
+                           [[ 0.69108355,  0.66880383],
+                            [ 0.59480972,  0.56776003]],
+                           [[ 2.36270298,  2.36904306],
+                            [ 2.38090835,  2.38247847]]]])
+  # 计算相对误差
+  dout, _ = forward_pass(x, w, b, 2, 1)
+  print("relative_error: ", relative_error(dout, correct_out))
+#+END_SRC
+
+#+RESULTS:
+: relative_error:  2.2121476417505994e-08
