@@ -2,6 +2,7 @@
 
 
 #+begin_archive
+@@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 29, 2019 @@html:</span>@@ [[file:posts/cifar-on-linear-classficier.org][线性分类器训练CIFAR]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 28, 2019 @@html:</span>@@ [[file:posts/cifar-data-on-knn.org][KNN算法预测CIFAR]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 28, 2019 @@html:</span>@@ [[file:posts/data-preprocess.org][关于数据预处理]] @@html:</span>@@ @@html:</li>@@
 @@html:<li>@@ @@html:<span class="archive-item"><span class="archive-date">@@ Oct 28, 2019 @@html:</span>@@ [[file:posts/have-fun-on-quick-draw-01.org][用AI画出手写风格的图]] @@html:</span>@@ @@html:</li>@@

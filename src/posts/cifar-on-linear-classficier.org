@@ -1,0 +1,249 @@
+#+title: 线性分类器训练CIFAR
+#+date: [2019-10-29 09:22]
+
+直觉上看，我们希望通过训练，得到一个模型，这个模型可以快速的应用到新的测试数据上，
+而不用遍历整个训练数据集。
+
+* 得分函数(score function)
+就拿图片数据来说，score function就是将图片中的元素值映射到每一个类的得分上，通俗
+来讲，就是输入元素值，输出属于每一个类的概率。
+* 损失函数(loss function)
+计算真实值与预测值之间的误差，而训练的目的在于使整个模型的损失最小(最优化问题)。
+* 多非类支持向量机(MSVM)
+支持向量机也是损失函数的一种，通过利用预测的类与真实的类计算损失函数。
+** 原理
+\(L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta)\) 其中\(i\)代表第\(i\)
+个样本，\(j\)表示成当前样本所需要预测的类个数，\(y_j\)代表正确类的得分，根据上面
+的公式来看，Supports Vector Machine 的原理在于计算当前样本属于每一个类的得分，然
+后通过将其他不正确类的得分减去正确类的得分后加上偏差的总和。
+** 算法实现
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def svm_li_unvectorized(X, Y, W):
+      '''采用循环'''
+      delta = 1.0
+      scores = W.dot(X)
+      correct_class_scores = scores[Y]
+      class_num = W.shape[0]
+      loss_i = 0.0
+      for j in range(class_num):
+          if j == Y:
+              continue
+          loss_i += max(0, scores[j] - correct_class_scores + delta)
+      return loss_i
+
+  def svm_li_vectorized(X, Y, W):
+      '''用向量替换循环，提高速度'''
+      delta = 1.0
+      scores = W.dot(X)
+      margins = max(0, scores - scores[Y] + delta)
+      # 由于前面是直接对整个向量进行减去scores[Y], 导致其中正确的类也相减，在加上delta
+      # 而损失函数计算的仅仅是不正确的类的误差，所以将第Y个margins重新赋值为0
+      # 避免循环判断
+      margins[Y] = 0
+      loss_i = np.sum(margins)
+      return loss_i
+
+  def svm_loss_function_loop(X, Y, W, reg, delta=1):
+      '''
+      Inputs:
+      ------------------------------------------------------------
+      - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --> (50000, 3072)
+      - Y: (N, 1) label. eg CIFAR (50000, 1)
+      - W: (C, D) weights. eg CIFAR (10, 32, 32, 3) --> (10, 3072)
+      - reg: (float) lambda. regularization strgenth
+
+      Outputs:
+      ------------------------------------------------------------
+      - loss: as sigle float.
+      - gradient:  with respect to weights W; with same shape of inputs W
+      return (loss, gradient)
+      '''
+      dW = np.zeros(W.shape)
+      x_num = X.shape[0]
+      w_num = W.shape[0]
+      loss = 0.0
+      for n in range(x_num):
+          # 每一个样本
+          scores = X[n].dot(W.T)
+          correct_class_score = scores[Y[n]]
+          # 计算与正确类别不同且比当前类损失更小的类的个数
+          loss_contribution_count = 0
+          for w in range(w_num):
+              # 如果当前的类与正确类相同，则下一步
+              if w == Y[n]:
+                  continue
+              # 计算当前类与正确类的距离
+              margin = scores[w] - scores[Y[n]] + delta
+              if margin > 0:
+                  loss += margin
+                  # 预测错误，但margin大于0，所以对这个预测错误的类进行权重更新
+                  # 更新的方式为：对预测错误的数据进行累加
+                  dW[w, :] += X[n]
+                  loss_contribution_count += 1
+          # 对于预测正确的类，也进行权重更新，更新的方式是：
+          # 将当前的权重值减去错误预测类中margin大于0的个数乘以当前预测的数据
+          dW[Y[n], :] += (-1) * loss_contribution_count * X[n]
+
+      loss /= x_num
+      dW /= x_num
+
+      # 正则化
+      loss += reg * np.sum(W * W)
+      dW += 2 * reg * W
+      return loss, dW
+
+  def svm_loss_function_vectorized(X, Y, W, reg, delta=1):
+      '''
+      don't has loop, faster than with loop
+
+      Inputs:
+      ------------------------------------------------------------
+      - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --> (50000, 3072)
+      - Y: (N, 1) label. eg CIFAR (50000, 1)
+      - W: (C, D) weights. eg CIFAR (10, 32, 32, 3) --> (10, 3072)
+      - reg: (float) lambda. regularization strgenth
+
+      Outputs:
+      ------------------------------------------------------------
+      - loss: as sigle float.
+      - gradient:  with respect to weights W; with same shape of inputs W
+      return (loss, gradient)
+      '''
+      x_num = X.shape[0]
+      w_num = W.shape[0]
+      loss = 0.0
+
+      scores = X.dot(W.T)          # (N, C)
+      # 在scores矩阵中，每一行具有C个类，其中一个属于正确的类,  而正确类位于Y
+      # 在np.reshape(a, newshape=-1)其中-1代表根据给出的值，推断出后面的值
+      correct_class_scores = scores[list(range(x_num)), Y].reshape(x_num, -1) # (N, 1)
+      # 计算每一个元素对应的margin值
+      scores += delta - correct_class_scores
+      # 将正确类对应的margin赋值为0
+      # 前面的scores[list(range(x_num)), Y] != scores[:, Y]
+      scores[list(range(x_num)), Y] = 0
+      # 把scores中所有的大于0的margin都加起来
+      loss = np.sum(np.fmax(scores, 0)) / x_num
+      # 加上正规化权重
+      loss += reg * np.sum(W * W)
+
+      # dW主要将每个类中margin大于0的数据累加起来，并在最后
+      dW = np.zeros(W.shape)      # (C, D)
+      # 生成同维度矩阵
+      xmask = np.zeros(scores.shape) # (N, C)
+      # 将其中margin大于0的标记为1
+      xmask[scores > 0] = 1
+      xmask[np.arange(x_num), Y] = -np.sum(xmask, axis=1) # 计数 loss_contribution_count
+      # xmask.T 代表每一列表示一张图片的预测效果，共C行，其中margin大于0的被赋值为1
+      # 利用xmask.T(C, N)与X(N, D)进行点积的过程中，xmask.T中第一行代表第一个类，其中margin>0被
+      # 标记为1，否则为0。这一个点积就是将N个样本中所有在当前类中margin>0的行(row)累加到一行。由于
+      # 一共具有C个类，所以最终得到(C, D)的矩阵
+      dW = xmask.T.dot(X)
+      # 求平均值
+      dW /= x_num
+      dW += 2 * reg * W
+      return loss, dW
+#+END_SRC
+* 归一化指数函数(softmax)
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def softmax_loss_function_vectorized(X, Y, W, reg, delta=1):
+      pass
+#+END_SRC
+* 线性分类器
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  class LinerClassifier():
+      def __init__(self):
+          self.W = None
+
+      def train(self, X, Y, class_num, learning_rate=1e-3, regularization=1e-5, num_iters=100,
+                batch_size=128, verbose=False):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - X: (N, D) train set, eg CIFAR is (50000, 32, 32, 3) --> (50000, 3072)
+          - Y: (N, 1) label set, eg CIFAR is (50000, 1)
+          - learning_rate: (float) SGD learning rate.
+          - regularization: (float) regularization lambda.
+          - num_iters: (integer) SGD iters num.
+          - batch_size: (integer) SGD splits each batch size.
+          - verbose: (boolen) whether print details infomations.
+
+          Outputs:
+          ------------------------------------------------------------
+          '''
+          x_num, x_dim = X.shape
+          if self.W is None:
+              self.W = 0.001 * np.random.randn(num_classes, x_dim)
+
+          loss_history = []
+          for i in range(num_iters):
+              batch_idx = np.random.choice(x_num, batch_size)
+              X_batch = X[batch_idx]
+              Y_batch = Y[batch_idx]
+
+              loss, grad = self.loss(X_batch, Y_batch, regularization)
+              loss_history.append(loss)
+
+              self.W += (-1) * learning_rate * grad
+
+              if verbose:
+                  print('Current iters informarion:\ncount: %d\nloss: %d' %(i, loss))
+          return loss_history
+
+      def loss(self, X, Y, reg):
+          pass
+
+      def predict(self, X):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - X: (N, D) is the test set.
+          Outputs:
+          ------------------------------------------------------------
+          - pred: (N, 1) is the predict label.
+          '''
+          pred = np.zeros(X.shape[0])
+          scores = X.dot(self.W.T)
+          pred = np.argmax(scores, axis=1)
+          return pred
+
+  class LinerSVM(LinerClassifier):
+      def loss(self, X, Y, reg):
+          return svm_loss_function_vectorized(X, Y, self.W, reg)
+
+  class LinerSoftmax(LinerClassifier):
+      def loss(self, X, Y, reg):
+          return softmax_loss_function_vectorized(X, Y, self.W, reg)
+#+END_SRC
+
+* 测试数据
+#+BEGIN_SRC jupyter-python :session py :results output :exports both
+  # 将数据添加一组偏差
+  X_train2d_dev = np.hstack([X_train2d, np.ones((X_train2d.shape[0], 1))])
+  X_test2d_dev = np.hstack([X_test2d, np.ones((X_test2d.shape[0], 1))])
+  W = np.random.randn(10, X_train2d_dev.shape[1]) * 0.0001
+
+  svm = LinerSVM()
+  # train return loss_history
+  loss_hist = svm.train(X_train2d_dev, Y_train, class_num=10, learning_rate=1e-7, regularization=2.5e4,
+                        num_iters=500, verbose=False)
+  ypred = svm.predict(X_test2d_dev)
+  svm_acc = np.mean(ypred == Y_test)
+  print("svm accurary: %.2f" %(svm_acc))
+#+END_SRC
+
+#+RESULTS:
+: svm accurary: 0.19
+
+
+* 损失函数可视化
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-linear-classficier-918772.png :exports both
+  plt.plot(loss_hist)
+  plt.title('Loss function')
+  plt.ylabel('Loss value')
+  plt.xlabel('iters num')
+  plt.show()
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-linear-classficier-918772.png]]
