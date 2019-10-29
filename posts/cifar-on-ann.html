@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 13:50 -->
+<!-- 2019-10-29 Tue 14:32 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用神经网络训练CIFAR-10</title>
@@ -114,9 +114,9 @@ f_plot(f_sigmoid, x)
 
 </figure>
 </div>
-<div id="outline-container-org0f7d2f2" class="outline-4">
-<h4 id="org0f7d2f2">缺点：</h4>
-<div class="outline-text-4" id="text-org0f7d2f2">
+<div id="outline-container-org4903870" class="outline-4">
+<h4 id="org4903870">缺点：</h4>
+<div class="outline-text-4" id="text-org4903870">
 <p>
 在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
 的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
@@ -178,9 +178,9 @@ tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计�
 </p>
 </div>
 </div>
-<div id="outline-container-org4903870" class="outline-4">
-<h4 id="org4903870">缺点：</h4>
-<div class="outline-text-4" id="text-org4903870">
+<div id="outline-container-org0a6cd6a" class="outline-4">
+<h4 id="org0a6cd6a">缺点：</h4>
+<div class="outline-text-4" id="text-org0a6cd6a">
 <p>
 ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
 掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。
@@ -309,6 +309,228 @@ f_plot(f_maxout, x)
 relative_error:  2.2121476417505994e-08
 
 </pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc43b87e" class="outline-2">
+<h2 id="orgc43b87e">反向传播(误差反向传播)</h2>
+<div class="outline-text-2" id="text-orgc43b87e">
+<p>
+<b>误差</b> 从输出节点反向传播到输入的节点，是一种需要与 <b>最优化</b> 算法结合使用的方法。
+该方法对 <b>网络中所有的权重计算损失函数的梯度</b> 。这个梯度会反馈给最优化算法，用来
+更新权重值，一最小化损失函数。
+</p>
+
+<p>
+反向传播要求每一个 <b>输入值</b> 对应的一个渴望的 <b>输出值</b> 用来计算损失函数的梯度。
+</p>
+
+<p>
+反向传播一般具有三个层，分别为输入层、隐藏层、输出层。其中通过正向的传播计算最后
+的预测值，通过与期望值进行比较，计算误差(一般平方误差)，而通过梯度下降的方法寻找
+最低的权重值，以至于最后的误差值处于极小值。
+</p>
+</div>
+<div id="outline-container-org7701ad9" class="outline-3">
+<h3 id="org7701ad9">简单的反向传播实现</h3>
+<div class="outline-text-3" id="text-org7701ad9">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">backward_pass</span>(dout, cache):
+    <span style="color: #35a69c;">'''&#36825;&#37324;dout&#20026;&#19968;&#20010;&#28212;&#26395;&#36755;&#20986;&#25968;&#32452;&#65292;cache&#20026;&#20013;&#20855;&#26377;input_volumes, input_weights,</span>
+<span style="color: #35a69c;">    input_baises, stride, zero_padding'''</span>
+    <span style="color: #6c71c4;">X</span>, <span style="color: #6c71c4;">W</span>, <span style="color: #6c71c4;">B</span>, <span style="color: #6c71c4;">S</span>, <span style="color: #6c71c4;">P</span> = cache
+    <span style="color: #6c71c4;">x_num</span>, <span style="color: #6c71c4;">x_channel</span>, <span style="color: #6c71c4;">x_height</span>, <span style="color: #6c71c4;">x_width</span> = X.shape
+    <span style="color: #6c71c4;">w_num</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">w_height</span>, <span style="color: #6c71c4;">w_width</span> = W.shape
+
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20351;&#29992;np.pad&#29983;&#25104;zeros padding&#21518;&#30340;&#25968;&#32452;&#65292;X&#20855;&#26377;&#22235;&#20010;&#32500;&#24230;&#65292;&#32780;&#25105;&#20204;&#21482;&#38656;&#35201;&#23545;</span>
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26368;&#37324;&#38754;&#20004;&#20010;&#32500;&#24230;&#36827;&#34892;padding&#65292;&#22240;&#27492;&#21069;&#38754;&#20004;&#20010;&#35774;&#32622;&#25104;(0,0)&#65292;&#32780;&#21518;&#20004;&#20010;&#32500;&#24230;(P,P)&#34920;&#31034;&#22312;&#36825;&#20010;</span>
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21069;&#38754;&#28155;&#21152;P&#20010;&#25351;&#23450;constant padding&#65292;&#32780;&#21518;&#38754;&#20063;&#28155;&#21152;P&#20010;constant padding&#12290;</span>
+    <span style="color: #6c71c4;">X_pad</span> = np.pad(X, ((0, 0), (0, 0), (P, P), (P, P)), <span style="color: #2aa198;">"constant"</span>, constant_values=0)
+    <span style="color: #6c71c4;">o_Xpad</span> = np.zeros_like(X_pad)
+
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#32467;&#26524;&#25968;&#32452;&#30340;&#32500;&#24230;</span>
+    <span style="color: #6c71c4;">o_height</span> = (x_height - w_height + 2 * P) // S + 1
+    <span style="color: #6c71c4;">o_width</span> = (x_width - w_width + 2 * P) // S + 1
+
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36755;&#20986;&#32467;&#26524;</span>
+    <span style="color: #6c71c4;">o_X</span> = np.zeros_like(X)
+    <span style="color: #6c71c4;">o_W</span> = np.zeros_like(W)
+    <span style="color: #6c71c4;">o_B</span> = np.zeros_like(B)
+
+    <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(x_num):
+        <span style="color: #859900;">for</span> f <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(w_num):
+            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20559;&#24046;&#30340;&#20010;&#25968;&#19982;&#36807;&#28388;&#22120;&#30340;&#20010;&#25968;&#30456;&#21516;</span>
+            <span style="color: #6c71c4;">o_B</span>[f] += dout[n, f].<span style="color: #268bd2;">sum</span>()
+            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26681;&#25454;&#36755;&#20986;&#32500;&#24230;&#65292;&#25512;&#20986;&#37319;&#38598;&#30340;&#20301;&#32622;&#65292;&#23545;padding&#21518;&#30340;&#30697;&#38453;&#36827;&#34892;&#32034;&#24341;</span>
+            <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_height):
+                <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_width):
+                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#21069;&#21521;&#20256;&#25773;&#32467;&#26524;&#20013;&#23545;&#24212;&#30340;&#20540; &#20056;&#20197; &#25152;&#37319;&#38598;&#30340;&#21306;&#22495; &#32047;&#21152;&#21040;&#26435;&#37325;&#30697;&#38453;&#20013;</span>
+                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26126;&#26174;&#22320;&#65292;&#22914;&#26524;&#36755;&#20986;&#30697;&#38453;&#20013;&#23545;&#24212;&#30340;&#20540;&#20026;0,&#21017;&#26435;&#37325;&#30697;&#38453;&#20445;&#25345;&#19981;&#21464;&#12290;</span>
+                    <span style="color: #6c71c4;">o_W</span>[f] += X_pad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] * dout[n, f, y, x]
+                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#21407;&#22987;&#30340;&#25968;&#25454;&#36827;&#34892;&#26356;&#26032;&#65292;&#21453;&#21521;&#26356;&#26032;&#25968;&#25454;</span>
+                    <span style="color: #6c71c4;">o_Xpad</span>[n, :, y*S : y*S+w_height, x*S : x*S+w_width] += W[f] * dout[n, f, y, x]
+    <span style="color: #6c71c4;">o_X</span> = o_Xpad[:, :, P:P+x_height, P:P+x_width]
+    <span style="color: #859900;">return</span> o_X, o_W, o_B
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf1e9650" class="outline-2">
+<h2 id="orgf1e9650">通过卷积处理图片</h2>
+<div class="outline-text-2" id="text-orgf1e9650">
+<p>
+读取图片，在原来的 <code>scipy</code> 包中，可以使用 <code>scipy.misc.imread</code> 来对图片进行读取，
+而后来的 <code>scipy</code> 包中可以使用 <code>scipy.imageio.imread</code> 来取代，但是
+<code>scipy.imageio.imread</code> 返回的数组类型是 <code>scipy.imageio.core.util.Array</code> ，而不是
+常用的 <code>numpy.ndarray</code> 数组，因此可以使用 <code>matplotlib.pyplot.imread</code> 对图片进行读取并返
+回 <code>numpy.ndarray</code> 格式。但是最新的 <code>scipy</code> 版本中，也没有了 <code>imageio</code> 模块；而
+ <code>matplotlib.pyplot.imread</code> 支持的格式并不是很多，需要可以使用 <code>pillow</code> 。
+</p>
+</div>
+<div id="outline-container-org59898b4" class="outline-3">
+<h3 id="org59898b4">图片预览</h3>
+<div class="outline-text-3" id="text-org59898b4">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">from</span> PIL <span style="color: #859900;">import</span> Image
+<span style="color: #6c71c4;">kieen</span> = Image.<span style="color: #268bd2;">open</span>(<span style="color: #2aa198;">"./images/cifar-on-ann-cat.jpg"</span>)
+<span style="color: #405A61;"># </span><span style="color: #405A61;">kieen = plt.imread("./images/cifar-on-ann-cat.jpg")</span>
+<span style="color: #6c71c4;">puppy</span> = Image.<span style="color: #268bd2;">open</span>(<span style="color: #2aa198;">"./images/cifar-on-ann-dog.jpg"</span>)
+plt.figure(figsize=(10.0, 8.0))
+plt.subplot(1, 2, 1)
+plt.imshow(kieen)
+plt.xticks([])
+plt.yticks([])
+plt.subplot(1, 2, 2)
+plt.imshow(puppy)
+plt.xticks([])
+plt.yticks([])
+plt.show()
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/cifar-on-ann-834866.png" alt="cifar-on-ann-834866.png">
+
+</figure>
+</div>
+</div>
+
+<div id="outline-container-org71c6cb1" class="outline-3">
+<h3 id="org71c6cb1">裁剪</h3>
+<div class="outline-text-3" id="text-org71c6cb1">
+<p>
+由于图片分辨率为1277x1920不是方阵，这里先对图片进行裁剪成方阵。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">kieen_cropped</span> = kieen.crop((0, 0, kieen.size[0], kieen.size[0]))
+<span style="color: #6c71c4;">puppy_cropped</span> = puppy.crop((0, 0, puppy.size[0], puppy.size[0]))
+plt.subplot(1, 2, 1)
+plt.imshow(kieen_cropped)
+plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.subplot(1, 2, 2)
+plt.imshow(puppy_cropped)
+plt.axis(<span style="color: #2aa198;">'off'</span>)
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/cifar-on-ann-689444.png" alt="cifar-on-ann-689444.png">
+
+</figure>
+</div>
+</div>
+
+<div id="outline-container-org8a11818" class="outline-3">
+<h3 id="org8a11818">重设大小</h3>
+<div class="outline-text-3" id="text-org8a11818">
+<p>
+选择一个更小的图片进行试验。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">img_size</span> = 200
+<span style="color: #6c71c4;">kieen_small</span> = kieen.resize((img_size, img_size))
+<span style="color: #6c71c4;">puppy_small</span> = puppy.resize((img_size, img_size))
+<span style="color: #6c71c4;">kieen_array</span> = np.array(kieen_small)
+<span style="color: #6c71c4;">puppy_array</span> = np.array(puppy_small)
+
+<span style="color: #6c71c4;">x</span> = np.zeros((2, 3, img_size, img_size))
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;RGB&#32500;&#25918;&#22312;&#21069;&#38754;</span>
+<span style="color: #6c71c4;">x</span>[0, :, :, :] = kieen_array.transpose((2, 0, 1))
+<span style="color: #6c71c4;">x</span>[1, :, :, :] = puppy_array.transpose((2, 0, 1))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgccbfbcc" class="outline-3">
+<h3 id="orgccbfbcc">生成权重矩阵（过滤器）</h3>
+<div class="outline-text-3" id="text-orgccbfbcc">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#19968;&#20849;&#19977;&#20010;&#36807;&#28388;&#22120;&#65292;&#27599;&#19968;&#20010;&#20026;3x3x3</span>
+<span style="color: #6c71c4;">w</span> = np.zeros((2, 3, 3, 3))
+
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#31532;&#19968;&#20010;&#65292;&#21033;&#29992;&#30697;&#38453;&#23545;&#22270;&#29255;&#36827;&#34892;&#36716;&#21464;</span>
+<span style="color: #6c71c4;">w</span>[0, 0, :, :] = [[0, 0, 0], [0, 0.3, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">red</span>
+<span style="color: #6c71c4;">w</span>[0, 1, :, :] = [[0, 0, 0], [0, 0.6, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">green</span>
+<span style="color: #6c71c4;">w</span>[0, 2, :, :] = [[0, 0, 0], [0, 0.1, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">blue</span>
+
+<span style="color: #6c71c4;">w</span>[1, 2, :, :] = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]] <span style="color: #405A61;"># </span><span style="color: #405A61;">blue</span>
+<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20559;&#24046;</span>
+<span style="color: #6c71c4;">b</span> = np.array([0, 128])
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org842bd12" class="outline-3">
+<h3 id="org842bd12">卷积操作</h3>
+<div class="outline-text-3" id="text-org842bd12">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">out</span>, <span style="color: #6c71c4;">_</span> = forward_pass(x, w, b, 1, 1)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">imshow_helper</span>(img, normalize=<span style="color: #d33682;">True</span>):
+    <span style="color: #35a69c;">'''predigest the plot command'''</span>
+    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#24402;&#19968;&#21270;</span>
+    <span style="color: #859900;">if</span> normalize:
+        <span style="color: #6c71c4;">img_max</span>, <span style="color: #6c71c4;">img_min</span> = np.<span style="color: #268bd2;">max</span>(img), np.<span style="color: #268bd2;">min</span>(img)
+        <span style="color: #6c71c4;">img</span> = 225.0 * (img - img_min) / (img_max - img_min)
+    plt.imshow(img.astype(<span style="color: #2aa198;">'uint8'</span>))
+    plt.gca().axis(<span style="color: #2aa198;">'off'</span>)
+
+plt.figure(figsize=(15, 10))
+<span style="color: #405A61;"># </span><span style="color: #405A61;">kieen</span>
+plt.subplot(2, 4, 1)
+imshow_helper(kieen_array, normalize=<span style="color: #d33682;">False</span>)
+plt.title(<span style="color: #2aa198;">'original'</span>)
+plt.subplot(2, 4, 2)
+imshow_helper(kieen_array, normalize=<span style="color: #d33682;">True</span>)
+plt.title(<span style="color: #2aa198;">'normalize'</span>)
+plt.subplot(2, 4, 3)
+imshow_helper(out[0, 0])
+plt.title(<span style="color: #2aa198;">'grayscale'</span>)
+plt.subplot(2, 4, 4)
+imshow_helper(out[0, 1])
+plt.title(<span style="color: #2aa198;">'edges'</span>)
+
+<span style="color: #405A61;"># </span><span style="color: #405A61;">puppy</span>
+plt.subplot(2, 4, 5)
+imshow_helper(puppy_array, normalize=<span style="color: #d33682;">False</span>)
+plt.subplot(2, 4, 6)
+imshow_helper(puppy_array, normalize=<span style="color: #d33682;">True</span>)
+plt.subplot(2, 4, 7)
+imshow_helper(out[1, 0])
+plt.subplot(2, 4, 8)
+imshow_helper(out[1, 1])
+plt.show()
+</pre>
+</div>
+
+
+<figure>
+<img src="./images/cifar-on-ann-321220.png" alt="cifar-on-ann-321220.png">
+
+</figure>
 </div>
 </div>
 </div>

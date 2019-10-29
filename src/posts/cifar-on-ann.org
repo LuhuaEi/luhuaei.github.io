@@ -157,3 +157,166 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 
 #+RESULTS:
 : relative_error:  2.2121476417505994e-08
+* 反向传播(误差反向传播)
+*误差* 从输出节点反向传播到输入的节点，是一种需要与 *最优化* 算法结合使用的方法。
+该方法对 *网络中所有的权重计算损失函数的梯度* 。这个梯度会反馈给最优化算法，用来
+更新权重值，一最小化损失函数。
+
+反向传播要求每一个 *输入值* 对应的一个渴望的 *输出值* 用来计算损失函数的梯度。
+
+反向传播一般具有三个层，分别为输入层、隐藏层、输出层。其中通过正向的传播计算最后
+的预测值，通过与期望值进行比较，计算误差(一般平方误差)，而通过梯度下降的方法寻找
+最低的权重值，以至于最后的误差值处于极小值。
+** 简单的反向传播实现
+#+BEGIN_SRC jupyter-python :session py :results output silent
+  def backward_pass(dout, cache):
+      '''这里dout为一个渴望输出数组，cache为中具有input_volumes, input_weights,
+      input_baises, stride, zero_padding'''
+      X, W, B, S, P = cache
+      x_num, x_channel, x_height, x_width = X.shape
+      w_num, _, w_height, w_width = W.shape
+
+      # 使用np.pad生成zeros padding后的数组，X具有四个维度，而我们只需要对
+      # 最里面两个维度进行padding，因此前面两个设置成(0,0)，而后两个维度(P,P)表示在这个
+      # 前面添加P个指定constant padding，而后面也添加P个constant padding。
+      X_pad = np.pad(X, ((0, 0), (0, 0), (P, P), (P, P)), "constant", constant_values=0)
+      o_Xpad = np.zeros_like(X_pad)
+
+      # 计算结果数组的维度
+      o_height = (x_height - w_height + 2 * P) // S + 1
+      o_width = (x_width - w_width + 2 * P) // S + 1
+
+      # 输出结果
+      o_X = np.zeros_like(X)
+      o_W = np.zeros_like(W)
+      o_B = np.zeros_like(B)
+
+      for n in range(x_num):
+          for f in range(w_num):
+              # 偏差的个数与过滤器的个数相同
+              o_B[f] += dout[n, f].sum()
+              # 根据输出维度，推出采集的位置，对padding后的矩阵进行索引
+              for y in range(0, o_height):
+                  for x in range(0, o_width):
+                      # 将前向传播结果中对应的值 乘以 所采集的区域 累加到权重矩阵中
+                      # 明显地，如果输出矩阵中对应的值为0,则权重矩阵保持不变。
+                      o_W[f] += X_pad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] * dout[n, f, y, x]
+                      # 对原始的数据进行更新，反向更新数据
+                      o_Xpad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] += W[f] * dout[n, f, y, x]
+      o_X = o_Xpad[:, :, P:P+x_height, P:P+x_width]
+      return o_X, o_W, o_B
+#+END_SRC
+* 通过卷积处理图片
+读取图片，在原来的 =scipy= 包中，可以使用 =scipy.misc.imread= 来对图片进行读取，
+而后来的 =scipy= 包中可以使用 =scipy.imageio.imread= 来取代，但是
+=scipy.imageio.imread= 返回的数组类型是 =scipy.imageio.core.util.Array= ，而不是
+常用的 =numpy.ndarray= 数组，因此可以使用 =matplotlib.pyplot.imread= 对图片进行读取并返
+回 =numpy.ndarray= 格式。但是最新的 =scipy= 版本中，也没有了 =imageio= 模块；而
+ =matplotlib.pyplot.imread= 支持的格式并不是很多，需要可以使用 =pillow= 。
+** 图片预览
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-834866.png :exports both
+  from PIL import Image
+  kieen = Image.open("./images/cifar-on-ann-cat.jpg")
+  # kieen = plt.imread("./images/cifar-on-ann-cat.jpg")
+  puppy = Image.open("./images/cifar-on-ann-dog.jpg")
+  plt.figure(figsize=(10.0, 8.0))
+  plt.subplot(1, 2, 1)
+  plt.imshow(kieen)
+  plt.xticks([])
+  plt.yticks([])
+  plt.subplot(1, 2, 2)
+  plt.imshow(puppy)
+  plt.xticks([])
+  plt.yticks([])
+  plt.show()
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-834866.png]]
+
+** 裁剪
+由于图片分辨率为1277x1920不是方阵，这里先对图片进行裁剪成方阵。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-689444.png :exports both
+  kieen_cropped = kieen.crop((0, 0, kieen.size[0], kieen.size[0]))
+  puppy_cropped = puppy.crop((0, 0, puppy.size[0], puppy.size[0]))
+  plt.subplot(1, 2, 1)
+  plt.imshow(kieen_cropped)
+  plt.axis('off')
+  plt.subplot(1, 2, 2)
+  plt.imshow(puppy_cropped)
+  plt.axis('off')
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-689444.png]]
+
+** 重设大小
+选择一个更小的图片进行试验。
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  img_size = 200
+  kieen_small = kieen.resize((img_size, img_size))
+  puppy_small = puppy.resize((img_size, img_size))
+  kieen_array = np.array(kieen_small)
+  puppy_array = np.array(puppy_small)
+
+  x = np.zeros((2, 3, img_size, img_size))
+  # 将RGB维放在前面
+  x[0, :, :, :] = kieen_array.transpose((2, 0, 1))
+  x[1, :, :, :] = puppy_array.transpose((2, 0, 1))
+#+END_SRC
+** 生成权重矩阵（过滤器）
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  # 一共三个过滤器，每一个为3x3x3
+  w = np.zeros((2, 3, 3, 3))
+
+  # 第一个，利用矩阵对图片进行转变
+  w[0, 0, :, :] = [[0, 0, 0], [0, 0.3, 0], [0, 0, 0]] # red
+  w[0, 1, :, :] = [[0, 0, 0], [0, 0.6, 0], [0, 0, 0]] # green
+  w[0, 2, :, :] = [[0, 0, 0], [0, 0.1, 0], [0, 0, 0]] # blue
+
+  w[1, 2, :, :] = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]] # blue
+  # 偏差
+  b = np.array([0, 128])
+#+END_SRC
+** 卷积操作
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-321220.png :exports both
+  out, _ = forward_pass(x, w, b, 1, 1)
+
+  def imshow_helper(img, normalize=True):
+      '''predigest the plot command'''
+      # 归一化
+      if normalize:
+          img_max, img_min = np.max(img), np.min(img)
+          img = 225.0 * (img - img_min) / (img_max - img_min)
+      plt.imshow(img.astype('uint8'))
+      plt.gca().axis('off')
+
+  plt.figure(figsize=(15, 10))
+  # kieen
+  plt.subplot(2, 4, 1)
+  imshow_helper(kieen_array, normalize=False)
+  plt.title('original')
+  plt.subplot(2, 4, 2)
+  imshow_helper(kieen_array, normalize=True)
+  plt.title('normalize')
+  plt.subplot(2, 4, 3)
+  imshow_helper(out[0, 0])
+  plt.title('grayscale')
+  plt.subplot(2, 4, 4)
+  imshow_helper(out[0, 1])
+  plt.title('edges')
+
+  # puppy
+  plt.subplot(2, 4, 5)
+  imshow_helper(puppy_array, normalize=False)
+  plt.subplot(2, 4, 6)
+  imshow_helper(puppy_array, normalize=True)
+  plt.subplot(2, 4, 7)
+  imshow_helper(out[1, 0])
+  plt.subplot(2, 4, 8)
+  imshow_helper(out[1, 1])
+  plt.show()
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-321220.png]]
