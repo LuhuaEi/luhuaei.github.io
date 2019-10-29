@@ -19,6 +19,12 @@
 损失函数寻找最优的权重值，使得损失函数值最小。我们不可以寻找到最好的权重值在一开
 始，而是要通过交互改进的方法进行寻找，即先设定一个随机的权重值，通过每一次对权重
 进行修正。
+
+#+BEGIN_QUOTE
+Our strategy will be to start with random weights and iteratively refine them
+over time to get lower loss
+#+END_QUOTE
+
 ** 随机搜索
 先随机生成一个权重，对给予的权重值求值损失函数，那当前的损失函数与目前最优的损失
 函数相比，如果更优，则保留该权重，否则重复生成一个随机新的权重值，重复比较。
