@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 00:50 -->
+<!-- 2019-10-29 Tue 10:32 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>神经网络拟合“玩具数据”</title>
@@ -54,6 +54,114 @@
 <header>
 <h1 class="title">神经网络拟合“玩具数据”</h1>
 </header>
+<div id="outline-container-org0db52b1" class="outline-2">
+<h2 id="org0db52b1">神经网络</h2>
+<div class="outline-text-2" id="text-org0db52b1">
+</div>
+<div id="outline-container-org48293c6" class="outline-3">
+<h3 id="org48293c6">名称</h3>
+<div class="outline-text-3" id="text-org48293c6">
+<p>
+一般约定，N-layers不包括输入层。因此，一个一层神经网络代表的一个没有隐藏层的神经
+网络。在这种定义下，简单的逻辑回归或者支持向量机都是一个一层的神经网络。同时神经
+网络也被称为人工神经网络(ANN, Artificial Neural Networks)或者多层感应器(MLP,
+Multi-Layer Perceptrons).
+</p>
+</div>
+</div>
+<div id="outline-container-org6416c14" class="outline-3">
+<h3 id="org6416c14">组件</h3>
+<div class="outline-text-3" id="text-org6416c14">
+<ol class="org-ol">
+<li>节点，即神经元，位于层中</li>
+<li>权重，即链接线的粗细</li>
+<li>偏差，每一个节点都具有一个偏差</li>
+<li>激励函数，对层中每一个节点的输入进行转换，不同的层拥有不同的激励函数</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orge8a53ee" class="outline-3">
+<h3 id="orge8a53ee">大小</h3>
+<div class="outline-text-3" id="text-orge8a53ee">
+<ol class="org-ol">
+<li>如何计算神经网络中神经元的个数或者参数变量？神经元的个数有隐藏层所含的节点总
+数加上输出层节点个数，而参数变量为偏差+连接线。</li>
+<li>如何根据实际的问题决定层的个数？值得注意的是，随着神经网络的层数增加，网络可
+以完美地拟合出一条决策边界，但很容易导致过拟合问题。但过拟合问题可以使用其他
+方法防止。</li>
+<li>使用大网络带来的好处？小的网络很难使用梯度下降进行优化，梯度下降有个缺点就是
+可能收敛在局部极小值，而大的网络具有更多的极小值，而这些极小值可能比最小值具
+有更小的损失。</li>
+<li><p>
+小的网络输出的结果具有更大的波动，可能会收敛到一个很好的极小值，但也有可能会
+输出一个较差的结果。而在大的网络中，将会产生更多的结果，且最终的波动比小的网
+络更小。
+</p>
+
+<blockquote>
+<p>
+n other words, all solutions are about equally as good, and rely less on the
+luck of random initialization.
+</p>
+</blockquote></li>
+
+<li>因此，你不要因为过拟合问题而使用更小的网络，相反，如果条件允许，应该使用更大
+的网络以及使用正规惩罚等手段来控制过拟合问题。</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org858ad8e" class="outline-3">
+<h3 id="org858ad8e">层的类型</h3>
+<div class="outline-text-3" id="text-org858ad8e">
+</div>
+<div id="outline-container-orgcda553e" class="outline-4">
+<h4 id="orgcda553e">全链接层</h4>
+<div class="outline-text-4" id="text-orgcda553e">
+<p>
+故名思义，就是后一个层的每一个节点都与前一个层的所有节点相连。
+</p>
+</div>
+</div>
+<div id="outline-container-org9ec944e" class="outline-4">
+<h4 id="org9ec944e">输出层</h4>
+<div class="outline-text-4" id="text-org9ec944e">
+<p>
+输出层与其他的层不同，其没有激励函数，这是因为往往最后一层代表着类的得分或者一些
+其他类型的标签(分类)或者数值(回归)。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org474e7fc" class="outline-3">
+<h3 id="org474e7fc">函数</h3>
+<div class="outline-text-3" id="text-org474e7fc">
+<blockquote>
+<p>
+Neural Networks with at least one hidden layer are universal approximators(通用
+近似器)
+</p>
+</blockquote>
+<p>
+经过证明，存在一个连续函数f，以及e为参数且大于0,而一个具有一层隐藏层的神经网络函
+数g，对于所有x，都有 <code>|f - g| &lt; e</code> 即神经网络近似于任何连续的函数。
+</p>
+
+<p>
+一个两层的神经网络为一个通用近似器，其在数学上性质很可爱，但在实际中，其很弱小和
+无用。多个隐藏层将会比当个隐藏层的效果更好，同时也适用使用梯度优化器。
+</p>
+</div>
+</div>
+<div id="outline-container-org5c73a18" class="outline-3">
+<h3 id="org5c73a18">结构</h3>
+<div class="outline-text-3" id="text-org5c73a18">
+<p>
+为一个网状结构，从输入数据，经过隐藏层的映射，输出对应的结果。
+</p>
+</div>
+</div>
+</div>
+
 <div id="outline-container-orgbc73dff" class="outline-2">
 <h2 id="orgbc73dff">预加载</h2>
 <div class="outline-text-2" id="text-orgbc73dff">
@@ -130,9 +238,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org1b1c5c9" class="outline-2">
-<h2 id="org1b1c5c9">计算损失</h2>
-<div class="outline-text-2" id="text-org1b1c5c9">
+<div id="outline-container-org13e6d9d" class="outline-2">
+<h2 id="org13e6d9d">计算损失</h2>
+<div class="outline-text-2" id="text-org13e6d9d">
 <p>
 使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
 \)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
@@ -167,9 +275,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgefef9e0" class="outline-2">
-<h2 id="orgefef9e0">计算梯度</h2>
-<div class="outline-text-2" id="text-orgefef9e0">
+<div id="outline-container-orgf2b33b0" class="outline-2">
+<h2 id="orgf2b33b0">计算梯度</h2>
+<div class="outline-text-2" id="text-orgf2b33b0">
 <p>
 根据公式计算得到，可以直接得出损失函数的梯度。
 </p>
@@ -228,9 +336,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org0db52b1" class="outline-2">
-<h2 id="org0db52b1">神经网络</h2>
-<div class="outline-text-2" id="text-org0db52b1">
+<div id="outline-container-org2ca314b" class="outline-2">
+<h2 id="org2ca314b">Neural network</h2>
+<div class="outline-text-2" id="text-org2ca314b">
 <p>
 从上面的线性分类器中，看到准确率仅仅51%。采用神经网络对数据进行拟合，设定一个两
 层的网络，其中第一层网络具有100个节点，而第二层即最后一层具有3个(节点)分类。
@@ -265,9 +373,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 </div>
-<div id="outline-container-org13e6d9d" class="outline-3">
-<h3 id="org13e6d9d">计算损失</h3>
-<div class="outline-text-3" id="text-org13e6d9d">
+<div id="outline-container-org03d21d0" class="outline-3">
+<h3 id="org03d21d0">计算损失</h3>
+<div class="outline-text-3" id="text-org03d21d0">
 <p>
 损失函数同样是使用上面的softmax。根据反向传播算法。
 </p>
@@ -290,9 +398,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgf2b33b0" class="outline-3">
-<h3 id="orgf2b33b0">计算梯度</h3>
-<div class="outline-text-3" id="text-orgf2b33b0">
+<div id="outline-container-org86d460b" class="outline-3">
+<h3 id="org86d460b">计算梯度</h3>
+<div class="outline-text-3" id="text-org86d460b">
 <p>
 对损失函数求导。
 </p>
