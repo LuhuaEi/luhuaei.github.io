@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 10:32 -->
+<!-- 2019-10-30 Wed 23:17 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>神经网络拟合“玩具数据”</title>
@@ -238,9 +238,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org13e6d9d" class="outline-2">
-<h2 id="org13e6d9d">计算损失</h2>
-<div class="outline-text-2" id="text-org13e6d9d">
+<div id="outline-container-org03d21d0" class="outline-2">
+<h2 id="org03d21d0">计算损失</h2>
+<div class="outline-text-2" id="text-org03d21d0">
 <p>
 使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
 \)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
@@ -250,7 +250,7 @@ plt.tight_layout(pad=0.0)
 
 <p>
 这个数据集的损失等于\(L = \frac{1}{N} \sum_i L_i + \frac{1}{2}\lambda \sum_k
-\sum_l W_{k,i}^{2} \)，表示为样本的平均损失加上正规损失。
+\sum_i W_{k,i}^{2} \)，表示为样本的平均损失加上正规损失。
 </p>
 
 <p>
@@ -275,9 +275,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-orgf2b33b0" class="outline-2">
-<h2 id="orgf2b33b0">计算梯度</h2>
-<div class="outline-text-2" id="text-orgf2b33b0">
+<div id="outline-container-org86d460b" class="outline-2">
+<h2 id="org86d460b">计算梯度</h2>
+<div class="outline-text-2" id="text-org86d460b">
 <p>
 根据公式计算得到，可以直接得出损失函数的梯度。
 </p>
@@ -373,9 +373,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 </div>
-<div id="outline-container-org03d21d0" class="outline-3">
-<h3 id="org03d21d0">计算损失</h3>
-<div class="outline-text-3" id="text-org03d21d0">
+<div id="outline-container-org96199e2" class="outline-3">
+<h3 id="org96199e2">计算损失</h3>
+<div class="outline-text-3" id="text-org96199e2">
 <p>
 损失函数同样是使用上面的softmax。根据反向传播算法。
 </p>
@@ -398,9 +398,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org86d460b" class="outline-3">
-<h3 id="org86d460b">计算梯度</h3>
-<div class="outline-text-3" id="text-org86d460b">
+<div id="outline-container-org4b23a1b" class="outline-3">
+<h3 id="org4b23a1b">计算梯度</h3>
+<div class="outline-text-3" id="text-org4b23a1b">
 <p>
 对损失函数求导。
 </p>

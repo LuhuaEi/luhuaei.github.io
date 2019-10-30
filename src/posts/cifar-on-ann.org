@@ -1,4 +1,4 @@
-#+title: 使用神经网络训练CIFAR-10
+#+title: 使用神经网络训练CIFAR(03)
 #+date: [2019-10-29 13:11]
 
 * 激励函数
@@ -97,35 +97,52 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 [[file:./images/cifar-on-ann-890421.png]]
 * 前向传播
 前向传播就是平时看到的传播模式，就是一个一个接着往下传播。简单的前向传播实现，主
-要用于理解前向传播的思想。
+要用于理解前向传播的思想。神经网络中的 =channel= 是指每一个样本中的第三维度，就
+图片来说，一般具有 =RGB= 三层。而 =depth= 是指隐藏层的个数，一般也称为内核个数。
+
+添加 =zero padding= 是为了保持输出的采集结果维度与原来的相同。
+
+采集结果的矩阵的维度计算：
+  - \(height = (X_{height} - W_{height} + 2 * ZeroPadding) // stride + 1\)
+  - \(wight = (X_{width} - W_{width} + 2 * ZeroPadding)\)
+
+=np.pad()= 对一个矩阵进行填补。
 ** 前向传播算法
+这个简单的算法使用的仅仅是线性组合。\(f(x_i, W, b) = W x_i + b\)
 #+BEGIN_SRC jupyter-python :session py :results output silent :exports both
   def forward_pass(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
-      '''input_array(num, channel, width, height) 分别对应图片的数量，图片的层数，宽度，高度
-      input_weights(num, channel, width, height) 分别对应过滤器的个数，channel，宽度，高度
-      channel 与 depth 并不一样，前者代表单个样本中的Z轴，而depth代
-      表卷积层的Z轴，即采集器的个数也称为内核的个数。
+      '''
+      Inputs:
+      ------------------------------------------------------------
+      - input_volumns: the train dataset. (N, channel, width, height)
+      - input_weights: the weights array. (K, channel, widht, height)
+      - input_biase:   the biases. (K, )
+      - zero_padding:  the size of padding for zero.
+      Outputs:
+      ------------------------------------------------------------
+      - dout: The weights array collection result. (N, K, o_height, o_width)
+      - cache: The parameters cache. (dict)
       '''
       x_num, x_channel, x_height, x_width = input_volumes.shape
-      f_num, _, f_height, f_width = input_weights.shape
-      out_height = (x_height - f_height + 2*zero_padding) // stride + 1
-      out_width = (x_width - f_width + 2*zero_padding) // stride + 1
+      w_num, _, w_height, w_width = input_weights.shape
+      o_height = (x_height - w_height + 2*zero_padding) // stride + 1
+      o_width = (x_width - w_width + 2*zero_padding) // stride + 1
 
       X = np.pad(input_volumes, ((0, 0), (0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
                  "constant", constant_values=0)
 
       # 每一个采集器只会产生一个二维的数组
-      dout = np.zeros((x_num, f_num, out_height, out_width))
+      dout = np.zeros((x_num, w_num, o_height, o_width))
       # 对样本迭代，即对每一张图片进行迭代
       for n in range(x_num):
           # 对多个采集器进行迭代采集
-          for f in range(f_num):
-              for y in range(0, out_height):
-                  for x in range(0, out_width):
+          for k in range(w_num):
+              for y in range(0, o_height):
+                  for x in range(0, o_width):
                       # 利用输出的维度，反推采集的区域
-                      dout[n, f, y, x] = np.sum(
-                          X[n, :, y*stride : y*stride + f_height, x*stride : x*stride + f_width] * input_weights[f]
-                      ) + input_biases[f]
+                      dout[n, k, y, x] = np.sum(
+                          X[n, :, y*stride:y*stride + w_height, x*stride:x*stride + w_width] * input_weights[k]
+                      ) + input_biases[k]
       cache = (input_volumes, input_weights, input_biases, stride, zero_padding)
       return dout, cache
 #+END_SRC
@@ -157,55 +174,6 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 
 #+RESULTS:
 : relative_error:  2.2121476417505994e-08
-* 反向传播(误差反向传播)
-*误差* 从输出节点反向传播到输入的节点，是一种需要与 *最优化* 算法结合使用的方法。
-该方法对 *网络中所有的权重计算损失函数的梯度* 。这个梯度会反馈给最优化算法，用来
-更新权重值，一最小化损失函数。
-
-反向传播要求每一个 *输入值* 对应的一个渴望的 *输出值* 用来计算损失函数的梯度。
-
-反向传播一般具有三个层，分别为输入层、隐藏层、输出层。其中通过正向的传播计算最后
-的预测值，通过与期望值进行比较，计算误差(一般平方误差)，而通过梯度下降的方法寻找
-最低的权重值，以至于最后的误差值处于极小值。
-** 简单的反向传播实现
-#+BEGIN_SRC jupyter-python :session py :results output silent
-  def backward_pass(dout, cache):
-      '''这里dout为一个渴望输出数组，cache为中具有input_volumes, input_weights,
-      input_baises, stride, zero_padding'''
-      X, W, B, S, P = cache
-      x_num, x_channel, x_height, x_width = X.shape
-      w_num, _, w_height, w_width = W.shape
-
-      # 使用np.pad生成zeros padding后的数组，X具有四个维度，而我们只需要对
-      # 最里面两个维度进行padding，因此前面两个设置成(0,0)，而后两个维度(P,P)表示在这个
-      # 前面添加P个指定constant padding，而后面也添加P个constant padding。
-      X_pad = np.pad(X, ((0, 0), (0, 0), (P, P), (P, P)), "constant", constant_values=0)
-      o_Xpad = np.zeros_like(X_pad)
-
-      # 计算结果数组的维度
-      o_height = (x_height - w_height + 2 * P) // S + 1
-      o_width = (x_width - w_width + 2 * P) // S + 1
-
-      # 输出结果
-      o_X = np.zeros_like(X)
-      o_W = np.zeros_like(W)
-      o_B = np.zeros_like(B)
-
-      for n in range(x_num):
-          for f in range(w_num):
-              # 偏差的个数与过滤器的个数相同
-              o_B[f] += dout[n, f].sum()
-              # 根据输出维度，推出采集的位置，对padding后的矩阵进行索引
-              for y in range(0, o_height):
-                  for x in range(0, o_width):
-                      # 将前向传播结果中对应的值 乘以 所采集的区域 累加到权重矩阵中
-                      # 明显地，如果输出矩阵中对应的值为0,则权重矩阵保持不变。
-                      o_W[f] += X_pad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] * dout[n, f, y, x]
-                      # 对原始的数据进行更新，反向更新数据
-                      o_Xpad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] += W[f] * dout[n, f, y, x]
-      o_X = o_Xpad[:, :, P:P+x_height, P:P+x_width]
-      return o_X, o_W, o_B
-#+END_SRC
 * 通过卷积处理图片
 读取图片，在原来的 =scipy= 包中，可以使用 =scipy.misc.imread= 来对图片进行读取，
 而后来的 =scipy= 包中可以使用 =scipy.imageio.imread= 来取代，但是
@@ -266,7 +234,7 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 #+END_SRC
 ** 生成权重矩阵（过滤器）
 #+BEGIN_SRC jupyter-python :session py :results output silent :exports both
-  # 一共三个过滤器，每一个为3x3x3
+  # 一共两个过滤器，每一个为3x3x3
   w = np.zeros((2, 3, 3, 3))
 
   # 第一个，利用矩阵对图片进行转变
@@ -320,3 +288,243 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 
 #+RESULTS:
 [[file:./images/cifar-on-ann-321220.png]]
+* 两层神经网络
+=input -> fully connected layer -> ReLU(no linear) -> fully connected
+layer(class scores) -> softmax(loss function).=
+
+通过线性（全连接层）计算出来的得分，经过处理（分类中，寻找最大的得分的类作为预测
+结果）后，将所预测的结果与实际的目标进行比较，如果差异很小，则代表当前的参数很好。
+(我们希望预测结果与目标接近，即差异越小效果越优)。而如果差异很大，则我们想将该信
+息传递给前面的权重参数（比如，当前差异很大，希望减少权重），这就是反向传播的原理。
+而在传播过程前，我们需要将“很大差异”转便成可以接受的数值。这就是损失函数的工作。
+
+其应该具有几个要求：
+- 可以通过求导知道权重更新的方向(可导)
+- 如果当前“差异”很小，应当保持前面的权重不变。
+
+在下面的例子中使用的损失函数是 =Softmax= 函数。\(L_i =
+-log(\frac{f_{y_j}}{\sum_j e^{f_j}})\)， 其中\(f_{y_i}\)代表着目前的正确类的
+=scores= 。
+** 模型
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  class TwoLayerNN(object):
+      def __init__(self, input_size, hidden_size, output_size, std=1e-4):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - input_size: The input dataset every sample dimension muliplay.
+          - hidden_size: The neurons of H in the hidden layers.
+          - output_size: The numbers of classes.
+          - std: The standard variable.
+          Outputs:
+          ------------------------------------------------------------
+          - self.params: (dict) store the parameters of weights, bias.
+          '''
+          self.params = {}
+          self.params['W1'] = std * np.random.randn(input_size, hidden_size)
+          self.params['B1'] = np.zeros(hidden_size)
+          self.params['W2'] = std * np.random.randn(hidden_size, output_size)
+          self.params['B2'] = np.zeros(output_size)
+
+      def loss(self, x, y=None, reg=0.0):
+          '''
+          Use softmax compute loss
+          Inputs:
+          ------------------------------------------------------------
+          - x: The x is the need computer loss value data set..
+          - y: The y is labels parallelism of x.
+          - reg: The lambda of reguarization.
+          Outpus:
+          ------------------------------------------------------------
+          - loss: The loss about softmax data loss and regularization loss.
+          '''
+          W1, B1 = self.params['W1'], self.params['B1']
+          W2, B2 = self.params['W2'], self.params['B2']
+          N, D = x.shape
+
+          # input -> [fc -> relu] -> fc
+          H1 = np.maximum(0, np.dot(x, W1) + B1)
+          # input -> fc -> relu -> [fc]
+          scores = np.dot(H1, W2) + B2
+          if y is None:
+              return scores
+
+          scores -= scores.max()
+          exp_scores = np.exp(scores)
+          sum_exp_scores = np.sum(exp_scores, axis=1)
+          corr_exp_scores = exp_scores[range(N), y]
+          data_loss = (-1) * np.log(corr_exp_scores / sum_exp_scores)
+          reg_loss = reg * (np.sum(W1 * W1) + np.sum(W2 * W2))
+          loss = np.sum(data_loss) / N + reg_loss
+
+          grads = {}              # # backpass gradient
+          d_scores = exp_scores / sum_exp_scores.reshape(N, 1)
+          d_scores[range(N), y] = - (sum_exp_scores - corr_exp_scores) / sum_exp_scores
+          d_scores /= N
+          d_H1 = d_scores.dot(W2.T)
+          d_H1[H1 == 0] = 0
+          d_W2 = H1.T.dot(d_scores)
+          d_B2 = d_scores.sum(axis=0)
+          d_W1 = x.T.dot(d_H1)
+          d_B1 = d_H1.sum(axis=0)
+
+          grads['W1'] = d_W1 + reg * W1 * 2
+          grads['W2'] = d_W2 + reg * W2 * 2
+          grads['B1'] = d_B1
+          grads['B2'] = d_B2
+          return loss, grads
+
+      def train(self, X, y, X_val, y_val, learning_rate=1e-3, learning_rate_decay=0.95,
+                reg=5e-6, num_iters=100, batch_size=200, verbose=False):
+          '''
+          Inputs:
+          ------------------------------------------------------------
+          - X: The train data set. (N, D)
+          - y: The train data labels. (N, )
+          - X_val: The validation data set. (N_val, D).
+          - y_val: The validation data labels. (N_val, )
+          - learning_rate: The weight update learning step.
+          - learning_rate_decay: The parameters used to decay the learning rate after each point.
+          - reg: The lambda of regularizaion.
+          - num_iters: The iter numbers of train.
+          - batch_size: Number of sample used each train.
+          - verbose: boolean, whether print details information.
+          Outputs:
+          ------------------------------------------------------------
+          '''
+          num_train = X.shape[0]
+          each_iter_epoch = max(num_train / batch_size, 1)
+
+          loss_history = []
+          train_acc_history = []
+          val_acc_history = []
+
+          for i in range(num_iters):
+              batch_idx = np.random.choice(num_train, batch_size)
+              x_batch = X[batch_idx]
+              y_batch = y[batch_idx]
+
+              loss, grads = self.loss(x_batch, y_batch, reg=reg)
+              loss_history.append(loss)
+
+              self.params['W1'] -= learning_rate * grads['W1']
+              self.params['W2'] -= learning_rate * grads['W2']
+              self.params['B1'] -= learning_rate * grads['B1']
+              self.params['B2'] -= learning_rate * grads['B2']
+
+              if verbose and i % 100 == 0:
+                  print("inter number: (%d / %d) loss: %f" %(i, num_iters, loss))
+
+              # 寻找最优的学习速率。
+              if i % each_iter_epoch == 0:
+                  train_acc = (self.predict(x_batch) == y_batch).mean()
+                  val_acc = (self.predict(X_val) == y_val).mean()
+                  train_acc_history.append(train_acc)
+                  val_acc_history.append(val_acc)
+
+                  learning_rate *= learning_rate_decay
+
+          return {
+              "loss_history": loss_history,
+              "train_acc_history": train_acc_history,
+              "val_acc_history": val_acc_history
+          }
+
+      def predict(self, x):
+          y_pred = np.argmax(np.dot(np.maximum(0, np.dot(x, self.params['W1']) + self.params['B1']),
+                                    self.params['W2'])
+                             + self.params['B2'], axis=1)
+          return y_pred
+#+END_SRC
+** 测试
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  input_size = 4                  # 单个样本的维度
+  output_size = 3                 # 输出的类个数
+  hidden_size = 10                # 隐藏层中节点个数
+  num_input = 5                   # 样本个数
+
+  def init_twolayer():
+      np.random.seed(0)
+      return TwoLayerNN(input_size, hidden_size, output_size, std=1e-1)
+
+  def init_data():
+      np.random.seed(1)
+      x = 10 * np.random.randn(num_input, input_size)
+      y = np.array([0, 1, 2, 2, 1])
+      return x, y
+
+  net = init_twolayer()
+  net_x, net_y = init_data()
+  net_loss, _ = net.loss(net_x, net_y, reg=0.05)
+  abs(net_loss - float(1.30378789133))
+#+END_SRC
+* 训练模型
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  cifar_net = TwoLayerNN(X_train2d.shape[1], 50, 10)
+  cifar_stats = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+                                learning_rate=1e-4, learning_rate_decay=0.95,
+                                reg=0.25, num_iters=1000, batch_size=200, verbose=False)
+#+END_SRC
+查看模型的准确率。
+#+BEGIN_SRC jupyter-python :session py :results output :exports both
+  print("val accurary: %f" %((cifar_net.predict(X_vali2d) == Y_vali).mean()))
+#+END_SRC
+
+#+RESULTS:
+: val accurary: 0.248000
+* 调整参数
+通过前面的训练过程中，我们记录了 =loss_history, train_acc_history,
+val_acc_history= 加上从模型的对象中可以获得模型的权重信息。
+#+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-602007.png :exports both
+  plt.figure(figsize=(9.0, 6.0))
+  plt.plot(cifar_stats['loss_history'])
+  plt.xlabel('x')
+  plt.ylabel('loss')
+#+END_SRC
+
+#+RESULTS:
+[[file:./images/cifar-on-ann-602007.png]]
+从上图中，看出损失函数是来回波动下降的，而导致波动的原因可能是学习速率太快。
+
+将前面训练的过程结合起来，根据输出结果进行调整参数，寻找最高的准确率。
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  hidden_size = list(range(100, 1000, 100))
+  learning_rate = [1e-3, 1e-4, 1e-5, 2e-3, 2e-4, 2e-5, 3e-3, 3e-4, 3e-5]
+  reg = np.arange(0, 1, 0.2)
+
+  cifar_model = None
+  cifar_model_acc = 0
+  for h in hidden_size:
+      for l in learning_rate:
+          for r in reg:
+              net = TwoLayerNN(X_train2d.shape[1], h, 10)
+              net_stats = net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+                                     learning_rate=l, learning_rate_decay=0.95,
+                                     reg=r, num_iters=1000, batch_size=200, verbose=False)
+              acc = net_stats['val_acc_history'][-1] # the last validation accurary.
+              if acc > cifar_model_acc:
+                  cifar_model = net
+                  cifar_model_acc = acc
+              print("h: %d, l: %f, r: %f, acc: %f" %(h, l, r, acc, ))
+#+END_SRC
+
+#+BEGIN_SRC jupyter-python :session py :results output :exports both
+  print("The best accurary: %f" %cifar_model_acc)
+
+  y_pred = cifar_model.predict(X_test2d)
+  print("Test acc: %f" %(np.mean(y_pred == Y_test)))
+#+END_SRC
+
+#+RESULTS:
+: The best accurary: 0.421000
+: Test acc: 0.389000
+
+* 总结
+1. 神经网络的建模流程是：通过通过前向传播计算最后的得分(scores)，根据损失函数、
+   得分、真实值计算损失值；根据损失函数的可导性质，计算处于当前输入值(inputs)的
+   梯度，在根据梯度的方向，方向更新权重，以至于损失值达到最小。
+2. 调整参数的流程：提前设定好需要迭代的参数(隐藏层、学习速率、正则参数)，计算模
+   型在各个参数下的准确率，寻找最高准确率的模型。
+
+* 参考
+1. [[http://cs231n.github.io/][CS231N]]

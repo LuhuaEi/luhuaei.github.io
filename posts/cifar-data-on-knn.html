@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 00:47 -->
+<!-- 2019-10-30 Wed 23:17 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KNN算法预测CIFAR</title>
+<title>KNN算法预测CIFAR(01)</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="luhuaei">
 
@@ -30,7 +30,7 @@
 </div>
 <div id="content">
 <header>
-<h1 class="title">KNN算法预测CIFAR</h1>
+<h1 class="title">KNN算法预测CIFAR(01)</h1>
 </header><p>
 根据KNN的原理，实现KNN模型，加深对KNN的理解。
 </p>
@@ -47,7 +47,6 @@
 <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35774;&#32622;&#40664;&#35748;&#30340;&#22270;&#29255;&#22823;&#23567;</span>
 <span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'figure.figsize'</span>] = (10.0, 8.0)
 <span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'image.cmap'</span>] = <span style="color: #2aa198;">'gray'</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20943;&#23569;&#22810;&#22270;&#29255;&#24067;&#23616;&#20013;&#31354;&#30333;&#36793;</span>
 <span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'image.interpolation'</span>] = <span style="color: #2aa198;">'nearest'</span>
 
 <span style="color: #859900;">def</span> <span style="color: #268bd2;">relative_error</span>(x, y):
@@ -168,6 +167,7 @@
 <span style="color: #6c71c4;">Y_vali</span> = DATA[<span style="color: #2aa198;">'y_validation'</span>]
 <span style="color: #6c71c4;">X_train2d</span> = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
 <span style="color: #6c71c4;">X_test2d</span> = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
+<span style="color: #6c71c4;">X_vali2d</span> = X_vali.reshape(X_vali.shape[0], -1)
 </pre>
 </div>
 </div>

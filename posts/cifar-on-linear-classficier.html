@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 09:40 -->
+<!-- 2019-10-30 Wed 23:17 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>线性分类器训练CIFAR</title>
+<title>线性分类器训练CIFAR(02)</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="luhuaei">
 
@@ -52,7 +52,7 @@
 </div>
 <div id="content">
 <header>
-<h1 class="title">线性分类器训练CIFAR</h1>
+<h1 class="title">线性分类器训练CIFAR(02)</h1>
 </header><p>
 直觉上看，我们希望通过训练，得到一个模型，这个模型可以快速的应用到新的测试数据上，
 而不用遍历整个训练数据集。
@@ -230,9 +230,18 @@
 <div id="outline-container-org8e7dc58" class="outline-2">
 <h2 id="org8e7dc58">归一化指数函数(softmax)</h2>
 <div class="outline-text-2" id="text-org8e7dc58">
+<p>
+\(L_i = -log( \frac { e^{ y_{f_i} } } { \sum_j e^{ f_{j} } } ) \)
+</p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">softmax_loss_function_vectorized</span>(X, Y, W, reg, delta=1):
-    <span style="color: #859900;">pass</span>
+<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">softmax_loss_function_vectorized</span>(X, Y, W, reg):
+    <span style="color: #6c71c4;">N</span> = X.shape[0]
+    <span style="color: #6c71c4;">scores</span> = np.exp(np.dot(X, W))
+    <span style="color: #6c71c4;">sum_scores</span> = scores.<span style="color: #268bd2;">sum</span>(axis=1)
+    <span style="color: #6c71c4;">data_loss</span> = -1 * np.log(scores[<span style="color: #268bd2;">range</span>(N), Y] / sum_scores)
+    <span style="color: #6c71c4;">reg_loss</span> = 1 / 2 * reg * np.<span style="color: #268bd2;">sum</span>(W * W)
+    <span style="color: #6c71c4;">loss</span> = data_loss + reg_loss
+    <span style="color: #859900;">return</span> loss
 </pre>
 </div>
 </div>
@@ -334,7 +343,6 @@ svm accurary: 0.19
 </pre>
 </div>
 </div>
-
 
 <div id="outline-container-orgcb85f51" class="outline-2">
 <h2 id="orgcb85f51">损失函数可视化</h2>

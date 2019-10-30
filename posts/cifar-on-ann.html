@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 14:32 -->
+<!-- 2019-10-30 Wed 23:18 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>使用神经网络训练CIFAR-10</title>
+<title>使用神经网络训练CIFAR(03)</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="luhuaei">
 
@@ -52,7 +52,7 @@
 </div>
 <div id="content">
 <header>
-<h1 class="title">使用神经网络训练CIFAR-10</h1>
+<h1 class="title">使用神经网络训练CIFAR(03)</h1>
 </header>
 <div id="outline-container-org14e4035" class="outline-2">
 <h2 id="org14e4035">激励函数</h2>
@@ -114,9 +114,9 @@ f_plot(f_sigmoid, x)
 
 </figure>
 </div>
-<div id="outline-container-org4903870" class="outline-4">
-<h4 id="org4903870">缺点：</h4>
-<div class="outline-text-4" id="text-org4903870">
+<div id="outline-container-org1b15576" class="outline-4">
+<h4 id="org1b15576">缺点：</h4>
+<div class="outline-text-4" id="text-org1b15576">
 <p>
 在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
 的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
@@ -178,9 +178,9 @@ tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计�
 </p>
 </div>
 </div>
-<div id="outline-container-org0a6cd6a" class="outline-4">
-<h4 id="org0a6cd6a">缺点：</h4>
-<div class="outline-text-4" id="text-org0a6cd6a">
+<div id="outline-container-org46a2121" class="outline-4">
+<h4 id="org46a2121">缺点：</h4>
+<div class="outline-text-4" id="text-org46a2121">
 <p>
 ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
 掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。
@@ -237,39 +237,66 @@ f_plot(f_maxout, x)
 <div class="outline-text-2" id="text-org6ce96fe">
 <p>
 前向传播就是平时看到的传播模式，就是一个一个接着往下传播。简单的前向传播实现，主
-要用于理解前向传播的思想。
+要用于理解前向传播的思想。神经网络中的 <code>channel</code> 是指每一个样本中的第三维度，就
+图片来说，一般具有 <code>RGB</code> 三层。而 <code>depth</code> 是指隐藏层的个数，一般也称为内核个数。
+</p>
+
+<p>
+添加 <code>zero padding</code> 是为了保持输出的采集结果维度与原来的相同。
+</p>
+
+<p>
+采集结果的矩阵的维度计算：
+</p>
+<ul class="org-ul">
+<li>\(height = (X_{height} - W_{height} + 2 * ZeroPadding) // stride + 1\)</li>
+<li>\(wight = (X_{width} - W_{width} + 2 * ZeroPadding)\)</li>
+</ul>
+
+<p>
+<code>np.pad()</code> 对一个矩阵进行填补。
 </p>
 </div>
 <div id="outline-container-orgf156b52" class="outline-3">
 <h3 id="orgf156b52">前向传播算法</h3>
 <div class="outline-text-3" id="text-orgf156b52">
+<p>
+这个简单的算法使用的仅仅是线性组合。\(f(x_i, W, b) = W x_i + b\)
+</p>
 <div class="org-src-container">
 <pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">forward_pass</span>(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
-    <span style="color: #35a69c;">'''input_array(num, channel, width, height) &#20998;&#21035;&#23545;&#24212;&#22270;&#29255;&#30340;&#25968;&#37327;&#65292;&#22270;&#29255;&#30340;&#23618;&#25968;&#65292;&#23485;&#24230;&#65292;&#39640;&#24230;</span>
-<span style="color: #35a69c;">    input_weights(num, channel, width, height) &#20998;&#21035;&#23545;&#24212;&#36807;&#28388;&#22120;&#30340;&#20010;&#25968;&#65292;channel&#65292;&#23485;&#24230;&#65292;&#39640;&#24230;</span>
-<span style="color: #35a69c;">    channel &#19982; depth &#24182;&#19981;&#19968;&#26679;&#65292;&#21069;&#32773;&#20195;&#34920;&#21333;&#20010;&#26679;&#26412;&#20013;&#30340;Z&#36724;&#65292;&#32780;depth&#20195;</span>
-<span style="color: #35a69c;">    &#34920;&#21367;&#31215;&#23618;&#30340;Z&#36724;&#65292;&#21363;&#37319;&#38598;&#22120;&#30340;&#20010;&#25968;&#20063;&#31216;&#20026;&#20869;&#26680;&#30340;&#20010;&#25968;&#12290;</span>
+    <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">    Inputs:</span>
+<span style="color: #35a69c;">    ------------------------------------------------------------</span>
+<span style="color: #35a69c;">    - input_volumns: the train dataset. (N, channel, width, height)</span>
+<span style="color: #35a69c;">    - input_weights: the weights array. (K, channel, widht, height)</span>
+<span style="color: #35a69c;">    - input_biase:   the biases. (K, )</span>
+<span style="color: #35a69c;">    - zero_padding:  the size of padding for zero.</span>
+<span style="color: #35a69c;">    Outputs:</span>
+<span style="color: #35a69c;">    ------------------------------------------------------------</span>
+<span style="color: #35a69c;">    - dout: The weights array collection result. (N, K, o_height, o_width)</span>
+<span style="color: #35a69c;">    - cache: The parameters cache. (dict)</span>
 <span style="color: #35a69c;">    '''</span>
     <span style="color: #6c71c4;">x_num</span>, <span style="color: #6c71c4;">x_channel</span>, <span style="color: #6c71c4;">x_height</span>, <span style="color: #6c71c4;">x_width</span> = input_volumes.shape
-    <span style="color: #6c71c4;">f_num</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">f_height</span>, <span style="color: #6c71c4;">f_width</span> = input_weights.shape
-    <span style="color: #6c71c4;">out_height</span> = (x_height - f_height + 2*zero_padding) // stride + 1
-    <span style="color: #6c71c4;">out_width</span> = (x_width - f_width + 2*zero_padding) // stride + 1
+    <span style="color: #6c71c4;">w_num</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">w_height</span>, <span style="color: #6c71c4;">w_width</span> = input_weights.shape
+    <span style="color: #6c71c4;">o_height</span> = (x_height - w_height + 2*zero_padding) // stride + 1
+    <span style="color: #6c71c4;">o_width</span> = (x_width - w_width + 2*zero_padding) // stride + 1
 
     <span style="color: #6c71c4;">X</span> = np.pad(input_volumes, ((0, 0), (0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
                <span style="color: #2aa198;">"constant"</span>, constant_values=0)
 
     <span style="color: #405A61;"># </span><span style="color: #405A61;">&#27599;&#19968;&#20010;&#37319;&#38598;&#22120;&#21482;&#20250;&#20135;&#29983;&#19968;&#20010;&#20108;&#32500;&#30340;&#25968;&#32452;</span>
-    <span style="color: #6c71c4;">dout</span> = np.zeros((x_num, f_num, out_height, out_width))
+    <span style="color: #6c71c4;">dout</span> = np.zeros((x_num, w_num, o_height, o_width))
     <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#26679;&#26412;&#36845;&#20195;&#65292;&#21363;&#23545;&#27599;&#19968;&#24352;&#22270;&#29255;&#36827;&#34892;&#36845;&#20195;</span>
     <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(x_num):
         <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#22810;&#20010;&#37319;&#38598;&#22120;&#36827;&#34892;&#36845;&#20195;&#37319;&#38598;</span>
-        <span style="color: #859900;">for</span> f <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(f_num):
-            <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, out_height):
-                <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, out_width):
+        <span style="color: #859900;">for</span> k <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(w_num):
+            <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_height):
+                <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_width):
                     <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21033;&#29992;&#36755;&#20986;&#30340;&#32500;&#24230;&#65292;&#21453;&#25512;&#37319;&#38598;&#30340;&#21306;&#22495;</span>
-                    <span style="color: #6c71c4;">dout</span>[n, f, y, x] = np.<span style="color: #268bd2;">sum</span>(
-                        X[n, :, y*stride : y*stride + f_height, x*stride : x*stride + f_width] * input_weights[f]
-                    ) + input_biases[f]
+                    <span style="color: #6c71c4;">dout</span>[n, k, y, x] = np.<span style="color: #268bd2;">sum</span>(
+                        X[n, :, y*stride:y*stride + w_height, x*stride:x*stride + w_width] * input_weights[k]
+                    ) + input_biases[k]
     <span style="color: #6c71c4;">cache</span> = (input_volumes, input_weights, input_biases, stride, zero_padding)
     <span style="color: #859900;">return</span> dout, cache
 </pre>
@@ -309,70 +336,6 @@ f_plot(f_maxout, x)
 relative_error:  2.2121476417505994e-08
 
 </pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orgc43b87e" class="outline-2">
-<h2 id="orgc43b87e">反向传播(误差反向传播)</h2>
-<div class="outline-text-2" id="text-orgc43b87e">
-<p>
-<b>误差</b> 从输出节点反向传播到输入的节点，是一种需要与 <b>最优化</b> 算法结合使用的方法。
-该方法对 <b>网络中所有的权重计算损失函数的梯度</b> 。这个梯度会反馈给最优化算法，用来
-更新权重值，一最小化损失函数。
-</p>
-
-<p>
-反向传播要求每一个 <b>输入值</b> 对应的一个渴望的 <b>输出值</b> 用来计算损失函数的梯度。
-</p>
-
-<p>
-反向传播一般具有三个层，分别为输入层、隐藏层、输出层。其中通过正向的传播计算最后
-的预测值，通过与期望值进行比较，计算误差(一般平方误差)，而通过梯度下降的方法寻找
-最低的权重值，以至于最后的误差值处于极小值。
-</p>
-</div>
-<div id="outline-container-org7701ad9" class="outline-3">
-<h3 id="org7701ad9">简单的反向传播实现</h3>
-<div class="outline-text-3" id="text-org7701ad9">
-<div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">backward_pass</span>(dout, cache):
-    <span style="color: #35a69c;">'''&#36825;&#37324;dout&#20026;&#19968;&#20010;&#28212;&#26395;&#36755;&#20986;&#25968;&#32452;&#65292;cache&#20026;&#20013;&#20855;&#26377;input_volumes, input_weights,</span>
-<span style="color: #35a69c;">    input_baises, stride, zero_padding'''</span>
-    <span style="color: #6c71c4;">X</span>, <span style="color: #6c71c4;">W</span>, <span style="color: #6c71c4;">B</span>, <span style="color: #6c71c4;">S</span>, <span style="color: #6c71c4;">P</span> = cache
-    <span style="color: #6c71c4;">x_num</span>, <span style="color: #6c71c4;">x_channel</span>, <span style="color: #6c71c4;">x_height</span>, <span style="color: #6c71c4;">x_width</span> = X.shape
-    <span style="color: #6c71c4;">w_num</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">w_height</span>, <span style="color: #6c71c4;">w_width</span> = W.shape
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20351;&#29992;np.pad&#29983;&#25104;zeros padding&#21518;&#30340;&#25968;&#32452;&#65292;X&#20855;&#26377;&#22235;&#20010;&#32500;&#24230;&#65292;&#32780;&#25105;&#20204;&#21482;&#38656;&#35201;&#23545;</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26368;&#37324;&#38754;&#20004;&#20010;&#32500;&#24230;&#36827;&#34892;padding&#65292;&#22240;&#27492;&#21069;&#38754;&#20004;&#20010;&#35774;&#32622;&#25104;(0,0)&#65292;&#32780;&#21518;&#20004;&#20010;&#32500;&#24230;(P,P)&#34920;&#31034;&#22312;&#36825;&#20010;</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21069;&#38754;&#28155;&#21152;P&#20010;&#25351;&#23450;constant padding&#65292;&#32780;&#21518;&#38754;&#20063;&#28155;&#21152;P&#20010;constant padding&#12290;</span>
-    <span style="color: #6c71c4;">X_pad</span> = np.pad(X, ((0, 0), (0, 0), (P, P), (P, P)), <span style="color: #2aa198;">"constant"</span>, constant_values=0)
-    <span style="color: #6c71c4;">o_Xpad</span> = np.zeros_like(X_pad)
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#32467;&#26524;&#25968;&#32452;&#30340;&#32500;&#24230;</span>
-    <span style="color: #6c71c4;">o_height</span> = (x_height - w_height + 2 * P) // S + 1
-    <span style="color: #6c71c4;">o_width</span> = (x_width - w_width + 2 * P) // S + 1
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36755;&#20986;&#32467;&#26524;</span>
-    <span style="color: #6c71c4;">o_X</span> = np.zeros_like(X)
-    <span style="color: #6c71c4;">o_W</span> = np.zeros_like(W)
-    <span style="color: #6c71c4;">o_B</span> = np.zeros_like(B)
-
-    <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(x_num):
-        <span style="color: #859900;">for</span> f <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(w_num):
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20559;&#24046;&#30340;&#20010;&#25968;&#19982;&#36807;&#28388;&#22120;&#30340;&#20010;&#25968;&#30456;&#21516;</span>
-            <span style="color: #6c71c4;">o_B</span>[f] += dout[n, f].<span style="color: #268bd2;">sum</span>()
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26681;&#25454;&#36755;&#20986;&#32500;&#24230;&#65292;&#25512;&#20986;&#37319;&#38598;&#30340;&#20301;&#32622;&#65292;&#23545;padding&#21518;&#30340;&#30697;&#38453;&#36827;&#34892;&#32034;&#24341;</span>
-            <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_height):
-                <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_width):
-                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#21069;&#21521;&#20256;&#25773;&#32467;&#26524;&#20013;&#23545;&#24212;&#30340;&#20540; &#20056;&#20197; &#25152;&#37319;&#38598;&#30340;&#21306;&#22495; &#32047;&#21152;&#21040;&#26435;&#37325;&#30697;&#38453;&#20013;</span>
-                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26126;&#26174;&#22320;&#65292;&#22914;&#26524;&#36755;&#20986;&#30697;&#38453;&#20013;&#23545;&#24212;&#30340;&#20540;&#20026;0,&#21017;&#26435;&#37325;&#30697;&#38453;&#20445;&#25345;&#19981;&#21464;&#12290;</span>
-                    <span style="color: #6c71c4;">o_W</span>[f] += X_pad[n, :, y*S : y*S+w_height, x*S : x*S+w_width] * dout[n, f, y, x]
-                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#21407;&#22987;&#30340;&#25968;&#25454;&#36827;&#34892;&#26356;&#26032;&#65292;&#21453;&#21521;&#26356;&#26032;&#25968;&#25454;</span>
-                    <span style="color: #6c71c4;">o_Xpad</span>[n, :, y*S : y*S+w_height, x*S : x*S+w_width] += W[f] * dout[n, f, y, x]
-    <span style="color: #6c71c4;">o_X</span> = o_Xpad[:, :, P:P+x_height, P:P+x_width]
-    <span style="color: #859900;">return</span> o_X, o_W, o_B
-</pre>
-</div>
 </div>
 </div>
 </div>
@@ -468,7 +431,7 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 <h3 id="orgccbfbcc">生成权重矩阵（过滤器）</h3>
 <div class="outline-text-3" id="text-orgccbfbcc">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#19968;&#20849;&#19977;&#20010;&#36807;&#28388;&#22120;&#65292;&#27599;&#19968;&#20010;&#20026;3x3x3</span>
+<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#19968;&#20849;&#20004;&#20010;&#36807;&#28388;&#22120;&#65292;&#27599;&#19968;&#20010;&#20026;3x3x3</span>
 <span style="color: #6c71c4;">w</span> = np.zeros((2, 3, 3, 3))
 
 <span style="color: #405A61;"># </span><span style="color: #405A61;">&#31532;&#19968;&#20010;&#65292;&#21033;&#29992;&#30697;&#38453;&#23545;&#22270;&#29255;&#36827;&#34892;&#36716;&#21464;</span>
@@ -532,6 +495,306 @@ plt.show()
 
 </figure>
 </div>
+</div>
+</div>
+<div id="outline-container-org6dc826e" class="outline-2">
+<h2 id="org6dc826e">两层神经网络</h2>
+<div class="outline-text-2" id="text-org6dc826e">
+<p>
+<code>input -&gt; fully connected layer -&gt; ReLU(no linear) -&gt; fully connected
+layer(class scores) -&gt; softmax(loss function).</code>
+</p>
+
+<p>
+通过线性（全连接层）计算出来的得分，经过处理（分类中，寻找最大的得分的类作为预测
+结果）后，将所预测的结果与实际的目标进行比较，如果差异很小，则代表当前的参数很好。
+(我们希望预测结果与目标接近，即差异越小效果越优)。而如果差异很大，则我们想将该信
+息传递给前面的权重参数（比如，当前差异很大，希望减少权重），这就是反向传播的原理。
+而在传播过程前，我们需要将“很大差异”转便成可以接受的数值。这就是损失函数的工作。
+</p>
+
+<p>
+其应该具有几个要求：
+</p>
+<ul class="org-ul">
+<li>可以通过求导知道权重更新的方向(可导)</li>
+<li>如果当前“差异”很小，应当保持前面的权重不变。</li>
+</ul>
+
+<p>
+在下面的例子中使用的损失函数是 <code>Softmax</code> 函数。\(L_i =
+-log(\frac{f_{y_j}}{\sum_j e^{f_j}})\)， 其中\(f_{y_i}\)代表着目前的正确类的
+<code>scores</code> 。
+</p>
+</div>
+<div id="outline-container-org734bbba" class="outline-3">
+<h3 id="org734bbba">模型</h3>
+<div class="outline-text-3" id="text-org734bbba">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">TwoLayerNN</span>(<span style="color: #268bd2;">object</span>):
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>, input_size, hidden_size, output_size, std=1e-4):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - input_size: The input dataset every sample dimension muliplay.</span>
+<span style="color: #35a69c;">        - hidden_size: The neurons of H in the hidden layers.</span>
+<span style="color: #35a69c;">        - output_size: The numbers of classes.</span>
+<span style="color: #35a69c;">        - std: The standard variable.</span>
+<span style="color: #35a69c;">        Outputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - self.params: (dict) store the parameters of weights, bias.</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #859900;">self</span>.params = {}
+        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>] = std * np.random.randn(input_size, hidden_size)
+        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>] = np.zeros(hidden_size)
+        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>] = std * np.random.randn(hidden_size, output_size)
+        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>] = np.zeros(output_size)
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">loss</span>(<span style="color: #859900;">self</span>, x, y=<span style="color: #d33682;">None</span>, reg=0.0):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        Use softmax compute loss</span>
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - x: The x is the need computer loss value data set..</span>
+<span style="color: #35a69c;">        - y: The y is labels parallelism of x.</span>
+<span style="color: #35a69c;">        - reg: The lambda of reguarization.</span>
+<span style="color: #35a69c;">        Outpus:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - loss: The loss about softmax data loss and regularization loss.</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #6c71c4;">W1</span>, <span style="color: #6c71c4;">B1</span> = <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>], <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>]
+        <span style="color: #6c71c4;">W2</span>, <span style="color: #6c71c4;">B2</span> = <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>], <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>]
+        <span style="color: #6c71c4;">N</span>, <span style="color: #6c71c4;">D</span> = x.shape
+
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">input -&gt; [fc -&gt; relu] -&gt; fc</span>
+        <span style="color: #6c71c4;">H1</span> = np.maximum(0, np.dot(x, W1) + B1)
+        <span style="color: #405A61;"># </span><span style="color: #405A61;">input -&gt; fc -&gt; relu -&gt; [fc]</span>
+        <span style="color: #6c71c4;">scores</span> = np.dot(H1, W2) + B2
+        <span style="color: #859900;">if</span> y <span style="color: #859900;">is</span> <span style="color: #d33682;">None</span>:
+            <span style="color: #859900;">return</span> scores
+
+        <span style="color: #6c71c4;">scores</span> -= scores.<span style="color: #268bd2;">max</span>()
+        <span style="color: #6c71c4;">exp_scores</span> = np.exp(scores)
+        <span style="color: #6c71c4;">sum_exp_scores</span> = np.<span style="color: #268bd2;">sum</span>(exp_scores, axis=1)
+        <span style="color: #6c71c4;">corr_exp_scores</span> = exp_scores[<span style="color: #268bd2;">range</span>(N), y]
+        <span style="color: #6c71c4;">data_loss</span> = (-1) * np.log(corr_exp_scores / sum_exp_scores)
+        <span style="color: #6c71c4;">reg_loss</span> = reg * (np.<span style="color: #268bd2;">sum</span>(W1 * W1) + np.<span style="color: #268bd2;">sum</span>(W2 * W2))
+        <span style="color: #6c71c4;">loss</span> = np.<span style="color: #268bd2;">sum</span>(data_loss) / N + reg_loss
+
+        <span style="color: #6c71c4;">grads</span> = {}              <span style="color: #405A61;"># </span><span style="color: #405A61;"># backpass gradient</span>
+        <span style="color: #6c71c4;">d_scores</span> = exp_scores / sum_exp_scores.reshape(N, 1)
+        <span style="color: #6c71c4;">d_scores</span>[<span style="color: #268bd2;">range</span>(N), y] = - (sum_exp_scores - corr_exp_scores) / sum_exp_scores
+        <span style="color: #6c71c4;">d_scores</span> /= N
+        <span style="color: #6c71c4;">d_H1</span> = d_scores.dot(W2.T)
+        <span style="color: #6c71c4;">d_H1</span>[H1 == 0] = 0
+        <span style="color: #6c71c4;">d_W2</span> = H1.T.dot(d_scores)
+        <span style="color: #6c71c4;">d_B2</span> = d_scores.<span style="color: #268bd2;">sum</span>(axis=0)
+        <span style="color: #6c71c4;">d_W1</span> = x.T.dot(d_H1)
+        <span style="color: #6c71c4;">d_B1</span> = d_H1.<span style="color: #268bd2;">sum</span>(axis=0)
+
+        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'W1'</span>] = d_W1 + reg * W1 * 2
+        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'W2'</span>] = d_W2 + reg * W2 * 2
+        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'B1'</span>] = d_B1
+        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'B2'</span>] = d_B2
+        <span style="color: #859900;">return</span> loss, grads
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, X, y, X_val, y_val, learning_rate=1e-3, learning_rate_decay=0.95,
+              reg=5e-6, num_iters=100, batch_size=200, verbose=<span style="color: #d33682;">False</span>):
+        <span style="color: #35a69c;">'''</span>
+<span style="color: #35a69c;">        Inputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        - X: The train data set. (N, D)</span>
+<span style="color: #35a69c;">        - y: The train data labels. (N, )</span>
+<span style="color: #35a69c;">        - X_val: The validation data set. (N_val, D).</span>
+<span style="color: #35a69c;">        - y_val: The validation data labels. (N_val, )</span>
+<span style="color: #35a69c;">        - learning_rate: The weight update learning step.</span>
+<span style="color: #35a69c;">        - learning_rate_decay: The parameters used to decay the learning rate after each point.</span>
+<span style="color: #35a69c;">        - reg: The lambda of regularizaion.</span>
+<span style="color: #35a69c;">        - num_iters: The iter numbers of train.</span>
+<span style="color: #35a69c;">        - batch_size: Number of sample used each train.</span>
+<span style="color: #35a69c;">        - verbose: boolean, whether print details information.</span>
+<span style="color: #35a69c;">        Outputs:</span>
+<span style="color: #35a69c;">        ------------------------------------------------------------</span>
+<span style="color: #35a69c;">        '''</span>
+        <span style="color: #6c71c4;">num_train</span> = X.shape[0]
+        <span style="color: #6c71c4;">each_iter_epoch</span> = <span style="color: #268bd2;">max</span>(num_train / batch_size, 1)
+
+        <span style="color: #6c71c4;">loss_history</span> = []
+        <span style="color: #6c71c4;">train_acc_history</span> = []
+        <span style="color: #6c71c4;">val_acc_history</span> = []
+
+        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(num_iters):
+            <span style="color: #6c71c4;">batch_idx</span> = np.random.choice(num_train, batch_size)
+            <span style="color: #6c71c4;">x_batch</span> = X[batch_idx]
+            <span style="color: #6c71c4;">y_batch</span> = y[batch_idx]
+
+            <span style="color: #6c71c4;">loss</span>, <span style="color: #6c71c4;">grads</span> = <span style="color: #859900;">self</span>.loss(x_batch, y_batch, reg=reg)
+            loss_history.append(loss)
+
+            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'W1'</span>]
+            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'W2'</span>]
+            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'B1'</span>]
+            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'B2'</span>]
+
+            <span style="color: #859900;">if</span> verbose <span style="color: #859900;">and</span> i % 100 == 0:
+                <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"inter number: (%d / %d) loss: %f"</span> %(i, num_iters, loss))
+
+            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23547;&#25214;&#26368;&#20248;&#30340;&#23398;&#20064;&#36895;&#29575;&#12290;</span>
+            <span style="color: #859900;">if</span> i % each_iter_epoch == 0:
+                <span style="color: #6c71c4;">train_acc</span> = (<span style="color: #859900;">self</span>.predict(x_batch) == y_batch).mean()
+                <span style="color: #6c71c4;">val_acc</span> = (<span style="color: #859900;">self</span>.predict(X_val) == y_val).mean()
+                train_acc_history.append(train_acc)
+                val_acc_history.append(val_acc)
+
+                <span style="color: #6c71c4;">learning_rate</span> *= learning_rate_decay
+
+        <span style="color: #859900;">return</span> {
+            <span style="color: #2aa198;">"loss_history"</span>: loss_history,
+            <span style="color: #2aa198;">"train_acc_history"</span>: train_acc_history,
+            <span style="color: #2aa198;">"val_acc_history"</span>: val_acc_history
+        }
+
+    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict</span>(<span style="color: #859900;">self</span>, x):
+        <span style="color: #6c71c4;">y_pred</span> = np.argmax(np.dot(np.maximum(0, np.dot(x, <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>]) + <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>]),
+                                  <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>])
+                           + <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>], axis=1)
+        <span style="color: #859900;">return</span> y_pred
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6633f21" class="outline-3">
+<h3 id="org6633f21">测试</h3>
+<div class="outline-text-3" id="text-org6633f21">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">input_size</span> = 4                  <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21333;&#20010;&#26679;&#26412;&#30340;&#32500;&#24230;</span>
+<span style="color: #6c71c4;">output_size</span> = 3                 <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36755;&#20986;&#30340;&#31867;&#20010;&#25968;</span>
+<span style="color: #6c71c4;">hidden_size</span> = 10                <span style="color: #405A61;"># </span><span style="color: #405A61;">&#38544;&#34255;&#23618;&#20013;&#33410;&#28857;&#20010;&#25968;</span>
+<span style="color: #6c71c4;">num_input</span> = 5                   <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26679;&#26412;&#20010;&#25968;</span>
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">init_twolayer</span>():
+    np.random.seed(0)
+    <span style="color: #859900;">return</span> TwoLayerNN(input_size, hidden_size, output_size, std=1e-1)
+
+<span style="color: #859900;">def</span> <span style="color: #268bd2;">init_data</span>():
+    np.random.seed(1)
+    <span style="color: #6c71c4;">x</span> = 10 * np.random.randn(num_input, input_size)
+    <span style="color: #6c71c4;">y</span> = np.array([0, 1, 2, 2, 1])
+    <span style="color: #859900;">return</span> x, y
+
+<span style="color: #6c71c4;">net</span> = init_twolayer()
+<span style="color: #6c71c4;">net_x</span>, <span style="color: #6c71c4;">net_y</span> = init_data()
+<span style="color: #6c71c4;">net_loss</span>, <span style="color: #6c71c4;">_</span> = net.loss(net_x, net_y, reg=0.05)
+<span style="color: #268bd2;">abs</span>(net_loss - <span style="color: #268bd2;">float</span>(1.30378789133))
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org2c3f6c0" class="outline-2">
+<h2 id="org2c3f6c0">训练模型</h2>
+<div class="outline-text-2" id="text-org2c3f6c0">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">cifar_net</span> = TwoLayerNN(X_train2d.shape[1], 50, 10)
+<span style="color: #6c71c4;">cifar_stats</span> = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+                              learning_rate=1e-4, learning_rate_decay=0.95,
+                              reg=0.25, num_iters=1000, batch_size=200, verbose=<span style="color: #d33682;">False</span>)
+</pre>
+</div>
+<p>
+查看模型的准确率。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">"val accurary: %f"</span> %((cifar_net.predict(X_vali2d) == Y_vali).mean()))
+</pre>
+</div>
+
+<pre class="example">
+val accurary: 0.248000
+
+</pre>
+</div>
+</div>
+<div id="outline-container-orgfa921a9" class="outline-2">
+<h2 id="orgfa921a9">调整参数</h2>
+<div class="outline-text-2" id="text-orgfa921a9">
+<p>
+通过前面的训练过程中，我们记录了 <code>loss_history, train_acc_history,
+val_acc_history</code> 加上从模型的对象中可以获得模型的权重信息。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python">plt.figure(figsize=(9.0, 6.0))
+plt.plot(cifar_stats[<span style="color: #2aa198;">'loss_history'</span>])
+plt.xlabel(<span style="color: #2aa198;">'x'</span>)
+plt.ylabel(<span style="color: #2aa198;">'loss'</span>)
+</pre>
+</div>
+
+<p>
+<img src="./images/cifar-on-ann-602007.png" alt="cifar-on-ann-602007.png">
+从上图中，看出损失函数是来回波动下降的，而导致波动的原因可能是学习速率太快。
+</p>
+
+<p>
+将前面训练的过程结合起来，根据输出结果进行调整参数，寻找最高的准确率。
+</p>
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #6c71c4;">hidden_size</span> = <span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(100, 1000, 100))
+<span style="color: #6c71c4;">learning_rate</span> = [1e-3, 1e-4, 1e-5, 2e-3, 2e-4, 2e-5, 3e-3, 3e-4, 3e-5]
+<span style="color: #6c71c4;">reg</span> = np.arange(0, 1, 0.2)
+
+<span style="color: #6c71c4;">cifar_model</span> = <span style="color: #d33682;">None</span>
+<span style="color: #6c71c4;">cifar_model_acc</span> = 0
+<span style="color: #859900;">for</span> h <span style="color: #859900;">in</span> hidden_size:
+    <span style="color: #859900;">for</span> l <span style="color: #859900;">in</span> learning_rate:
+        <span style="color: #859900;">for</span> r <span style="color: #859900;">in</span> reg:
+            <span style="color: #6c71c4;">net</span> = TwoLayerNN(X_train2d.shape[1], h, 10)
+            <span style="color: #6c71c4;">net_stats</span> = net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+                                   learning_rate=l, learning_rate_decay=0.95,
+                                   reg=r, num_iters=1000, batch_size=200, verbose=<span style="color: #d33682;">False</span>)
+            <span style="color: #6c71c4;">acc</span> = net_stats[<span style="color: #2aa198;">'val_acc_history'</span>][-1] <span style="color: #405A61;"># </span><span style="color: #405A61;">the last validation accurary.</span>
+            <span style="color: #859900;">if</span> acc &gt; cifar_model_acc:
+                <span style="color: #6c71c4;">cifar_model</span> = net
+                <span style="color: #6c71c4;">cifar_model_acc</span> = acc
+            <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"h: %d, l: %f, r: %f, acc: %f"</span> %(h, l, r, acc, ))
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">"The best accurary: %f"</span> %cifar_model_acc)
+
+<span style="color: #6c71c4;">y_pred</span> = cifar_model.predict(X_test2d)
+<span style="color: #859900;">print</span>(<span style="color: #2aa198;">"Test acc: %f"</span> %(np.mean(y_pred == Y_test)))
+</pre>
+</div>
+
+<pre class="example">
+The best accurary: 0.421000
+Test acc: 0.389000
+
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org5c079a3" class="outline-2">
+<h2 id="org5c079a3">总结</h2>
+<div class="outline-text-2" id="text-org5c079a3">
+<ol class="org-ol">
+<li>神经网络的建模流程是：通过通过前向传播计算最后的得分(scores)，根据损失函数、
+得分、真实值计算损失值；根据损失函数的可导性质，计算处于当前输入值(inputs)的
+梯度，在根据梯度的方向，方向更新权重，以至于损失值达到最小。</li>
+<li>调整参数的流程：提前设定好需要迭代的参数(隐藏层、学习速率、正则参数)，计算模
+型在各个参数下的准确率，寻找最高准确率的模型。</li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org76ebe04" class="outline-2">
+<h2 id="org76ebe04">参考</h2>
+<div class="outline-text-2" id="text-org76ebe04">
+<ol class="org-ol">
+<li><a href="http://cs231n.github.io/">CS231N</a></li>
+</ol>
 </div>
 </div>
 </div>

@@ -1,4 +1,4 @@
-#+title: KNN算法预测CIFAR
+#+title: KNN算法预测CIFAR(01)
 #+date: [2019-10-28 23:51]
 
 根据KNN的原理，实现KNN模型，加深对KNN的理解。
@@ -13,7 +13,6 @@
   # 设置默认的图片大小
   plt.rcParams['figure.figsize'] = (10.0, 8.0)
   plt.rcParams['image.cmap'] = 'gray'
-  # 减少多图片布局中空白边
   plt.rcParams['image.interpolation'] = 'nearest'
 
   def relative_error(x, y):
@@ -117,6 +116,7 @@
   Y_vali = DATA['y_validation']
   X_train2d = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
   X_test2d = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
+  X_vali2d = X_vali.reshape(X_vali.shape[0], -1)
 #+END_SRC
 * 可视化数据
 =np.flatnonzero()= 将函数变平，并返回非零元素的索引。
