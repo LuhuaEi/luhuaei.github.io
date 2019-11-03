@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-30 Wed 23:18 -->
+<!-- 2019-11-03 Sun 11:52 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用神经网络训练CIFAR(03)</title>
@@ -114,9 +114,9 @@ f_plot(f_sigmoid, x)
 
 </figure>
 </div>
-<div id="outline-container-org1b15576" class="outline-4">
-<h4 id="org1b15576">缺点：</h4>
-<div class="outline-text-4" id="text-org1b15576">
+<div id="outline-container-org46a2121" class="outline-4">
+<h4 id="org46a2121">缺点：</h4>
+<div class="outline-text-4" id="text-org46a2121">
 <p>
 在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
 的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
@@ -178,9 +178,9 @@ tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计�
 </p>
 </div>
 </div>
-<div id="outline-container-org46a2121" class="outline-4">
-<h4 id="org46a2121">缺点：</h4>
-<div class="outline-text-4" id="text-org46a2121">
+<div id="outline-container-org93cc0a1" class="outline-4">
+<h4 id="org93cc0a1">缺点：</h4>
+<div class="outline-text-4" id="text-org93cc0a1">
 <p>
 ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
 掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。

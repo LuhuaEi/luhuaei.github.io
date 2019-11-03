@@ -107,7 +107,7 @@
 将数据集变成一个2维的矩阵。选取前面的5000作为训练集，1000作为验证集，1000作为测
 试集。一些模型需要用到2维的数据形式。 =np.prod()= 为将元素累积。
 #+BEGIN_SRC jupyter-python :session py :results output silent :exports both
-  DATA = get_CIFAR_data(5000, 1000, 1000, False)
+  DATA = get_CIFAR_data()
   X_train = DATA['x_train']
   Y_train = DATA['y_train']
   X_test = DATA['x_test']

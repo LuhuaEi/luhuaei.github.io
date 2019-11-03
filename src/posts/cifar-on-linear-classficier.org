@@ -9,7 +9,7 @@
 来讲，就是输入元素值，输出属于每一个类的概率。
 * 损失函数(loss function)
 计算真实值与预测值之间的误差，而训练的目的在于使整个模型的损失最小(最优化问题)。
-* 多非类支持向量机(MSVM)
+* 多分类支持向量机(MSVM)
 支持向量机也是损失函数的一种，通过利用预测的类与真实的类计算损失函数。
 ** 原理
 \(L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta)\) 其中\(i\)代表第\(i\)
@@ -17,13 +17,16 @@
 的公式来看，Supports Vector Machine 的原理在于计算当前样本属于每一个类的得分，然
 后通过将其他不正确类的得分减去正确类的得分后加上偏差的总和。
 ** 算法实现
+=np.reshape(a, newshape=-1)= 其中-1代表根据给出的值，推断出后面的值。
+
+下面两个函数用来计算数据损失部分。(loss = data loss + regularization loss)
 #+BEGIN_SRC jupyter-python :session py :results output silent :exports both
   def svm_li_unvectorized(X, Y, W):
       '''采用循环'''
       delta = 1.0
-      scores = W.dot(X)
+      scores = X.dot(W)
       correct_class_scores = scores[Y]
-      class_num = W.shape[0]
+      class_num = W.shape[1]
       loss_i = 0.0
       for j in range(class_num):
           if j == Y:
@@ -34,7 +37,7 @@
   def svm_li_vectorized(X, Y, W):
       '''用向量替换循环，提高速度'''
       delta = 1.0
-      scores = W.dot(X)
+      scores = X.dot(W)
       margins = max(0, scores - scores[Y] + delta)
       # 由于前面是直接对整个向量进行减去scores[Y], 导致其中正确的类也相减，在加上delta
       # 而损失函数计算的仅仅是不正确的类的误差，所以将第Y个margins重新赋值为0
@@ -42,14 +45,17 @@
       margins[Y] = 0
       loss_i = np.sum(margins)
       return loss_i
+#+END_SRC
 
+整个 =SVM= 计算出来的损失函数值。并计算梯度。
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
   def svm_loss_function_loop(X, Y, W, reg, delta=1):
       '''
       Inputs:
       ------------------------------------------------------------
       - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --> (50000, 3072)
       - Y: (N, 1) label. eg CIFAR (50000, 1)
-      - W: (C, D) weights. eg CIFAR (10, 32, 32, 3) --> (10, 3072)
+      - W: (D, C) weights.
       - reg: (float) lambda. regularization strgenth
 
       Outputs:
@@ -60,11 +66,11 @@
       '''
       dW = np.zeros(W.shape)
       x_num = X.shape[0]
-      w_num = W.shape[0]
+      w_num = W.shape[1]
       loss = 0.0
       for n in range(x_num):
           # 每一个样本
-          scores = X[n].dot(W.T)
+          scores = X[n].dot(W)
           correct_class_score = scores[Y[n]]
           # 计算与正确类别不同且比当前类损失更小的类的个数
           loss_contribution_count = 0
@@ -78,11 +84,11 @@
                   loss += margin
                   # 预测错误，但margin大于0，所以对这个预测错误的类进行权重更新
                   # 更新的方式为：对预测错误的数据进行累加
-                  dW[w, :] += X[n]
+                  dW[:, w] += X[n]
                   loss_contribution_count += 1
           # 对于预测正确的类，也进行权重更新，更新的方式是：
           # 将当前的权重值减去错误预测类中margin大于0的个数乘以当前预测的数据
-          dW[Y[n], :] += (-1) * loss_contribution_count * X[n]
+          dW[:, Y[n]] += (-1) * loss_contribution_count * X[n]
 
       loss /= x_num
       dW /= x_num
@@ -100,9 +106,8 @@
       ------------------------------------------------------------
       - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --> (50000, 3072)
       - Y: (N, 1) label. eg CIFAR (50000, 1)
-      - W: (C, D) weights. eg CIFAR (10, 32, 32, 3) --> (10, 3072)
+      - W: (D, C) weights. eg CIFAR (32, 32, 3, 10) --> (3072, 10)
       - reg: (float) lambda. regularization strgenth
-
       Outputs:
       ------------------------------------------------------------
       - loss: as sigle float.
@@ -110,17 +115,15 @@
       return (loss, gradient)
       '''
       x_num = X.shape[0]
-      w_num = W.shape[0]
+      w_num = W.shape[1]
       loss = 0.0
 
-      scores = X.dot(W.T)          # (N, C)
       # 在scores矩阵中，每一行具有C个类，其中一个属于正确的类,  而正确类位于Y
-      # 在np.reshape(a, newshape=-1)其中-1代表根据给出的值，推断出后面的值
+      scores = X.dot(W)          # (N, C)
       correct_class_scores = scores[list(range(x_num)), Y].reshape(x_num, -1) # (N, 1)
       # 计算每一个元素对应的margin值
       scores += delta - correct_class_scores
       # 将正确类对应的margin赋值为0
-      # 前面的scores[list(range(x_num)), Y] != scores[:, Y]
       scores[list(range(x_num)), Y] = 0
       # 把scores中所有的大于0的margin都加起来
       loss = np.sum(np.fmax(scores, 0)) / x_num
@@ -128,17 +131,15 @@
       loss += reg * np.sum(W * W)
 
       # dW主要将每个类中margin大于0的数据累加起来，并在最后
-      dW = np.zeros(W.shape)      # (C, D)
-      # 生成同维度矩阵
+      dW = np.zeros(W.shape)      # (D, C)
       xmask = np.zeros(scores.shape) # (N, C)
       # 将其中margin大于0的标记为1
       xmask[scores > 0] = 1
       xmask[np.arange(x_num), Y] = -np.sum(xmask, axis=1) # 计数 loss_contribution_count
-      # xmask.T 代表每一列表示一张图片的预测效果，共C行，其中margin大于0的被赋值为1
-      # 利用xmask.T(C, N)与X(N, D)进行点积的过程中，xmask.T中第一行代表第一个类，其中margin>0被
-      # 标记为1，否则为0。这一个点积就是将N个样本中所有在当前类中margin>0的行(row)累加到一行。由于
-      # 一共具有C个类，所以最终得到(C, D)的矩阵
-      dW = xmask.T.dot(X)
+      # xmask代表每一行表示一张图片的预测效果，共C列，其中margin大于0的被赋值为1
+      # 利用X.T(D, N)与xmask(N, C)进行点积的过程中，xmask中第一列代表第一个类，其中margin>0被
+      # 标记为1，否则为0。
+      dW = X.T.dot(xmask)
       # 求平均值
       dW /= x_num
       dW += 2 * reg * W
@@ -174,13 +175,12 @@
           - num_iters: (integer) SGD iters num.
           - batch_size: (integer) SGD splits each batch size.
           - verbose: (boolen) whether print details infomations.
-
           Outputs:
           ------------------------------------------------------------
           '''
           x_num, x_dim = X.shape
           if self.W is None:
-              self.W = 0.001 * np.random.randn(num_classes, x_dim)
+              self.W = 0.001 * np.random.randn(x_dim, class_num)
 
           loss_history = []
           for i in range(num_iters):
@@ -194,7 +194,7 @@
               self.W += (-1) * learning_rate * grad
 
               if verbose:
-                  print('Current iters informarion:\ncount: %d\nloss: %d' %(i, loss))
+                  print('Current iters informarion count: %s  loss: %s' %(i, loss))
           return loss_history
 
       def loss(self, X, Y, reg):
@@ -210,7 +210,7 @@
           - pred: (N, 1) is the predict label.
           '''
           pred = np.zeros(X.shape[0])
-          scores = X.dot(self.W.T)
+          scores = X.dot(self.W)
           pred = np.argmax(scores, axis=1)
           return pred
 
@@ -240,10 +240,11 @@
 #+END_SRC
 
 #+RESULTS:
-: svm accurary: 0.19
+: svm accurary: 0.35
 
 * 损失函数可视化
 #+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-linear-classficier-918772.png :exports both
+  plt.figure(figsize=(9.0, 6.0))
   plt.plot(loss_hist)
   plt.title('Loss function')
   plt.ylabel('Loss value')
