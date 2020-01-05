@@ -71,10 +71,10 @@
       return Xtr, Ytr, Xte, Yte
 
 
-  def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=10000,
+  def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=1000,
                      subtract_mean=True):
       '''
-      整个CIFAR共有60000张图片，其中50000作为训练集，10000作为测试集。对加载的数据
+      整个CIFAR共有60000张图片，其中50000作为训练集，1000作为测试集。对加载的数据
       进行预处理操作，并返回字典形式。
       '''
       cifar_dir = "/home/luhuaei/Data/cifar-10-batches-py/"

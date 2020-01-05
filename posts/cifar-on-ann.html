@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-11-03 Sun 11:52 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用神经网络训练CIFAR(03)</title>
@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -93,17 +93,17 @@
 值将会被求值为1。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">f_sigmoid</span> = <span style="color: #859900;">lambda</span> x: 1.0 / (1.0 + np.exp(-x))
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">f_plot</span>(f, x):
-    <span style="color: #6c71c4;">y</span> = <span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">map</span>(f, x))
-    plt.style.use(<span style="color: #2aa198;">'ggplot'</span>)
-    plt.plot(x, y, <span style="color: #2aa198;">'r-'</span>)
-    plt.plot([0.0, 0.0], [<span style="color: #268bd2;">min</span>(y) -1, <span style="color: #268bd2;">max</span>(y)+1], <span style="color: #2aa198;">'b-'</span>)
-    plt.plot([-10.0, 10.0], [0.0, 0.0], <span style="color: #2aa198;">'b-'</span>)
-    plt.xlabel(<span style="color: #2aa198;">'x'</span>)
-    plt.ylabel(<span style="color: #2aa198;">'y'</span>)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">f_sigmoid</span> = <span style="color: #fb4934;">lambda</span> x: 1.0 / (1.0 + np.exp(-x))
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_plot</span>(f, x):
+    <span style="color: #83a598;">y</span> = <span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">map</span>(f, x))
+    plt.style.use(<span style="color: #b8bb26;">'ggplot'</span>)
+    plt.plot(x, y, <span style="color: #b8bb26;">'r-'</span>)
+    plt.plot([0.0, 0.0], [<span style="color: #fe8019;">min</span>(y) -1, <span style="color: #fe8019;">max</span>(y)+1], <span style="color: #b8bb26;">'b-'</span>)
+    plt.plot([-10.0, 10.0], [0.0, 0.0], <span style="color: #b8bb26;">'b-'</span>)
+    plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
+    plt.ylabel(<span style="color: #b8bb26;">'y'</span>)
 
-<span style="color: #6c71c4;">x</span> = np.arange(-10, 10, 0.001)
+<span style="color: #83a598;">x</span> = np.arange(-10, 10, 0.001)
 f_plot(f_sigmoid, x)
 </pre>
 </div>
@@ -114,9 +114,9 @@ f_plot(f_sigmoid, x)
 
 </figure>
 </div>
-<div id="outline-container-org46a2121" class="outline-4">
-<h4 id="org46a2121">缺点：</h4>
-<div class="outline-text-4" id="text-org46a2121">
+<div id="outline-container-org93cc0a1" class="outline-4">
+<h4 id="org93cc0a1">缺点：</h4>
+<div class="outline-text-4" id="text-org93cc0a1">
 <p>
 在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
 的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
@@ -124,16 +124,34 @@ f_plot(f_sigmoid, x)
 </p>
 </div>
 </div>
+<div id="outline-container-org9c83c0d" class="outline-4">
+<h4 id="org9c83c0d">函数</h4>
+<div class="outline-text-4" id="text-org9c83c0d">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">sigmoid_forward</span>(x):
+    <span style="color: #83a598;">out</span> = 1.0 / (1.0 + np.exp(-x))
+    <span style="color: #83a598;">cache</span> = (x)
+    <span style="color: #fb4934;">return</span> out, cache
+
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">sigmoid_backward</span>(dout, cache):
+    <span style="color: #83a598;">x</span> = cache
+    <span style="color: #83a598;">dx</span> = dout * (np.exp(-x) / (1 + np.exp(-x)) ** 2)
+    <span style="color: #fb4934;">return</span> dx
+</pre>
 </div>
-<div id="outline-container-orgee228bf" class="outline-3">
-<h3 id="orgee228bf">tanh(logistic)</h3>
-<div class="outline-text-3" id="text-orgee228bf">
+</div>
+</div>
+</div>
+
+<div id="outline-container-org53a43ec" class="outline-3">
+<h3 id="org53a43ec">tanh</h3>
+<div class="outline-text-3" id="text-org53a43ec">
 <p>
 非线性函数，取值范围为[-1, 1]，Sigmod变体，但是为0中心化的，\(tanh(x) =
 2\sigma(2x) - 1\)
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">f_tanh</span> = <span style="color: #859900;">lambda</span> x: 2.0 * f_sigmoid(2.0 * x) - 1.0
+<pre class="src src-jupyter-python"><span style="color: #83a598;">f_tanh</span> = <span style="color: #fb4934;">lambda</span> x: 2.0 * f_sigmoid(2.0 * x) - 1.0
 f_plot(f_tanh, x)
 </pre>
 </div>
@@ -143,6 +161,24 @@ f_plot(f_tanh, x)
 <img src="./images/cifar-on-ann-891349.png" alt="cifar-on-ann-891349.png">
 
 </figure>
+</div>
+
+<div id="outline-container-org721f563" class="outline-4">
+<h4 id="org721f563">函数</h4>
+<div class="outline-text-4" id="text-org721f563">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">tanh_forward</span>(x):
+    <span style="color: #83a598;">out</span>, <span style="color: #83a598;">_</span> = sigmoid_forward(2.0 * x)
+    <span style="color: #83a598;">out</span> = 2.0 * out - 1.0
+    <span style="color: #fb4934;">return</span> out, x
+
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">tanh_backward</span>(dout, cache):
+    <span style="color: #83a598;">x</span> = cache
+    <span style="color: #83a598;">dx</span> = 2.0 * sigmoid_backward(dout, 2.0 * x)
+    <span style="color: #fb4934;">return</span> dx
+</pre>
+</div>
+</div>
 </div>
 </div>
 
@@ -155,7 +191,7 @@ ReLU(Rectified Linear Unit)函数表示成\(ReLU(x) = max(0, x)\)。从斜率的
 果很关心学习的速率，可以尝试Leaky ReLU或者Maxout。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">f_relu</span> = <span style="color: #859900;">lambda</span> x: x <span style="color: #859900;">if</span> x &gt; 0 <span style="color: #859900;">else</span> 0
+<pre class="src src-jupyter-python"><span style="color: #83a598;">f_relu</span> = <span style="color: #fb4934;">lambda</span> x: x <span style="color: #fb4934;">if</span> x &gt; 0 <span style="color: #fb4934;">else</span> 0
 f_plot(f_relu, x)
 </pre>
 </div>
@@ -178,16 +214,34 @@ tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计�
 </p>
 </div>
 </div>
-<div id="outline-container-org93cc0a1" class="outline-4">
-<h4 id="org93cc0a1">缺点：</h4>
-<div class="outline-text-4" id="text-org93cc0a1">
+<div id="outline-container-org4d61fb8" class="outline-4">
+<h4 id="org4d61fb8">缺点：</h4>
+<div class="outline-text-4" id="text-org4d61fb8">
 <p>
 ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
 掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。
 </p>
 </div>
 </div>
+<div id="outline-container-orgc4001d0" class="outline-4">
+<h4 id="orgc4001d0">函数</h4>
+<div class="outline-text-4" id="text-orgc4001d0">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">relu_forward</span>(x):
+    <span style="color: #83a598;">out</span> = np.maximum(0, x)
+    <span style="color: #fb4934;">return</span> out, x
+
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">relu_backward</span>(dout, cache):
+    <span style="color: #83a598;">x</span> = cache
+    <span style="color: #83a598;">dx</span> = dout
+    <span style="color: #83a598;">dx</span>[x &lt; 0] = 0
+    <span style="color: #fb4934;">return</span> dx
+</pre>
 </div>
+</div>
+</div>
+</div>
+
 <div id="outline-container-org3cc8119" class="outline-3">
 <h3 id="org3cc8119">泄漏ReLU(leaky ReLU)</h3>
 <div class="outline-text-3" id="text-org3cc8119">
@@ -197,7 +251,7 @@ ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时
 的结果，但一些方面结果并不令人满意。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">f_leaky_relu</span> = <span style="color: #859900;">lambda</span> x: x <span style="color: #859900;">if</span> x &gt;= 0 <span style="color: #859900;">else</span> 0.25*x
+<pre class="src src-jupyter-python"><span style="color: #83a598;">f_leaky_relu</span> = <span style="color: #fb4934;">lambda</span> x: x <span style="color: #fb4934;">if</span> x &gt;= 0 <span style="color: #fb4934;">else</span> 0.25*x
 f_plot(f_leaky_relu, x)
 </pre>
 </div>
@@ -207,6 +261,23 @@ f_plot(f_leaky_relu, x)
 <img src="./images/cifar-on-ann-495479.png" alt="cifar-on-ann-495479.png">
 
 </figure>
+</div>
+<div id="outline-container-org92f120f" class="outline-4">
+<h4 id="org92f120f">函数</h4>
+<div class="outline-text-4" id="text-org92f120f">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">leaky_relu_forward</span>(x):
+    <span style="color: #83a598;">out</span> = np.where(x &lt; 0, 0.25*x, x)
+    <span style="color: #fb4934;">return</span> out, x
+
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">leaky_relu_backward</span>(dout, cache):
+    <span style="color: #83a598;">x</span> = cache
+    <span style="color: #83a598;">dx</span> = dout
+    <span style="color: #83a598;">dx</span>[x &lt; 0] *= 0.25
+    <span style="color: #fb4934;">return</span> dx
+</pre>
+</div>
+</div>
 </div>
 </div>
 
@@ -219,7 +290,7 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
 神经元“死掉”)，但这样，其对于每一个神经元必须需要传递两个参数以上的变量。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">f_maxout</span> = <span style="color: #859900;">lambda</span> x: f_sigmoid(x) <span style="color: #859900;">if</span> f_sigmoid(x) &gt; f_relu(x) <span style="color: #859900;">else</span> f_relu(x)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">f_maxout</span> = <span style="color: #fb4934;">lambda</span> x: f_sigmoid(x) <span style="color: #fb4934;">if</span> f_sigmoid(x) &gt; f_relu(x) <span style="color: #fb4934;">else</span> f_relu(x)
 f_plot(f_maxout, x)
 </pre>
 </div>
@@ -257,48 +328,48 @@ f_plot(f_maxout, x)
 <code>np.pad()</code> 对一个矩阵进行填补。
 </p>
 </div>
-<div id="outline-container-orgf156b52" class="outline-3">
-<h3 id="orgf156b52">前向传播算法</h3>
-<div class="outline-text-3" id="text-orgf156b52">
+<div id="outline-container-org8ff662b" class="outline-3">
+<h3 id="org8ff662b">卷积前向传播算法</h3>
+<div class="outline-text-3" id="text-org8ff662b">
 <p>
 这个简单的算法使用的仅仅是线性组合。\(f(x_i, W, b) = W x_i + b\)
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">forward_pass</span>(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - input_volumns: the train dataset. (N, channel, width, height)</span>
-<span style="color: #35a69c;">    - input_weights: the weights array. (K, channel, widht, height)</span>
-<span style="color: #35a69c;">    - input_biase:   the biases. (K, )</span>
-<span style="color: #35a69c;">    - zero_padding:  the size of padding for zero.</span>
-<span style="color: #35a69c;">    Outputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - dout: The weights array collection result. (N, K, o_height, o_width)</span>
-<span style="color: #35a69c;">    - cache: The parameters cache. (dict)</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">x_num</span>, <span style="color: #6c71c4;">x_channel</span>, <span style="color: #6c71c4;">x_height</span>, <span style="color: #6c71c4;">x_width</span> = input_volumes.shape
-    <span style="color: #6c71c4;">w_num</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">w_height</span>, <span style="color: #6c71c4;">w_width</span> = input_weights.shape
-    <span style="color: #6c71c4;">o_height</span> = (x_height - w_height + 2*zero_padding) // stride + 1
-    <span style="color: #6c71c4;">o_width</span> = (x_width - w_width + 2*zero_padding) // stride + 1
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">forward_pass</span>(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
+    <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">    Inputs:</span>
+<span style="color: #ada296;">    ------------------------------------------------------------</span>
+<span style="color: #ada296;">    - input_volumns: the train dataset. (N, channel, width, height)</span>
+<span style="color: #ada296;">    - input_weights: the weights array. (K, channel, widht, height)</span>
+<span style="color: #ada296;">    - input_biase:   the biases. (K, )</span>
+<span style="color: #ada296;">    - zero_padding:  the size of padding for zero.</span>
+<span style="color: #ada296;">    Outputs:</span>
+<span style="color: #ada296;">    ------------------------------------------------------------</span>
+<span style="color: #ada296;">    - dout: The weights array collection result. (N, K, o_height, o_width)</span>
+<span style="color: #ada296;">    - cache: The parameters cache. (dict)</span>
+<span style="color: #ada296;">    '''</span>
+    <span style="color: #83a598;">x_num</span>, <span style="color: #83a598;">x_channel</span>, <span style="color: #83a598;">x_height</span>, <span style="color: #83a598;">x_width</span> = input_volumes.shape
+    <span style="color: #83a598;">w_num</span>, <span style="color: #83a598;">_</span>, <span style="color: #83a598;">w_height</span>, <span style="color: #83a598;">w_width</span> = input_weights.shape
+    <span style="color: #83a598;">o_height</span> = (x_height - w_height + 2*zero_padding) // stride + 1
+    <span style="color: #83a598;">o_width</span> = (x_width - w_width + 2*zero_padding) // stride + 1
 
-    <span style="color: #6c71c4;">X</span> = np.pad(input_volumes, ((0, 0), (0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
-               <span style="color: #2aa198;">"constant"</span>, constant_values=0)
+    <span style="color: #83a598;">X</span> = np.pad(input_volumes, ((0, 0), (0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
+               <span style="color: #b8bb26;">"constant"</span>, constant_values=0)
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#27599;&#19968;&#20010;&#37319;&#38598;&#22120;&#21482;&#20250;&#20135;&#29983;&#19968;&#20010;&#20108;&#32500;&#30340;&#25968;&#32452;</span>
-    <span style="color: #6c71c4;">dout</span> = np.zeros((x_num, w_num, o_height, o_width))
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#26679;&#26412;&#36845;&#20195;&#65292;&#21363;&#23545;&#27599;&#19968;&#24352;&#22270;&#29255;&#36827;&#34892;&#36845;&#20195;</span>
-    <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(x_num):
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#22810;&#20010;&#37319;&#38598;&#22120;&#36827;&#34892;&#36845;&#20195;&#37319;&#38598;</span>
-        <span style="color: #859900;">for</span> k <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(w_num):
-            <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_height):
-                <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, o_width):
-                    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21033;&#29992;&#36755;&#20986;&#30340;&#32500;&#24230;&#65292;&#21453;&#25512;&#37319;&#38598;&#30340;&#21306;&#22495;</span>
-                    <span style="color: #6c71c4;">dout</span>[n, k, y, x] = np.<span style="color: #268bd2;">sum</span>(
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#27599;&#19968;&#20010;&#37319;&#38598;&#22120;&#21482;&#20250;&#20135;&#29983;&#19968;&#20010;&#20108;&#32500;&#30340;&#25968;&#32452;</span>
+    <span style="color: #83a598;">dout</span> = np.zeros((x_num, w_num, o_height, o_width))
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23545;&#26679;&#26412;&#36845;&#20195;&#65292;&#21363;&#23545;&#27599;&#19968;&#24352;&#22270;&#29255;&#36827;&#34892;&#36845;&#20195;</span>
+    <span style="color: #fb4934;">for</span> n <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(x_num):
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23545;&#22810;&#20010;&#37319;&#38598;&#22120;&#36827;&#34892;&#36845;&#20195;&#37319;&#38598;</span>
+        <span style="color: #fb4934;">for</span> k <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(w_num):
+            <span style="color: #fb4934;">for</span> y <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(0, o_height):
+                <span style="color: #fb4934;">for</span> x <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(0, o_width):
+                    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#21033;&#29992;&#36755;&#20986;&#30340;&#32500;&#24230;&#65292;&#21453;&#25512;&#37319;&#38598;&#30340;&#21306;&#22495;</span>
+                    <span style="color: #83a598;">dout</span>[n, k, y, x] = np.<span style="color: #fe8019;">sum</span>(
                         X[n, :, y*stride:y*stride + w_height, x*stride:x*stride + w_width] * input_weights[k]
                     ) + input_biases[k]
-    <span style="color: #6c71c4;">cache</span> = (input_volumes, input_weights, input_biases, stride, zero_padding)
-    <span style="color: #859900;">return</span> dout, cache
+    <span style="color: #83a598;">cache</span> = (input_volumes, input_weights, input_biases, stride, zero_padding)
+    <span style="color: #fb4934;">return</span> dout, cache
 </pre>
 </div>
 </div>
@@ -307,14 +378,14 @@ f_plot(f_maxout, x)
 <h3 id="org0c648bf">测试数据</h3>
 <div class="outline-text-3" id="text-org0c648bf">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">x_shape</span> = (2, 3, 4, 4)
-<span style="color: #6c71c4;">w_shape</span> = (3, 3, 4, 4)
-<span style="color: #6c71c4;">x</span> = np.linspace(-0.1, 0.5, num=np.prod(x_shape)).reshape(x_shape)
-<span style="color: #6c71c4;">w</span> = np.linspace(-0.2, 0.3, num=np.prod(w_shape)).reshape(w_shape)
-<span style="color: #6c71c4;">b</span> = np.linspace(-0.1, 0.2, num=3)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">x_shape</span> = (2, 3, 4, 4)
+<span style="color: #83a598;">w_shape</span> = (3, 3, 4, 4)
+<span style="color: #83a598;">x</span> = np.linspace(-0.1, 0.5, num=np.prod(x_shape)).reshape(x_shape)
+<span style="color: #83a598;">w</span> = np.linspace(-0.2, 0.3, num=np.prod(w_shape)).reshape(w_shape)
+<span style="color: #83a598;">b</span> = np.linspace(-0.1, 0.2, num=3)
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#27491;&#30830;&#30340;&#31572;&#26696;</span>
-<span style="color: #6c71c4;">correct_out</span> = np.array([[[[-0.08759809, -0.10987781],
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#27491;&#30830;&#30340;&#31572;&#26696;</span>
+<span style="color: #83a598;">correct_out</span> = np.array([[[[-0.08759809, -0.10987781],
                           [-0.18387192, -0.2109216 ]],
                          [[ 0.21027089,  0.21661097],
                           [ 0.22847626,  0.23004637]],
@@ -326,15 +397,14 @@ f_plot(f_maxout, x)
                           [ 0.59480972,  0.56776003]],
                          [[ 2.36270298,  2.36904306],
                           [ 2.38090835,  2.38247847]]]])
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#30456;&#23545;&#35823;&#24046;</span>
-<span style="color: #6c71c4;">dout</span>, <span style="color: #6c71c4;">_</span> = forward_pass(x, w, b, 2, 1)
-<span style="color: #859900;">print</span>(<span style="color: #2aa198;">"relative_error: "</span>, relative_error(dout, correct_out))
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#30456;&#23545;&#35823;&#24046;</span>
+<span style="color: #83a598;">dout</span>, <span style="color: #83a598;">_</span> = forward_pass(x, w, b, 2, 1)
+<span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"relative_error: "</span>, relative_error(dout, correct_out))
 </pre>
 </div>
 
 <pre class="example">
 relative_error:  2.2121476417505994e-08
-
 </pre>
 </div>
 </div>
@@ -355,10 +425,10 @@ relative_error:  2.2121476417505994e-08
 <h3 id="org59898b4">图片预览</h3>
 <div class="outline-text-3" id="text-org59898b4">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">from</span> PIL <span style="color: #859900;">import</span> Image
-<span style="color: #6c71c4;">kieen</span> = Image.<span style="color: #268bd2;">open</span>(<span style="color: #2aa198;">"./images/cifar-on-ann-cat.jpg"</span>)
-<span style="color: #405A61;"># </span><span style="color: #405A61;">kieen = plt.imread("./images/cifar-on-ann-cat.jpg")</span>
-<span style="color: #6c71c4;">puppy</span> = Image.<span style="color: #268bd2;">open</span>(<span style="color: #2aa198;">"./images/cifar-on-ann-dog.jpg"</span>)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">from</span> PIL <span style="color: #fb4934;">import</span> Image
+<span style="color: #83a598;">kieen</span> = Image.<span style="color: #fe8019;">open</span>(<span style="color: #b8bb26;">"./images/cifar-on-ann-cat.jpg"</span>)
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">kieen = plt.imread("./images/cifar-on-ann-cat.jpg")</span>
+<span style="color: #83a598;">puppy</span> = Image.<span style="color: #fe8019;">open</span>(<span style="color: #b8bb26;">"./images/cifar-on-ann-dog.jpg"</span>)
 plt.figure(figsize=(10.0, 8.0))
 plt.subplot(1, 2, 1)
 plt.imshow(kieen)
@@ -387,14 +457,14 @@ plt.show()
 由于图片分辨率为1277x1920不是方阵，这里先对图片进行裁剪成方阵。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">kieen_cropped</span> = kieen.crop((0, 0, kieen.size[0], kieen.size[0]))
-<span style="color: #6c71c4;">puppy_cropped</span> = puppy.crop((0, 0, puppy.size[0], puppy.size[0]))
+<pre class="src src-jupyter-python"><span style="color: #83a598;">kieen_cropped</span> = kieen.crop((0, 0, kieen.size[0], kieen.size[0]))
+<span style="color: #83a598;">puppy_cropped</span> = puppy.crop((0, 0, puppy.size[0], puppy.size[0]))
 plt.subplot(1, 2, 1)
 plt.imshow(kieen_cropped)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 plt.subplot(1, 2, 2)
 plt.imshow(puppy_cropped)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 </pre>
 </div>
 
@@ -413,16 +483,16 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 选择一个更小的图片进行试验。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">img_size</span> = 200
-<span style="color: #6c71c4;">kieen_small</span> = kieen.resize((img_size, img_size))
-<span style="color: #6c71c4;">puppy_small</span> = puppy.resize((img_size, img_size))
-<span style="color: #6c71c4;">kieen_array</span> = np.array(kieen_small)
-<span style="color: #6c71c4;">puppy_array</span> = np.array(puppy_small)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">img_size</span> = 200
+<span style="color: #83a598;">kieen_small</span> = kieen.resize((img_size, img_size))
+<span style="color: #83a598;">puppy_small</span> = puppy.resize((img_size, img_size))
+<span style="color: #83a598;">kieen_array</span> = np.array(kieen_small)
+<span style="color: #83a598;">puppy_array</span> = np.array(puppy_small)
 
-<span style="color: #6c71c4;">x</span> = np.zeros((2, 3, img_size, img_size))
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;RGB&#32500;&#25918;&#22312;&#21069;&#38754;</span>
-<span style="color: #6c71c4;">x</span>[0, :, :, :] = kieen_array.transpose((2, 0, 1))
-<span style="color: #6c71c4;">x</span>[1, :, :, :] = puppy_array.transpose((2, 0, 1))
+<span style="color: #83a598;">x</span> = np.zeros((2, 3, img_size, img_size))
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;RGB&#32500;&#25918;&#22312;&#21069;&#38754;</span>
+<span style="color: #83a598;">x</span>[0, :, :, :] = kieen_array.transpose((2, 0, 1))
+<span style="color: #83a598;">x</span>[1, :, :, :] = puppy_array.transpose((2, 0, 1))
 </pre>
 </div>
 </div>
@@ -431,17 +501,17 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 <h3 id="orgccbfbcc">生成权重矩阵（过滤器）</h3>
 <div class="outline-text-3" id="text-orgccbfbcc">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#19968;&#20849;&#20004;&#20010;&#36807;&#28388;&#22120;&#65292;&#27599;&#19968;&#20010;&#20026;3x3x3</span>
-<span style="color: #6c71c4;">w</span> = np.zeros((2, 3, 3, 3))
+<pre class="src src-jupyter-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#19968;&#20849;&#20004;&#20010;&#36807;&#28388;&#22120;&#65292;&#27599;&#19968;&#20010;&#20026;3x3x3</span>
+<span style="color: #83a598;">w</span> = np.zeros((2, 3, 3, 3))
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#31532;&#19968;&#20010;&#65292;&#21033;&#29992;&#30697;&#38453;&#23545;&#22270;&#29255;&#36827;&#34892;&#36716;&#21464;</span>
-<span style="color: #6c71c4;">w</span>[0, 0, :, :] = [[0, 0, 0], [0, 0.3, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">red</span>
-<span style="color: #6c71c4;">w</span>[0, 1, :, :] = [[0, 0, 0], [0, 0.6, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">green</span>
-<span style="color: #6c71c4;">w</span>[0, 2, :, :] = [[0, 0, 0], [0, 0.1, 0], [0, 0, 0]] <span style="color: #405A61;"># </span><span style="color: #405A61;">blue</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#31532;&#19968;&#20010;&#65292;&#21033;&#29992;&#30697;&#38453;&#23545;&#22270;&#29255;&#36827;&#34892;&#36716;&#21464;</span>
+<span style="color: #83a598;">w</span>[0, 0, :, :] = [[0, 0, 0], [0, 0.3, 0], [0, 0, 0]] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">red</span>
+<span style="color: #83a598;">w</span>[0, 1, :, :] = [[0, 0, 0], [0, 0.6, 0], [0, 0, 0]] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">green</span>
+<span style="color: #83a598;">w</span>[0, 2, :, :] = [[0, 0, 0], [0, 0.1, 0], [0, 0, 0]] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">blue</span>
 
-<span style="color: #6c71c4;">w</span>[1, 2, :, :] = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]] <span style="color: #405A61;"># </span><span style="color: #405A61;">blue</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20559;&#24046;</span>
-<span style="color: #6c71c4;">b</span> = np.array([0, 128])
+<span style="color: #83a598;">w</span>[1, 2, :, :] = [[1, 2, 1], [0, 0, 0], [-1, -2, -1]] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">blue</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20559;&#24046;</span>
+<span style="color: #83a598;">b</span> = np.array([0, 128])
 </pre>
 </div>
 </div>
@@ -450,37 +520,37 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 <h3 id="org842bd12">卷积操作</h3>
 <div class="outline-text-3" id="text-org842bd12">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">out</span>, <span style="color: #6c71c4;">_</span> = forward_pass(x, w, b, 1, 1)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">out</span>, <span style="color: #83a598;">_</span> = forward_pass(x, w, b, 1, 1)
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">imshow_helper</span>(img, normalize=<span style="color: #d33682;">True</span>):
-    <span style="color: #35a69c;">'''predigest the plot command'''</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#24402;&#19968;&#21270;</span>
-    <span style="color: #859900;">if</span> normalize:
-        <span style="color: #6c71c4;">img_max</span>, <span style="color: #6c71c4;">img_min</span> = np.<span style="color: #268bd2;">max</span>(img), np.<span style="color: #268bd2;">min</span>(img)
-        <span style="color: #6c71c4;">img</span> = 225.0 * (img - img_min) / (img_max - img_min)
-    plt.imshow(img.astype(<span style="color: #2aa198;">'uint8'</span>))
-    plt.gca().axis(<span style="color: #2aa198;">'off'</span>)
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">imshow_helper</span>(img, normalize=<span style="color: #fabd2f;">True</span>):
+    <span style="color: #ada296;">'''predigest the plot command'''</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24402;&#19968;&#21270;</span>
+    <span style="color: #fb4934;">if</span> normalize:
+        <span style="color: #83a598;">img_max</span>, <span style="color: #83a598;">img_min</span> = np.<span style="color: #fe8019;">max</span>(img), np.<span style="color: #fe8019;">min</span>(img)
+        <span style="color: #83a598;">img</span> = 225.0 * (img - img_min) / (img_max - img_min)
+    plt.imshow(img.astype(<span style="color: #b8bb26;">'uint8'</span>))
+    plt.gca().axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.figure(figsize=(15, 10))
-<span style="color: #405A61;"># </span><span style="color: #405A61;">kieen</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">kieen</span>
 plt.subplot(2, 4, 1)
-imshow_helper(kieen_array, normalize=<span style="color: #d33682;">False</span>)
-plt.title(<span style="color: #2aa198;">'original'</span>)
+imshow_helper(kieen_array, normalize=<span style="color: #fabd2f;">False</span>)
+plt.title(<span style="color: #b8bb26;">'original'</span>)
 plt.subplot(2, 4, 2)
-imshow_helper(kieen_array, normalize=<span style="color: #d33682;">True</span>)
-plt.title(<span style="color: #2aa198;">'normalize'</span>)
+imshow_helper(kieen_array, normalize=<span style="color: #fabd2f;">True</span>)
+plt.title(<span style="color: #b8bb26;">'normalize'</span>)
 plt.subplot(2, 4, 3)
 imshow_helper(out[0, 0])
-plt.title(<span style="color: #2aa198;">'grayscale'</span>)
+plt.title(<span style="color: #b8bb26;">'grayscale'</span>)
 plt.subplot(2, 4, 4)
 imshow_helper(out[0, 1])
-plt.title(<span style="color: #2aa198;">'edges'</span>)
+plt.title(<span style="color: #b8bb26;">'edges'</span>)
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">puppy</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">puppy</span>
 plt.subplot(2, 4, 5)
-imshow_helper(puppy_array, normalize=<span style="color: #d33682;">False</span>)
+imshow_helper(puppy_array, normalize=<span style="color: #fabd2f;">False</span>)
 plt.subplot(2, 4, 6)
-imshow_helper(puppy_array, normalize=<span style="color: #d33682;">True</span>)
+imshow_helper(puppy_array, normalize=<span style="color: #fabd2f;">True</span>)
 plt.subplot(2, 4, 7)
 imshow_helper(out[1, 0])
 plt.subplot(2, 4, 8)
@@ -531,134 +601,134 @@ layer(class scores) -&gt; softmax(loss function).</code>
 <h3 id="org734bbba">模型</h3>
 <div class="outline-text-3" id="text-org734bbba">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">TwoLayerNN</span>(<span style="color: #268bd2;">object</span>):
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>, input_size, hidden_size, output_size, std=1e-4):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - input_size: The input dataset every sample dimension muliplay.</span>
-<span style="color: #35a69c;">        - hidden_size: The neurons of H in the hidden layers.</span>
-<span style="color: #35a69c;">        - output_size: The numbers of classes.</span>
-<span style="color: #35a69c;">        - std: The standard variable.</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - self.params: (dict) store the parameters of weights, bias.</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #859900;">self</span>.params = {}
-        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>] = std * np.random.randn(input_size, hidden_size)
-        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>] = np.zeros(hidden_size)
-        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>] = std * np.random.randn(hidden_size, output_size)
-        <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>] = np.zeros(output_size)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">TwoLayerNN</span>(<span style="color: #fe8019;">object</span>):
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>, input_size, hidden_size, output_size, std=1e-4):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - input_size: The input dataset every sample dimension muliplay.</span>
+<span style="color: #ada296;">        - hidden_size: The neurons of H in the hidden layers.</span>
+<span style="color: #ada296;">        - output_size: The numbers of classes.</span>
+<span style="color: #ada296;">        - std: The standard variable.</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - self.params: (dict) store the parameters of weights, bias.</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #fb4934;">self</span>.params = {}
+        <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W1'</span>] = std * np.random.randn(input_size, hidden_size)
+        <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B1'</span>] = np.zeros(hidden_size)
+        <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W2'</span>] = std * np.random.randn(hidden_size, output_size)
+        <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B2'</span>] = np.zeros(output_size)
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">loss</span>(<span style="color: #859900;">self</span>, x, y=<span style="color: #d33682;">None</span>, reg=0.0):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Use softmax compute loss</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - x: The x is the need computer loss value data set..</span>
-<span style="color: #35a69c;">        - y: The y is labels parallelism of x.</span>
-<span style="color: #35a69c;">        - reg: The lambda of reguarization.</span>
-<span style="color: #35a69c;">        Outpus:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - loss: The loss about softmax data loss and regularization loss.</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #6c71c4;">W1</span>, <span style="color: #6c71c4;">B1</span> = <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>], <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>]
-        <span style="color: #6c71c4;">W2</span>, <span style="color: #6c71c4;">B2</span> = <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>], <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>]
-        <span style="color: #6c71c4;">N</span>, <span style="color: #6c71c4;">D</span> = x.shape
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">loss</span>(<span style="color: #fb4934;">self</span>, x, y=<span style="color: #fabd2f;">None</span>, reg=0.0):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Use softmax compute loss</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - x: The x is the need computer loss value data set..</span>
+<span style="color: #ada296;">        - y: The y is labels parallelism of x.</span>
+<span style="color: #ada296;">        - reg: The lambda of reguarization.</span>
+<span style="color: #ada296;">        Outpus:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - loss: The loss about softmax data loss and regularization loss.</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #83a598;">W1</span>, <span style="color: #83a598;">B1</span> = <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W1'</span>], <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B1'</span>]
+        <span style="color: #83a598;">W2</span>, <span style="color: #83a598;">B2</span> = <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W2'</span>], <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B2'</span>]
+        <span style="color: #83a598;">N</span>, <span style="color: #83a598;">D</span> = x.shape
 
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">input -&gt; [fc -&gt; relu] -&gt; fc</span>
-        <span style="color: #6c71c4;">H1</span> = np.maximum(0, np.dot(x, W1) + B1)
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">input -&gt; fc -&gt; relu -&gt; [fc]</span>
-        <span style="color: #6c71c4;">scores</span> = np.dot(H1, W2) + B2
-        <span style="color: #859900;">if</span> y <span style="color: #859900;">is</span> <span style="color: #d33682;">None</span>:
-            <span style="color: #859900;">return</span> scores
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">input -&gt; [fc -&gt; relu] -&gt; fc</span>
+        <span style="color: #83a598;">H1</span> = np.maximum(0, np.dot(x, W1) + B1)
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">input -&gt; fc -&gt; relu -&gt; [fc]</span>
+        <span style="color: #83a598;">scores</span> = np.dot(H1, W2) + B2
+        <span style="color: #fb4934;">if</span> y <span style="color: #fb4934;">is</span> <span style="color: #fabd2f;">None</span>:
+            <span style="color: #fb4934;">return</span> scores
 
-        <span style="color: #6c71c4;">scores</span> -= scores.<span style="color: #268bd2;">max</span>()
-        <span style="color: #6c71c4;">exp_scores</span> = np.exp(scores)
-        <span style="color: #6c71c4;">sum_exp_scores</span> = np.<span style="color: #268bd2;">sum</span>(exp_scores, axis=1)
-        <span style="color: #6c71c4;">corr_exp_scores</span> = exp_scores[<span style="color: #268bd2;">range</span>(N), y]
-        <span style="color: #6c71c4;">data_loss</span> = (-1) * np.log(corr_exp_scores / sum_exp_scores)
-        <span style="color: #6c71c4;">reg_loss</span> = reg * (np.<span style="color: #268bd2;">sum</span>(W1 * W1) + np.<span style="color: #268bd2;">sum</span>(W2 * W2))
-        <span style="color: #6c71c4;">loss</span> = np.<span style="color: #268bd2;">sum</span>(data_loss) / N + reg_loss
+        <span style="color: #83a598;">scores</span> -= scores.<span style="color: #fe8019;">max</span>()
+        <span style="color: #83a598;">exp_scores</span> = np.exp(scores)
+        <span style="color: #83a598;">sum_exp_scores</span> = np.<span style="color: #fe8019;">sum</span>(exp_scores, axis=1)
+        <span style="color: #83a598;">corr_exp_scores</span> = exp_scores[<span style="color: #fe8019;">range</span>(N), y]
+        <span style="color: #83a598;">data_loss</span> = (-1) * np.log(corr_exp_scores / sum_exp_scores)
+        <span style="color: #83a598;">reg_loss</span> = reg * (np.<span style="color: #fe8019;">sum</span>(W1 * W1) + np.<span style="color: #fe8019;">sum</span>(W2 * W2))
+        <span style="color: #83a598;">loss</span> = np.<span style="color: #fe8019;">sum</span>(data_loss) / N + reg_loss
 
-        <span style="color: #6c71c4;">grads</span> = {}              <span style="color: #405A61;"># </span><span style="color: #405A61;"># backpass gradient</span>
-        <span style="color: #6c71c4;">d_scores</span> = exp_scores / sum_exp_scores.reshape(N, 1)
-        <span style="color: #6c71c4;">d_scores</span>[<span style="color: #268bd2;">range</span>(N), y] = - (sum_exp_scores - corr_exp_scores) / sum_exp_scores
-        <span style="color: #6c71c4;">d_scores</span> /= N
-        <span style="color: #6c71c4;">d_H1</span> = d_scores.dot(W2.T)
-        <span style="color: #6c71c4;">d_H1</span>[H1 == 0] = 0
-        <span style="color: #6c71c4;">d_W2</span> = H1.T.dot(d_scores)
-        <span style="color: #6c71c4;">d_B2</span> = d_scores.<span style="color: #268bd2;">sum</span>(axis=0)
-        <span style="color: #6c71c4;">d_W1</span> = x.T.dot(d_H1)
-        <span style="color: #6c71c4;">d_B1</span> = d_H1.<span style="color: #268bd2;">sum</span>(axis=0)
+        <span style="color: #83a598;">grads</span> = {}              <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;"># backpass gradient</span>
+        <span style="color: #83a598;">d_scores</span> = exp_scores / sum_exp_scores.reshape(N, 1)
+        <span style="color: #83a598;">d_scores</span>[<span style="color: #fe8019;">range</span>(N), y] = - (sum_exp_scores - corr_exp_scores) / sum_exp_scores
+        <span style="color: #83a598;">d_scores</span> /= N
+        <span style="color: #83a598;">d_H1</span> = d_scores.dot(W2.T)
+        <span style="color: #83a598;">d_H1</span>[H1 == 0] = 0
+        <span style="color: #83a598;">d_W2</span> = H1.T.dot(d_scores)
+        <span style="color: #83a598;">d_B2</span> = d_scores.<span style="color: #fe8019;">sum</span>(axis=0)
+        <span style="color: #83a598;">d_W1</span> = x.T.dot(d_H1)
+        <span style="color: #83a598;">d_B1</span> = d_H1.<span style="color: #fe8019;">sum</span>(axis=0)
 
-        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'W1'</span>] = d_W1 + reg * W1 * 2
-        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'W2'</span>] = d_W2 + reg * W2 * 2
-        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'B1'</span>] = d_B1
-        <span style="color: #6c71c4;">grads</span>[<span style="color: #2aa198;">'B2'</span>] = d_B2
-        <span style="color: #859900;">return</span> loss, grads
+        <span style="color: #83a598;">grads</span>[<span style="color: #b8bb26;">'W1'</span>] = d_W1 + reg * W1 * 2
+        <span style="color: #83a598;">grads</span>[<span style="color: #b8bb26;">'W2'</span>] = d_W2 + reg * W2 * 2
+        <span style="color: #83a598;">grads</span>[<span style="color: #b8bb26;">'B1'</span>] = d_B1
+        <span style="color: #83a598;">grads</span>[<span style="color: #b8bb26;">'B2'</span>] = d_B2
+        <span style="color: #fb4934;">return</span> loss, grads
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, X, y, X_val, y_val, learning_rate=1e-3, learning_rate_decay=0.95,
-              reg=5e-6, num_iters=100, batch_size=200, verbose=<span style="color: #d33682;">False</span>):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - X: The train data set. (N, D)</span>
-<span style="color: #35a69c;">        - y: The train data labels. (N, )</span>
-<span style="color: #35a69c;">        - X_val: The validation data set. (N_val, D).</span>
-<span style="color: #35a69c;">        - y_val: The validation data labels. (N_val, )</span>
-<span style="color: #35a69c;">        - learning_rate: The weight update learning step.</span>
-<span style="color: #35a69c;">        - learning_rate_decay: The parameters used to decay the learning rate after each point.</span>
-<span style="color: #35a69c;">        - reg: The lambda of regularizaion.</span>
-<span style="color: #35a69c;">        - num_iters: The iter numbers of train.</span>
-<span style="color: #35a69c;">        - batch_size: Number of sample used each train.</span>
-<span style="color: #35a69c;">        - verbose: boolean, whether print details information.</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #6c71c4;">num_train</span> = X.shape[0]
-        <span style="color: #6c71c4;">each_iter_epoch</span> = <span style="color: #268bd2;">max</span>(num_train / batch_size, 1)
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, X, y, X_val, y_val, learning_rate=1e-3, learning_rate_decay=0.95,
+              reg=5e-6, num_iters=100, batch_size=200, verbose=<span style="color: #fabd2f;">False</span>):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - X: The train data set. (N, D)</span>
+<span style="color: #ada296;">        - y: The train data labels. (N, )</span>
+<span style="color: #ada296;">        - X_val: The validation data set. (N_val, D).</span>
+<span style="color: #ada296;">        - y_val: The validation data labels. (N_val, )</span>
+<span style="color: #ada296;">        - learning_rate: The weight update learning step.</span>
+<span style="color: #ada296;">        - learning_rate_decay: The parameters used to decay the learning rate after each point.</span>
+<span style="color: #ada296;">        - reg: The lambda of regularizaion.</span>
+<span style="color: #ada296;">        - num_iters: The iter numbers of train.</span>
+<span style="color: #ada296;">        - batch_size: Number of sample used each train.</span>
+<span style="color: #ada296;">        - verbose: boolean, whether print details information.</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #83a598;">num_train</span> = X.shape[0]
+        <span style="color: #83a598;">each_iter_epoch</span> = <span style="color: #fe8019;">max</span>(num_train / batch_size, 1)
 
-        <span style="color: #6c71c4;">loss_history</span> = []
-        <span style="color: #6c71c4;">train_acc_history</span> = []
-        <span style="color: #6c71c4;">val_acc_history</span> = []
+        <span style="color: #83a598;">loss_history</span> = []
+        <span style="color: #83a598;">train_acc_history</span> = []
+        <span style="color: #83a598;">val_acc_history</span> = []
 
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(num_iters):
-            <span style="color: #6c71c4;">batch_idx</span> = np.random.choice(num_train, batch_size)
-            <span style="color: #6c71c4;">x_batch</span> = X[batch_idx]
-            <span style="color: #6c71c4;">y_batch</span> = y[batch_idx]
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(num_iters):
+            <span style="color: #83a598;">batch_idx</span> = np.random.choice(num_train, batch_size)
+            <span style="color: #83a598;">x_batch</span> = X[batch_idx]
+            <span style="color: #83a598;">y_batch</span> = y[batch_idx]
 
-            <span style="color: #6c71c4;">loss</span>, <span style="color: #6c71c4;">grads</span> = <span style="color: #859900;">self</span>.loss(x_batch, y_batch, reg=reg)
+            <span style="color: #83a598;">loss</span>, <span style="color: #83a598;">grads</span> = <span style="color: #fb4934;">self</span>.loss(x_batch, y_batch, reg=reg)
             loss_history.append(loss)
 
-            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'W1'</span>]
-            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'W2'</span>]
-            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'B1'</span>]
-            <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>] -= learning_rate * grads[<span style="color: #2aa198;">'B2'</span>]
+            <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W1'</span>] -= learning_rate * grads[<span style="color: #b8bb26;">'W1'</span>]
+            <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W2'</span>] -= learning_rate * grads[<span style="color: #b8bb26;">'W2'</span>]
+            <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B1'</span>] -= learning_rate * grads[<span style="color: #b8bb26;">'B1'</span>]
+            <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B2'</span>] -= learning_rate * grads[<span style="color: #b8bb26;">'B2'</span>]
 
-            <span style="color: #859900;">if</span> verbose <span style="color: #859900;">and</span> i % 100 == 0:
-                <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"inter number: (%d / %d) loss: %f"</span> %(i, num_iters, loss))
+            <span style="color: #fb4934;">if</span> verbose <span style="color: #fb4934;">and</span> i % 100 == 0:
+                <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"inter number: (%d / %d) loss: %f"</span> %(i, num_iters, loss))
 
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23547;&#25214;&#26368;&#20248;&#30340;&#23398;&#20064;&#36895;&#29575;&#12290;</span>
-            <span style="color: #859900;">if</span> i % each_iter_epoch == 0:
-                <span style="color: #6c71c4;">train_acc</span> = (<span style="color: #859900;">self</span>.predict(x_batch) == y_batch).mean()
-                <span style="color: #6c71c4;">val_acc</span> = (<span style="color: #859900;">self</span>.predict(X_val) == y_val).mean()
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23547;&#25214;&#26368;&#20248;&#30340;&#23398;&#20064;&#36895;&#29575;&#12290;</span>
+            <span style="color: #fb4934;">if</span> i % each_iter_epoch == 0:
+                <span style="color: #83a598;">train_acc</span> = (<span style="color: #fb4934;">self</span>.predict(x_batch) == y_batch).mean()
+                <span style="color: #83a598;">val_acc</span> = (<span style="color: #fb4934;">self</span>.predict(X_val) == y_val).mean()
                 train_acc_history.append(train_acc)
                 val_acc_history.append(val_acc)
 
-                <span style="color: #6c71c4;">learning_rate</span> *= learning_rate_decay
+                <span style="color: #83a598;">learning_rate</span> *= learning_rate_decay
 
-        <span style="color: #859900;">return</span> {
-            <span style="color: #2aa198;">"loss_history"</span>: loss_history,
-            <span style="color: #2aa198;">"train_acc_history"</span>: train_acc_history,
-            <span style="color: #2aa198;">"val_acc_history"</span>: val_acc_history
+        <span style="color: #fb4934;">return</span> {
+            <span style="color: #b8bb26;">"loss_history"</span>: loss_history,
+            <span style="color: #b8bb26;">"train_acc_history"</span>: train_acc_history,
+            <span style="color: #b8bb26;">"val_acc_history"</span>: val_acc_history
         }
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict</span>(<span style="color: #859900;">self</span>, x):
-        <span style="color: #6c71c4;">y_pred</span> = np.argmax(np.dot(np.maximum(0, np.dot(x, <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W1'</span>]) + <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B1'</span>]),
-                                  <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'W2'</span>])
-                           + <span style="color: #859900;">self</span>.params[<span style="color: #2aa198;">'B2'</span>], axis=1)
-        <span style="color: #859900;">return</span> y_pred
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, x):
+        <span style="color: #83a598;">y_pred</span> = np.argmax(np.dot(np.maximum(0, np.dot(x, <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W1'</span>]) + <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B1'</span>]),
+                                  <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'W2'</span>])
+                           + <span style="color: #fb4934;">self</span>.params[<span style="color: #b8bb26;">'B2'</span>], axis=1)
+        <span style="color: #fb4934;">return</span> y_pred
 </pre>
 </div>
 </div>
@@ -667,25 +737,25 @@ layer(class scores) -&gt; softmax(loss function).</code>
 <h3 id="org6633f21">测试</h3>
 <div class="outline-text-3" id="text-org6633f21">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">input_size</span> = 4                  <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21333;&#20010;&#26679;&#26412;&#30340;&#32500;&#24230;</span>
-<span style="color: #6c71c4;">output_size</span> = 3                 <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36755;&#20986;&#30340;&#31867;&#20010;&#25968;</span>
-<span style="color: #6c71c4;">hidden_size</span> = 10                <span style="color: #405A61;"># </span><span style="color: #405A61;">&#38544;&#34255;&#23618;&#20013;&#33410;&#28857;&#20010;&#25968;</span>
-<span style="color: #6c71c4;">num_input</span> = 5                   <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26679;&#26412;&#20010;&#25968;</span>
+<pre class="src src-jupyter-python"><span style="color: #83a598;">input_size</span> = 4                  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#21333;&#20010;&#26679;&#26412;&#30340;&#32500;&#24230;</span>
+<span style="color: #83a598;">output_size</span> = 3                 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36755;&#20986;&#30340;&#31867;&#20010;&#25968;</span>
+<span style="color: #83a598;">hidden_size</span> = 10                <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#38544;&#34255;&#23618;&#20013;&#33410;&#28857;&#20010;&#25968;</span>
+<span style="color: #83a598;">num_input</span> = 5                   <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#26679;&#26412;&#20010;&#25968;</span>
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">init_twolayer</span>():
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">init_twolayer</span>():
     np.random.seed(0)
-    <span style="color: #859900;">return</span> TwoLayerNN(input_size, hidden_size, output_size, std=1e-1)
+    <span style="color: #fb4934;">return</span> TwoLayerNN(input_size, hidden_size, output_size, std=1e-1)
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">init_data</span>():
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">init_data</span>():
     np.random.seed(1)
-    <span style="color: #6c71c4;">x</span> = 10 * np.random.randn(num_input, input_size)
-    <span style="color: #6c71c4;">y</span> = np.array([0, 1, 2, 2, 1])
-    <span style="color: #859900;">return</span> x, y
+    <span style="color: #83a598;">x</span> = 10 * np.random.randn(num_input, input_size)
+    <span style="color: #83a598;">y</span> = np.array([0, 1, 2, 2, 1])
+    <span style="color: #fb4934;">return</span> x, y
 
-<span style="color: #6c71c4;">net</span> = init_twolayer()
-<span style="color: #6c71c4;">net_x</span>, <span style="color: #6c71c4;">net_y</span> = init_data()
-<span style="color: #6c71c4;">net_loss</span>, <span style="color: #6c71c4;">_</span> = net.loss(net_x, net_y, reg=0.05)
-<span style="color: #268bd2;">abs</span>(net_loss - <span style="color: #268bd2;">float</span>(1.30378789133))
+<span style="color: #83a598;">net</span> = init_twolayer()
+<span style="color: #83a598;">net_x</span>, <span style="color: #83a598;">net_y</span> = init_data()
+<span style="color: #83a598;">net_loss</span>, <span style="color: #83a598;">_</span> = net.loss(net_x, net_y, reg=0.05)
+<span style="color: #fe8019;">abs</span>(net_loss - <span style="color: #fe8019;">float</span>(1.30378789133))
 </pre>
 </div>
 </div>
@@ -695,23 +765,22 @@ layer(class scores) -&gt; softmax(loss function).</code>
 <h2 id="org2c3f6c0">训练模型</h2>
 <div class="outline-text-2" id="text-org2c3f6c0">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">cifar_net</span> = TwoLayerNN(X_train2d.shape[1], 50, 10)
-<span style="color: #6c71c4;">cifar_stats</span> = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+<pre class="src src-jupyter-python"><span style="color: #83a598;">cifar_net</span> = TwoLayerNN(X_train2d.shape[1], 50, 10)
+<span style="color: #83a598;">cifar_stats</span> = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
                               learning_rate=1e-4, learning_rate_decay=0.95,
-                              reg=0.25, num_iters=1000, batch_size=200, verbose=<span style="color: #d33682;">False</span>)
+                              reg=0.25, num_iters=1000, batch_size=200, verbose=<span style="color: #fabd2f;">False</span>)
 </pre>
 </div>
 <p>
 查看模型的准确率。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">"val accurary: %f"</span> %((cifar_net.predict(X_vali2d) == Y_vali).mean()))
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"val accurary: %f"</span> %((cifar_net.predict(X_vali2d) == Y_vali).mean()))
 </pre>
 </div>
 
 <pre class="example">
 val accurary: 0.248000
-
 </pre>
 </div>
 </div>
@@ -724,9 +793,9 @@ val_acc_history</code> 加上从模型的对象中可以获得模型的权重信
 </p>
 <div class="org-src-container">
 <pre class="src src-jupyter-python">plt.figure(figsize=(9.0, 6.0))
-plt.plot(cifar_stats[<span style="color: #2aa198;">'loss_history'</span>])
-plt.xlabel(<span style="color: #2aa198;">'x'</span>)
-plt.ylabel(<span style="color: #2aa198;">'loss'</span>)
+plt.plot(cifar_stats[<span style="color: #b8bb26;">'loss_history'</span>])
+plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
+plt.ylabel(<span style="color: #b8bb26;">'loss'</span>)
 </pre>
 </div>
 
@@ -739,39 +808,38 @@ plt.ylabel(<span style="color: #2aa198;">'loss'</span>)
 将前面训练的过程结合起来，根据输出结果进行调整参数，寻找最高的准确率。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">hidden_size</span> = <span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(100, 1000, 100))
-<span style="color: #6c71c4;">learning_rate</span> = [1e-3, 1e-4, 1e-5, 2e-3, 2e-4, 2e-5, 3e-3, 3e-4, 3e-5]
-<span style="color: #6c71c4;">reg</span> = np.arange(0, 1, 0.2)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">hidden_size</span> = <span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(100, 1000, 100))
+<span style="color: #83a598;">learning_rate</span> = [1e-3, 1e-4, 1e-5, 2e-3, 2e-4, 2e-5, 3e-3, 3e-4, 3e-5]
+<span style="color: #83a598;">reg</span> = np.arange(0, 1, 0.2)
 
-<span style="color: #6c71c4;">cifar_model</span> = <span style="color: #d33682;">None</span>
-<span style="color: #6c71c4;">cifar_model_acc</span> = 0
-<span style="color: #859900;">for</span> h <span style="color: #859900;">in</span> hidden_size:
-    <span style="color: #859900;">for</span> l <span style="color: #859900;">in</span> learning_rate:
-        <span style="color: #859900;">for</span> r <span style="color: #859900;">in</span> reg:
-            <span style="color: #6c71c4;">net</span> = TwoLayerNN(X_train2d.shape[1], h, 10)
-            <span style="color: #6c71c4;">net_stats</span> = net.train(X_train2d, Y_train, X_vali2d, Y_vali,
+<span style="color: #83a598;">cifar_model</span> = <span style="color: #fabd2f;">None</span>
+<span style="color: #83a598;">cifar_model_acc</span> = 0
+<span style="color: #fb4934;">for</span> h <span style="color: #fb4934;">in</span> hidden_size:
+    <span style="color: #fb4934;">for</span> l <span style="color: #fb4934;">in</span> learning_rate:
+        <span style="color: #fb4934;">for</span> r <span style="color: #fb4934;">in</span> reg:
+            <span style="color: #83a598;">net</span> = TwoLayerNN(X_train2d.shape[1], h, 10)
+            <span style="color: #83a598;">net_stats</span> = net.train(X_train2d, Y_train, X_vali2d, Y_vali,
                                    learning_rate=l, learning_rate_decay=0.95,
-                                   reg=r, num_iters=1000, batch_size=200, verbose=<span style="color: #d33682;">False</span>)
-            <span style="color: #6c71c4;">acc</span> = net_stats[<span style="color: #2aa198;">'val_acc_history'</span>][-1] <span style="color: #405A61;"># </span><span style="color: #405A61;">the last validation accurary.</span>
-            <span style="color: #859900;">if</span> acc &gt; cifar_model_acc:
-                <span style="color: #6c71c4;">cifar_model</span> = net
-                <span style="color: #6c71c4;">cifar_model_acc</span> = acc
-            <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"h: %d, l: %f, r: %f, acc: %f"</span> %(h, l, r, acc, ))
+                                   reg=r, num_iters=1000, batch_size=200, verbose=<span style="color: #fabd2f;">False</span>)
+            <span style="color: #83a598;">acc</span> = net_stats[<span style="color: #b8bb26;">'val_acc_history'</span>][-1] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">the last validation accurary.</span>
+            <span style="color: #fb4934;">if</span> acc &gt; cifar_model_acc:
+                <span style="color: #83a598;">cifar_model</span> = net
+                <span style="color: #83a598;">cifar_model_acc</span> = acc
+            <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"h: %d, l: %f, r: %f, acc: %f"</span> %(h, l, r, acc, ))
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">"The best accurary: %f"</span> %cifar_model_acc)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"The best accurary: %f"</span> %cifar_model_acc)
 
-<span style="color: #6c71c4;">y_pred</span> = cifar_model.predict(X_test2d)
-<span style="color: #859900;">print</span>(<span style="color: #2aa198;">"Test acc: %f"</span> %(np.mean(y_pred == Y_test)))
+<span style="color: #83a598;">y_pred</span> = cifar_model.predict(X_test2d)
+<span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"Test acc: %f"</span> %(np.mean(y_pred == Y_test)))
 </pre>
 </div>
 
 <pre class="example">
 The best accurary: 0.421000
 Test acc: 0.389000
-
 </pre>
 </div>
 </div>
@@ -803,7 +871,7 @@ Test acc: 0.389000
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>

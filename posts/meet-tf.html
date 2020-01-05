@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-11-03 Sun 11:52 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>遇见TensorFlow</title>
@@ -15,7 +15,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -79,93 +79,94 @@ TensorFlow中的Tensor具有三个属性：
 量。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">import</span> tensorflow <span style="color: #859900;">as</span> tf
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> tensorflow <span style="color: #fb4934;">as</span> tf
 
-<span style="color: #6c71c4;">type_float</span> = tf.constant(3.141519, tf.float32)
-<span style="color: #6c71c4;">type_int</span> = tf.cast(type_float, dtype=tf.int32, name=<span style="color: #2aa198;">"float_to_int"</span>)
-<span style="color: #859900;">print</span>(type_float)
-<span style="color: #859900;">print</span>(type_int)
+<span style="color: #83a598;">type_float</span> = tf.constant(3.141519, tf.float32)
+<span style="color: #83a598;">type_int</span> = tf.cast(type_float, dtype=tf.int32, name=<span style="color: #b8bb26;">"float_to_int"</span>)
+<span style="color: #fb4934;">print</span>(type_float)
+<span style="color: #fb4934;">print</span>(type_int)
 </pre>
 </div>
 
 <pre class="example">
-Tensor("Const_6:0", shape=(), dtype=float32)
+Tensor("Const:0", shape=(), dtype=float32)
 Tensor("float_to_int:0", shape=(), dtype=int32)
-
 </pre>
+
 
 <p>
 TensorFlow中内置许多基本操作函数，像绝对值、指数、对数、开方等。值得注意的是，这
 些操作函数也并不是返回一个结果，而是创建一个占位符，表示相关元素需要进行该操作。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">tensor_a</span> = tf.constant([[1, 2]], dtype=tf.float16)
-<span style="color: #6c71c4;">tensor_b</span> = tf.constant([[3, 4]], dtype=tf.float16)
-<span style="color: #6c71c4;">tensor_add</span> = tf.add(tensor_a, tensor_b)
-<span style="color: #859900;">print</span>(tensor_add)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">tensor_a</span> = tf.constant([[1, 2]], dtype=tf.float16)
+<span style="color: #83a598;">tensor_b</span> = tf.constant([[3, 4]], dtype=tf.float16)
+<span style="color: #83a598;">tensor_add</span> = tf.add(tensor_a, tensor_b)
+<span style="color: #fb4934;">print</span>(tensor_add)
 </pre>
 </div>
 
 <pre class="example">
 Tensor("Add:0", shape=(1, 2), dtype=float16)
-
 </pre>
+
 
 <p>
 我们需要用一个变量实时更新结果，可以使用=tf.get<sub>variable</sub>= 创建变量或者获取变量。
 </p>
 
 <p>
-Note: TensorFlow中默认是不允许重复定义统一 <code>name</code> 的变量。
+Note: TensorFlow中默认是不允许重复定义同一 <code>name</code> 的变量。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">var_int_1</span> = tf.get_variable(<span style="color: #2aa198;">"tensor_var_1"</span>, shape=[1, 2], dtype=tf.int32, initializer=tf.zeros_initializer)
-<span style="color: #859900;">print</span>(var_int_1.shape)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">var_int_1</span> = tf.get_variable(<span style="color: #b8bb26;">"tensor_var_1"</span>, shape=[1, 2], dtype=tf.int32, initializer=tf.zeros_initializer)
+<span style="color: #fb4934;">print</span>(var_int_1.shape)
 </pre>
 </div>
 
 <pre class="example">
 (1, 2)
-
 </pre>
+
 
 <p>
 使用 <code>tf.placeholder</code> 与 <code>tf.feed_ditc</code> 来定义占位符和提供占位符所需的数据。提供
 <code>name</code> 的一个好处就是会在输出的结构图(或者流程图flowchart)中将name显示为名称。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">data_place_holder_1</span> = tf.placeholder(tf.int16, shape=[1, 2], name=<span style="color: #2aa198;">"data_place_holder_1"</span>)
-<span style="color: #859900;">print</span>(data_place_holder_1)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">data_place_holder_1</span> = tf.placeholder(tf.int16, shape=[1, 2], name=<span style="color: #b8bb26;">"data_place_holder_1"</span>)
+<span style="color: #fb4934;">print</span>(data_place_holder_1)
 </pre>
 </div>
 
 <pre class="example">
 Tensor("data_place_holder_1:0", shape=(1, 2), dtype=int16)
-
 </pre>
+
 
 <p>
 <code>tf.session</code> 当整个模型的网络构建完后，TensorFlow将会创建一个会话对网络按照各个
 节点的操作函数进行求值。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">x</span> = tf.constant([2])
-<span style="color: #6c71c4;">y</span> = tf.constant([4])
-<span style="color: #6c71c4;">multiply</span> = tf.multiply(x, y)
-<span style="color: #859900;">with</span> tf.Session() <span style="color: #859900;">as</span> tfs:
-    <span style="color: #6c71c4;">result_1</span> = tfs.run(multiply)
-    <span style="color: #859900;">print</span>(result_1)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">x</span> = tf.constant([2])
+<span style="color: #83a598;">y</span> = tf.constant([4])
+<span style="color: #83a598;">multiply</span> = tf.multiply(x, y)
+<span style="color: #fb4934;">with</span> tf.Session() <span style="color: #fb4934;">as</span> tfs:
+    <span style="color: #83a598;">result_1</span> = tfs.run(multiply)
+    <span style="color: #fb4934;">print</span>(result_1)
 </pre>
 </div>
 
 <pre class="example">
 [8]
-
 </pre>
+
 
 <p>
 TensorFlow如此流行还有一个原因，其提供 `TensorBoard' 可视化工具，对调试、优化都
-有很大的帮助。
+有很大的帮助。TensorFlow 中将计算等操作视为底层 API, 而将一些集成的机器学习算法
+视为高层API(估计器estimator)。
 </p>
 </div>
 <div id="postamble" class="status">
@@ -173,7 +174,7 @@ TensorFlow如此流行还有一个原因，其提供 `TensorBoard' 可视化工�
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>

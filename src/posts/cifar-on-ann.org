@@ -41,7 +41,20 @@
 在 sigmoid 的两端即位于0或者1上的点的梯度都是0(也称为：饱和)，如果一开始所给予过大
 的权重，将会直接被判断为1，将不会被学习。函数输出的结果不是以0为中心化的，而且都
 是为大于0。
-** tanh(logistic)
+*** 函数
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def sigmoid_forward(x):
+      out = 1.0 / (1.0 + np.exp(-x))
+      cache = (x)
+      return out, cache
+
+  def sigmoid_backward(dout, cache):
+      x = cache
+      dx = dout * (np.exp(-x) / (1 + np.exp(-x)) ** 2)
+      return dx
+#+END_SRC
+
+** tanh
 非线性函数，取值范围为[-1, 1]，Sigmod变体，但是为0中心化的，\(tanh(x) =
 2\sigma(2x) - 1\)
 #+BEGIN_SRC jupyter-python :session py :results output graphic :file ./images/cifar-on-ann-891349.png :exports both
@@ -51,6 +64,19 @@
 
 #+RESULTS:
 [[file:./images/cifar-on-ann-891349.png]]
+
+*** 函数
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def tanh_forward(x):
+      out, _ = sigmoid_forward(2.0 * x)
+      out = 2.0 * out - 1.0
+      return out, x
+
+  def tanh_backward(dout, cache):
+      x = cache
+      dx = 2.0 * sigmoid_backward(dout, 2.0 * x)
+      return dx
+#+END_SRC
 
 ** 修正线性单元(ReLU)
 ReLU(Rectified Linear Unit)函数表示成\(ReLU(x) = max(0, x)\)。从斜率的角度看就是，
@@ -72,6 +98,19 @@ tanh/Sigmod相比，计算量更小，只需要判断，而tanh/Sigmod需要计�
 *** 缺点：
 ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时，将会导致这个神经元“死
 掉”。这是因为大的梯度，导致权重更新的步伐过快，将可能导致可以通过调整更低的学习速率进行解决。
+*** 函数
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def relu_forward(x):
+      out = np.maximum(0, x)
+      return out, x
+
+  def relu_backward(dout, cache):
+      x = cache
+      dx = dout
+      dx[x < 0] = 0
+      return dx
+#+END_SRC
+
 ** 泄漏ReLU(leaky ReLU)
 为了解决ReLU“死掉”问题而设计，当 x<0 时，将给予一个微小的数，而不是0。就如，当
 \(x<0 f(x) = ax\) 当 \(x>=0 f(x)=x\), 其中a代表一个常数，在一些方面可以取得很好
@@ -83,6 +122,18 @@ ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时
 
 #+RESULTS:
 [[file:./images/cifar-on-ann-495479.png]]
+*** 函数
+#+BEGIN_SRC jupyter-python :session py :results output silent :exports both
+  def leaky_relu_forward(x):
+      out = np.where(x < 0, 0.25*x, x)
+      return out, x
+
+  def leaky_relu_backward(dout, cache):
+      x = cache
+      dx = dout
+      dx[x < 0] *= 0.25
+      return dx
+#+END_SRC
 
 ** Maxout
 将多个激励函数进行合并，表达式为: \(max(F_1, F_2, ...)\) ，当后面的\(F_2, ...,
@@ -107,7 +158,7 @@ F_n\)为0时退化为ReLU函数，防止梯度消失(饱和)， 有避免ReLu的
   - \(wight = (X_{width} - W_{width} + 2 * ZeroPadding)\)
 
 =np.pad()= 对一个矩阵进行填补。
-** 前向传播算法
+** 卷积前向传播算法
 这个简单的算法使用的仅仅是线性组合。\(f(x_i, W, b) = W x_i + b\)
 #+BEGIN_SRC jupyter-python :session py :results output silent :exports both
   def forward_pass(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):

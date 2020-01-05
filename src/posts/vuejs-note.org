@@ -1,0 +1,85 @@
+#+title:Vue.js 学习笔记
+#+date: [2020-01-05 20:50]
+
+最近在学习 =Vue.js= ,在这里记录其中的一些坑.
+
+关于 =Vue.js= 基本情况可以参考大佬的[[https://manateelazycat.github.io/web/2019/07/14/vue-tooltips.html][Vue.js实践小技巧]]
+
+1. 数据或者对象中值改变,界面的数据不进行渲染.参考[[https://cn.vuejs.org/v2/guide/list.html#%E6%95%B0%E7%BB%84%E6%9B%B4%E6%96%B0%E6%A3%80%E6%B5%8B][官方文档]]
+
+2. 怎样创建一个递归的组件,应用场景: 比如一个树状结构的展示列表. 也有一些评论场景
+   使用树状结构进行展示回复.
+
+   #+begin_src
+     <template>
+         <div>
+             <tree :user="next_user" :value="next_value"></tree>
+         </div>
+     </template>
+
+     <script>
+      export default {
+          name: "tree",
+          props: {
+              user: String,
+              value: Number,
+          },
+          data() {
+              return {
+                  next_user: "",
+                  next_value: "",
+              }
+          }
+      }
+     </script>
+   #+end_src
+   递归的关键点在于为一个组件使用 =name=  标记, 并在自身模板中引用本身.注意设定
+   结束判断条件,否则会出现递归溢出错误.
+
+3. 在默认中引用全局函数并不需要加上 =this= 指针, 同样在模板中使用全局变量可以直
+   接写成 =$store.state.global_value= 的形式. 不同经过使用 =methods= 包装一层.
+
+4. 过滤器用起来很方便, 可以在组件中定义局部过滤器,也可以使用 =Vue= 定义全局过滤
+   器.
+   #+begin_src
+     <!-- 局部过滤器 -->
+     <script>
+      export default {
+          name: "test",
+          filters: {
+              odd: function(arr) {
+                  var result = [];
+                  arr.map((e) => {
+                      if (e % 2 != 0) result.push(e);
+                  });
+                  return result;
+              }
+          }
+      }
+
+     <!-- 全局过滤器 -->
+     Vue.filter("even", (arr) => {
+          var result = [];
+          arr.map((e) => {
+              if (e % 2 == 0) result.push(e);
+          });
+          return result;
+      });
+     </script>
+   #+end_src
+
+5. 在使用 =WebSocket= 中需要不断的从服务器端过去信息,需要前端不断的渲染, 可以使
+   用 =watch= 监听执行流, 达到同步执行的效果. 比如一共需要按顺序执行几个程序, 其中每一个
+   程序在执行过程中会不断返回信息, 可以使用一个变量作为令牌, 然后用 =watch= 监听
+   变化，从而切换执行的程序。
+
+6. 不该使用箭头函数
+   1. 不应该使用箭头函数来定义 method 函数
+   2. 不应该对 data 属性使用箭头函数
+   3. 不应该使用箭头函数来定义 watcher 函数
+   4. 不应该使用箭头函数来定义计算属性函数
+
+7. keep-alive 组件的使用，这个组件可以让你页面进行缓存，当切换路由的时候，可以保
+   留原来页面的渲染数据不变。比如，当一个用户在等待一个加载的时候，这是他可能感
+   到不耐烦，切换到其他的页面，当他再次切换回来，可以保持进度条，或者已经渲染的
+   数据不被刷新，或者重新计算渲染。

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-11-03 Sun 11:52 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>从图片中提出特征(CIFAR)(04)</title>
@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -143,11 +143,11 @@ HOG原始被使用于识别行人(pedestrian detection)。至于关于预处理�
 <a href="https://pixabay.com/photos/person-human-female-girl-face-864804/">图片来源</a>
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">female</span> = plt.imread(<span style="color: #2aa198;">"/home/luhuaei/blog/src/posts/images/images-extract-features-female.jpg"</span>)
-<span style="color: #6c71c4;">female</span> = female[:400, :, :]
+<pre class="src src-jupyter-python"><span style="color: #83a598;">female</span> = plt.imread(<span style="color: #b8bb26;">"/home/luhuaei/blog/src/posts/images/images-extract-features-female.jpg"</span>)
+<span style="color: #83a598;">female</span> = female[:400, :, :]
 plt.figure(figsize=(9.0, 6.0))
 plt.imshow(female)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 </pre>
 </div>
 
@@ -163,58 +163,58 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 mode = 'constant', constant_values = 1)</code> 。使用两个卷积核计算对应x和y的梯度。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">kernel_x</span> = np.array([  [+1, 0, -1],
+<pre class="src src-jupyter-python"><span style="color: #83a598;">kernel_x</span> = np.array([  [+1, 0, -1],
                        [+1, 0, -1],
                        [+1, 0, -1]])
-<span style="color: #6c71c4;">kernel_y</span> = np.array([  [+1, +1, +1],
+<span style="color: #83a598;">kernel_y</span> = np.array([  [+1, +1, +1],
                        [0, 0, 0],
                        [-1, -1, -1]])
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">rgb2gray</span>(image):
-      <span style="color: #859900;">return</span> np.dot(image, [0.299, 0.587, 0.144])
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">rgb2gray</span>(image):
+      <span style="color: #fb4934;">return</span> np.dot(image, [0.299, 0.587, 0.144])
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">convolution2d</span>(image, kernel, zero_padding=0, stride=1, grayscale=<span style="color: #d33682;">True</span>, keep_channel=<span style="color: #d33682;">False</span>):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    image: The array is 3 dimensional.(channel, height, width)</span>
-<span style="color: #35a69c;">    kernel: The kenels.</span>
-<span style="color: #35a69c;">    grayscale: bool, represent whether convert RGB to grayscale.</span>
-<span style="color: #35a69c;">    keep_channel: bool, represent whether keep channel output.(only grayscale is False)</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #859900;">if</span> grayscale:
-        <span style="color: #6c71c4;">image</span> = rgb2gray(image.transpose(1, 2, 0))
-        <span style="color: #6c71c4;">image</span> = np.atleast_3d(image).transpose(2, 0, 1)
-    <span style="color: #859900;">elif</span> image.ndim == 2:
-        <span style="color: #6c71c4;">image</span> = np.atleast_3d(image).transpose(2, 0, 1)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">convolution2d</span>(image, kernel, zero_padding=0, stride=1, grayscale=<span style="color: #fabd2f;">True</span>, keep_channel=<span style="color: #fabd2f;">False</span>):
+    <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">    image: The array is 3 dimensional.(channel, height, width)</span>
+<span style="color: #ada296;">    kernel: The kenels.</span>
+<span style="color: #ada296;">    grayscale: bool, represent whether convert RGB to grayscale.</span>
+<span style="color: #ada296;">    keep_channel: bool, represent whether keep channel output.(only grayscale is False)</span>
+<span style="color: #ada296;">    '''</span>
+    <span style="color: #fb4934;">if</span> grayscale:
+        <span style="color: #83a598;">image</span> = rgb2gray(image.transpose(1, 2, 0))
+        <span style="color: #83a598;">image</span> = np.atleast_3d(image).transpose(2, 0, 1)
+    <span style="color: #fb4934;">elif</span> image.ndim == 2:
+        <span style="color: #83a598;">image</span> = np.atleast_3d(image).transpose(2, 0, 1)
 
-    <span style="color: #6c71c4;">i_channel</span>, <span style="color: #6c71c4;">i_height</span>, <span style="color: #6c71c4;">i_width</span> = image.shape
-    <span style="color: #859900;">if</span> <span style="color: #859900;">not</span> keep_channel:
-        <span style="color: #6c71c4;">i_channel</span> = 1
+    <span style="color: #83a598;">i_channel</span>, <span style="color: #83a598;">i_height</span>, <span style="color: #83a598;">i_width</span> = image.shape
+    <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">not</span> keep_channel:
+        <span style="color: #83a598;">i_channel</span> = 1
 
-    <span style="color: #6c71c4;">k_height</span>, <span style="color: #6c71c4;">k_width</span> = kernel.shape
+    <span style="color: #83a598;">k_height</span>, <span style="color: #83a598;">k_width</span> = kernel.shape
 
-    <span style="color: #6c71c4;">o_width</span> = (i_width - k_width + 2 * zero_padding ) // stride + 1
-    <span style="color: #6c71c4;">o_height</span> = (i_height - k_height + 2 * zero_padding) // stride + 1
+    <span style="color: #83a598;">o_width</span> = (i_width - k_width + 2 * zero_padding ) // stride + 1
+    <span style="color: #83a598;">o_height</span> = (i_height - k_height + 2 * zero_padding) // stride + 1
 
-    <span style="color: #859900;">if</span> zero_padding:
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">pad_width: if only one tuple, will execute all axis, if provide three, will control each axis.</span>
-        <span style="color: #6c71c4;">image</span> = np.pad(image, ((0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
-                       mode=<span style="color: #2aa198;">'constant'</span>, constant_values=0)
-    <span style="color: #6c71c4;">rest</span> = np.zeros((i_channel, o_height, o_width))
+    <span style="color: #fb4934;">if</span> zero_padding:
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">pad_width: if only one tuple, will execute all axis, if provide three, will control each axis.</span>
+        <span style="color: #83a598;">image</span> = np.pad(image, ((0, 0), (zero_padding, zero_padding), (zero_padding, zero_padding)),
+                       mode=<span style="color: #b8bb26;">'constant'</span>, constant_values=0)
+    <span style="color: #83a598;">rest</span> = np.zeros((i_channel, o_height, o_width))
 
-    <span style="color: #859900;">for</span> o_h <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_height):
-        <span style="color: #859900;">for</span> o_w <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_width):
-            <span style="color: #6c71c4;">rect</span> = image[:, o_h:(o_h * stride) + k_height, o_w:(o_w * stride) + k_width] * kernel
-            <span style="color: #859900;">if</span> <span style="color: #859900;">not</span> keep_channel <span style="color: #859900;">and</span> <span style="color: #859900;">not</span> grayscale:
-                <span style="color: #6c71c4;">rest</span>[:, o_h, o_w] = np.<span style="color: #268bd2;">sum</span>(np.<span style="color: #268bd2;">max</span>(rect, axis=0))
-            <span style="color: #859900;">else</span>:
-                <span style="color: #6c71c4;">test</span> = np.<span style="color: #268bd2;">sum</span>(rect, axis=(1, 2))
-                <span style="color: #6c71c4;">rest</span>[:, o_h, o_w] = test
-    <span style="color: #859900;">return</span> rest
+    <span style="color: #fb4934;">for</span> o_h <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_height):
+        <span style="color: #fb4934;">for</span> o_w <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_width):
+            <span style="color: #83a598;">rect</span> = image[:, o_h:(o_h * stride) + k_height, o_w:(o_w * stride) + k_width] * kernel
+            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">not</span> keep_channel <span style="color: #fb4934;">and</span> <span style="color: #fb4934;">not</span> grayscale:
+                <span style="color: #83a598;">rest</span>[:, o_h, o_w] = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">max</span>(rect, axis=0))
+            <span style="color: #fb4934;">else</span>:
+                <span style="color: #83a598;">test</span> = np.<span style="color: #fe8019;">sum</span>(rect, axis=(1, 2))
+                <span style="color: #83a598;">rest</span>[:, o_h, o_w] = test
+    <span style="color: #fb4934;">return</span> rest
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">computer_oriented</span>(gx, gy):
-    <span style="color: #859900;">return</span> np.arctan2(gy, (gx + 1e-15)) * (180 / np.pi) + 90
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">computer_oriented</span>(gx, gy):
+    <span style="color: #fb4934;">return</span> np.arctan2(gy, (gx + 1e-15)) * (180 / np.pi) + 90
 </pre>
 </div>
 
@@ -224,20 +224,20 @@ mode = 'constant', constant_values = 1)</code> 。使用两个卷积核计算对
 channel的。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">female_gx</span> = convolution2d(female.transpose(2, 0, 1), kernel_x)
-<span style="color: #6c71c4;">female_gy</span> = convolution2d(female.transpose(2, 0, 1), kernel_y)
-<span style="color: #6c71c4;">female_gradient</span> = np.sqrt(np.square(female_gx) + np.square(female_gy))
-<span style="color: #6c71c4;">female_oriented</span> = computer_oriented(female_gy, female_gx)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">female_gx</span> = convolution2d(female.transpose(2, 0, 1), kernel_x)
+<span style="color: #83a598;">female_gy</span> = convolution2d(female.transpose(2, 0, 1), kernel_y)
+<span style="color: #83a598;">female_gradient</span> = np.sqrt(np.square(female_gx) + np.square(female_gy))
+<span style="color: #83a598;">female_oriented</span> = computer_oriented(female_gy, female_gx)
 
-<span style="color: #6c71c4;">female_gxc</span> = convolution2d(female.transpose(2, 0, 1), kernel_x, grayscale=<span style="color: #d33682;">False</span>)
-<span style="color: #6c71c4;">female_gyc</span> = convolution2d(female.transpose(2, 0, 1), kernel_y, grayscale=<span style="color: #d33682;">False</span>)
-<span style="color: #6c71c4;">female_gradientc</span> = np.sqrt(np.square(female_gxc) + np.square(female_gyc))
-<span style="color: #6c71c4;">female_orientedc</span> = computer_oriented(female_gyc, female_gxc)
+<span style="color: #83a598;">female_gxc</span> = convolution2d(female.transpose(2, 0, 1), kernel_x, grayscale=<span style="color: #fabd2f;">False</span>)
+<span style="color: #83a598;">female_gyc</span> = convolution2d(female.transpose(2, 0, 1), kernel_y, grayscale=<span style="color: #fabd2f;">False</span>)
+<span style="color: #83a598;">female_gradientc</span> = np.sqrt(np.square(female_gxc) + np.square(female_gyc))
+<span style="color: #83a598;">female_orientedc</span> = computer_oriented(female_gyc, female_gxc)
 
-<span style="color: #6c71c4;">female_gxcc</span> = convolution2d(female.transpose(2, 0, 1), kernel_x, grayscale=<span style="color: #d33682;">False</span>, keep_channel=<span style="color: #d33682;">True</span>)
-<span style="color: #6c71c4;">female_gycc</span> = convolution2d(female.transpose(2, 0, 1), kernel_y, grayscale=<span style="color: #d33682;">False</span>, keep_channel=<span style="color: #d33682;">True</span>)
-<span style="color: #6c71c4;">female_gradientcc</span> = np.sqrt(np.square(female_gxcc) + np.square(female_gycc))
-<span style="color: #6c71c4;">female_orientedcc</span> = computer_oriented(female_gycc, female_gxcc)
+<span style="color: #83a598;">female_gxcc</span> = convolution2d(female.transpose(2, 0, 1), kernel_x, grayscale=<span style="color: #fabd2f;">False</span>, keep_channel=<span style="color: #fabd2f;">True</span>)
+<span style="color: #83a598;">female_gycc</span> = convolution2d(female.transpose(2, 0, 1), kernel_y, grayscale=<span style="color: #fabd2f;">False</span>, keep_channel=<span style="color: #fabd2f;">True</span>)
+<span style="color: #83a598;">female_gradientcc</span> = np.sqrt(np.square(female_gxcc) + np.square(female_gycc))
+<span style="color: #83a598;">female_orientedcc</span> = computer_oriented(female_gycc, female_gxcc)
 </pre>
 </div>
 
@@ -247,19 +247,19 @@ channel的。
 <div class="org-src-container">
 <pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 10.0))
 plt.subplot(1, 3, 1)
-plt.imshow(female_gx[0].astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'gx'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gx[0].astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'gx'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 2)
-plt.imshow(female_gy[0].astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'gy'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gy[0].astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'gy'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 3)
-plt.imshow(female_gradient[0].astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'combine x and y'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gradient[0].astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'combine x and y'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 </pre>
 </div>
 
@@ -285,18 +285,18 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 <pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 15.0))
 plt.subplot(1, 3, 1)
 plt.imshow((female_gxc[0] + 255)/2)
-plt.title(<span style="color: #2aa198;">'gx'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.title(<span style="color: #b8bb26;">'gx'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 2)
 plt.imshow((female_gyc[0] + 255)/2)
-plt.title(<span style="color: #2aa198;">'gy'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.title(<span style="color: #b8bb26;">'gy'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 3)
 plt.imshow((female_gradientc[0] + 255)/2)
-plt.title(<span style="color: #2aa198;">'combine x and y'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.title(<span style="color: #b8bb26;">'combine x and y'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 </pre>
 </div>
 
@@ -312,19 +312,19 @@ plt.axis(<span style="color: #2aa198;">'off'</span>)
 <div class="org-src-container">
 <pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 15.0))
 plt.subplot(1, 3, 1)
-plt.imshow(female_gxcc.transpose(1, 2, 0).astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'gx'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gxcc.transpose(1, 2, 0).astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'gx'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 2)
-plt.imshow(female_gycc.transpose(1, 2, 0).astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'gy'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gycc.transpose(1, 2, 0).astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'gy'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 
 plt.subplot(1, 3, 3)
-plt.imshow(female_gradientcc.transpose(1, 2, 0).astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.title(<span style="color: #2aa198;">'magnitude'</span>)
-plt.axis(<span style="color: #2aa198;">'off'</span>)
+plt.imshow(female_gradientcc.transpose(1, 2, 0).astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.title(<span style="color: #b8bb26;">'magnitude'</span>)
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
 </pre>
 </div>
 
@@ -378,20 +378,20 @@ magnitude(female<sub>gradient</sub>) 和 oriented(direction)。所以一共具�
 到两边的距离比例，对其进行切割(split)，分别对两个分箱(bins)进行投票(vote)。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">split_block</span>(arr, cell_num):
-    <span style="color: #6c71c4;">a_channel</span>, <span style="color: #6c71c4;">a_height</span>, <span style="color: #6c71c4;">a_width</span> = arr.shape
-    <span style="color: #6c71c4;">o_height</span> = <span style="color: #268bd2;">int</span>(a_height / cell_num)
-    <span style="color: #6c71c4;">o_width</span> = <span style="color: #268bd2;">int</span>(a_width / cell_num)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">split_block</span>(arr, cell_num):
+    <span style="color: #83a598;">a_channel</span>, <span style="color: #83a598;">a_height</span>, <span style="color: #83a598;">a_width</span> = arr.shape
+    <span style="color: #83a598;">o_height</span> = <span style="color: #fe8019;">int</span>(a_height / cell_num)
+    <span style="color: #83a598;">o_width</span> = <span style="color: #fe8019;">int</span>(a_width / cell_num)
 
-    <span style="color: #6c71c4;">rest</span> = np.zeros((a_channel, o_height, o_width, cell_num, cell_num))
-    <span style="color: #859900;">for</span> o_h <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_height):
-        <span style="color: #859900;">for</span> o_w <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_width):
-            <span style="color: #6c71c4;">rect</span> = arr[:, o_h * cell_num:(o_h + 1) * cell_num, o_w * cell_num:(o_w + 1) * cell_num]
-            <span style="color: #6c71c4;">rest</span>[:, o_h, o_w, :, :] = rect
-    <span style="color: #859900;">return</span> rest
+    <span style="color: #83a598;">rest</span> = np.zeros((a_channel, o_height, o_width, cell_num, cell_num))
+    <span style="color: #fb4934;">for</span> o_h <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_height):
+        <span style="color: #fb4934;">for</span> o_w <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_width):
+            <span style="color: #83a598;">rect</span> = arr[:, o_h * cell_num:(o_h + 1) * cell_num, o_w * cell_num:(o_w + 1) * cell_num]
+            <span style="color: #83a598;">rest</span>[:, o_h, o_w, :, :] = rect
+    <span style="color: #fb4934;">return</span> rest
 
-<span style="color: #6c71c4;">female_gradient_block</span> = split_block(female_gradient, 8)
-<span style="color: #6c71c4;">female_oriented_block</span> = split_block(female_oriented, 8)
+<span style="color: #83a598;">female_gradient_block</span> = split_block(female_gradient, 8)
+<span style="color: #83a598;">female_oriented_block</span> = split_block(female_oriented, 8)
 </pre>
 </div>
 
@@ -404,14 +404,14 @@ magnitude(female<sub>gradient</sub>) 和 oriented(direction)。所以一共具�
 <pre class="src src-jupyter-python">
 plt.figure(figsize=(9.0, 6.0))
 plt.subplot(1, 2, 1)
-plt.imshow(female_gradient_block[0, 20, 50, :, :].astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.axis(<span style="color: #2aa198;">'off'</span>)
-plt.title(<span style="color: #2aa198;">'(20, 50)'</span>)
+plt.imshow(female_gradient_block[0, 20, 50, :, :].astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
+plt.title(<span style="color: #b8bb26;">'(20, 50)'</span>)
 
 plt.subplot(1, 2, 2)
-plt.imshow(female_gradient_block[0, 20, 70, :, :].astype(<span style="color: #2aa198;">'uint8'</span>))
-plt.axis(<span style="color: #2aa198;">'off'</span>)
-plt.title(<span style="color: #2aa198;">'(20, 70)'</span>)
+plt.imshow(female_gradient_block[0, 20, 70, :, :].astype(<span style="color: #b8bb26;">'uint8'</span>))
+plt.axis(<span style="color: #b8bb26;">'off'</span>)
+plt.title(<span style="color: #b8bb26;">'(20, 70)'</span>)
 </pre>
 </div>
 
@@ -425,36 +425,36 @@ plt.title(<span style="color: #2aa198;">'(20, 70)'</span>)
 计算各个方块对应的直方图分布。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">magnitude_vote</span>(magnitude_block, oriented_block, method=<span style="color: #2aa198;">'count'</span>):
-    <span style="color: #6c71c4;">oriented_block</span> = np.where(np.isnan(oriented_block), 0, oriented_block)
-    <span style="color: #6c71c4;">oriented_block</span> = np.where(oriented_block &gt;= 180, oriented_block - 180, oriented_block)
-    <span style="color: #6c71c4;">oriented_block</span> = np.where(oriented_block &lt; -180, oriented_block + 360, oriented_block)
-    <span style="color: #6c71c4;">oriented_block</span> = np.where(oriented_block &lt; 0, oriented_block + 180, oriented_block)
-    <span style="color: #6c71c4;">channel</span>, <span style="color: #6c71c4;">height</span>, <span style="color: #6c71c4;">width</span> = magnitude_block.shape
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">magnitude_vote</span>(magnitude_block, oriented_block, method=<span style="color: #b8bb26;">'count'</span>):
+    <span style="color: #83a598;">oriented_block</span> = np.where(np.isnan(oriented_block), 0, oriented_block)
+    <span style="color: #83a598;">oriented_block</span> = np.where(oriented_block &gt;= 180, oriented_block - 180, oriented_block)
+    <span style="color: #83a598;">oriented_block</span> = np.where(oriented_block &lt; -180, oriented_block + 360, oriented_block)
+    <span style="color: #83a598;">oriented_block</span> = np.where(oriented_block &lt; 0, oriented_block + 180, oriented_block)
+    <span style="color: #83a598;">channel</span>, <span style="color: #83a598;">height</span>, <span style="color: #83a598;">width</span> = magnitude_block.shape
 
-    <span style="color: #6c71c4;">rest</span> = np.zeros((channel, 9))
-    <span style="color: #859900;">for</span> c <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(channel):
-        <span style="color: #859900;">for</span> m, o <span style="color: #859900;">in</span> <span style="color: #268bd2;">zip</span>(magnitude_block[c, :, :].flatten(), oriented_block[c, :, :].flatten()):
-            <span style="color: #6c71c4;">select_bin</span> = <span style="color: #268bd2;">int</span>(<span style="color: #268bd2;">abs</span>((o // 20) % 9))
-            <span style="color: #859900;">if</span> method == <span style="color: #2aa198;">'count'</span>:
-                <span style="color: #6c71c4;">rest</span>[c, select_bin] += 1
-                <span style="color: #6c71c4;">rest</span>[c, <span style="color: #268bd2;">int</span>((select_bin + 1) % 9)] += 1
-            <span style="color: #859900;">elif</span> method == <span style="color: #2aa198;">'sum'</span>:
-                <span style="color: #6c71c4;">up_percent</span> = <span style="color: #268bd2;">abs</span>(o - (select_bin + 1) * 20) / 20.0
-                <span style="color: #6c71c4;">rest</span>[c, select_bin] += (1 - up_percent) * (np.<span style="color: #268bd2;">abs</span>(m))
-                <span style="color: #6c71c4;">rest</span>[c, <span style="color: #268bd2;">int</span>((select_bin + 1) % 9)] += up_percent * np.<span style="color: #268bd2;">abs</span>(m)
-    <span style="color: #859900;">return</span> rest
+    <span style="color: #83a598;">rest</span> = np.zeros((channel, 9))
+    <span style="color: #fb4934;">for</span> c <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(channel):
+        <span style="color: #fb4934;">for</span> m, o <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">zip</span>(magnitude_block[c, :, :].flatten(), oriented_block[c, :, :].flatten()):
+            <span style="color: #83a598;">select_bin</span> = <span style="color: #fe8019;">int</span>(<span style="color: #fe8019;">abs</span>((o // 20) % 9))
+            <span style="color: #fb4934;">if</span> method == <span style="color: #b8bb26;">'count'</span>:
+                <span style="color: #83a598;">rest</span>[c, select_bin] += 1
+                <span style="color: #83a598;">rest</span>[c, <span style="color: #fe8019;">int</span>((select_bin + 1) % 9)] += 1
+            <span style="color: #fb4934;">elif</span> method == <span style="color: #b8bb26;">'sum'</span>:
+                <span style="color: #83a598;">up_percent</span> = <span style="color: #fe8019;">abs</span>(o - (select_bin + 1) * 20) / 20.0
+                <span style="color: #83a598;">rest</span>[c, select_bin] += (1 - up_percent) * (np.<span style="color: #fe8019;">abs</span>(m))
+                <span style="color: #83a598;">rest</span>[c, <span style="color: #fe8019;">int</span>((select_bin + 1) % 9)] += up_percent * np.<span style="color: #fe8019;">abs</span>(m)
+    <span style="color: #fb4934;">return</span> rest
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">computer_histogram</span>(magn, orie):
-    <span style="color: #6c71c4;">channel</span>, <span style="color: #6c71c4;">height</span>, <span style="color: #6c71c4;">width</span> = magn.shape[:3]
-    <span style="color: #6c71c4;">rest</span> = np.zeros((channel, height, width, 9))
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">computer_histogram</span>(magn, orie):
+    <span style="color: #83a598;">channel</span>, <span style="color: #83a598;">height</span>, <span style="color: #83a598;">width</span> = magn.shape[:3]
+    <span style="color: #83a598;">rest</span> = np.zeros((channel, height, width, 9))
 
-    <span style="color: #859900;">for</span> h <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(height):
-        <span style="color: #859900;">for</span> w <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(width):
-            <span style="color: #6c71c4;">rest</span>[:, h, w, :] = magnitude_vote(magn[:, h, w, :, :], orie[:, h, w, :, :], method=<span style="color: #2aa198;">'sum'</span>)
-    <span style="color: #859900;">return</span> rest
+    <span style="color: #fb4934;">for</span> h <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(height):
+        <span style="color: #fb4934;">for</span> w <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(width):
+            <span style="color: #83a598;">rest</span>[:, h, w, :] = magnitude_vote(magn[:, h, w, :, :], orie[:, h, w, :, :], method=<span style="color: #b8bb26;">'sum'</span>)
+    <span style="color: #fb4934;">return</span> rest
 
-<span style="color: #6c71c4;">female_histogram</span> = computer_histogram(female_gradient_block, female_oriented_block)
+<span style="color: #83a598;">female_histogram</span> = computer_histogram(female_gradient_block, female_oriented_block)
 </pre>
 </div>
 
@@ -462,21 +462,21 @@ plt.title(<span style="color: #2aa198;">'(20, 70)'</span>)
 第(20, 50)个方块和(20, 70)方块对应的直方图形。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">plot_female_hist</span>(arr, ax_index=1, method=<span style="color: #2aa198;">'max'</span>):
-    <span style="color: #859900;">if</span> method == <span style="color: #2aa198;">'max'</span>:
-        <span style="color: #6c71c4;">x</span> = np.<span style="color: #268bd2;">max</span>(arr, axis=0)
-    <span style="color: #859900;">else</span>:
-        <span style="color: #6c71c4;">x</span> = np.<span style="color: #268bd2;">sum</span>(arr, axis=0)
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">ax[ax_index].hist(x, list(range(9)))</span>
-    ax[ax_index].bar(<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(9)), x)
-    ax[ax_index].set_xticks(<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(9)))
-    ax[ax_index].grid(<span style="color: #d33682;">True</span>)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">plot_female_hist</span>(arr, ax_index=1, method=<span style="color: #b8bb26;">'max'</span>):
+    <span style="color: #fb4934;">if</span> method == <span style="color: #b8bb26;">'max'</span>:
+        <span style="color: #83a598;">x</span> = np.<span style="color: #fe8019;">max</span>(arr, axis=0)
+    <span style="color: #fb4934;">else</span>:
+        <span style="color: #83a598;">x</span> = np.<span style="color: #fe8019;">sum</span>(arr, axis=0)
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">ax[ax_index].hist(x, list(range(9)))</span>
+    ax[ax_index].bar(<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(9)), x)
+    ax[ax_index].set_xticks(<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(9)))
+    ax[ax_index].grid(<span style="color: #fabd2f;">True</span>)
 
-<span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(1, 2, figsize=(9.0, 6.0))
-plot_female_hist(female_histogram[:, 20, 50, :], 0, <span style="color: #2aa198;">'max'</span>)
-plot_female_hist(female_histogram[:, 20, 70, :], 1, <span style="color: #2aa198;">'max'</span>)
+<span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(1, 2, figsize=(9.0, 6.0))
+plot_female_hist(female_histogram[:, 20, 50, :], 0, <span style="color: #b8bb26;">'max'</span>)
+plot_female_hist(female_histogram[:, 20, 70, :], 1, <span style="color: #b8bb26;">'max'</span>)
 
-female_oriented.<span style="color: #268bd2;">max</span>()
+female_oriented.<span style="color: #fe8019;">max</span>()
 </pre>
 </div>
 
@@ -500,19 +500,19 @@ female_oriented.<span style="color: #268bd2;">max</span>()
 一化。将结合成4个方块后，将具有 <code>4x9=36</code> 个直方图值。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">hog_normalize</span>(hist):
-    <span style="color: #6c71c4;">channel</span>, <span style="color: #6c71c4;">height</span>, <span style="color: #6c71c4;">width</span> = hist.shape[:3]
-    <span style="color: #6c71c4;">o_height</span>, <span style="color: #6c71c4;">o_width</span> = (height - 2) + 1, (width - 2) + 1
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">hog_normalize</span>(hist):
+    <span style="color: #83a598;">channel</span>, <span style="color: #83a598;">height</span>, <span style="color: #83a598;">width</span> = hist.shape[:3]
+    <span style="color: #83a598;">o_height</span>, <span style="color: #83a598;">o_width</span> = (height - 2) + 1, (width - 2) + 1
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">the 36 is 4 x 9, because each block have 9 histogram, and we split block 2x2</span>
-    <span style="color: #6c71c4;">rest</span> = np.zeros((channel, o_height, o_width, 36))
-    <span style="color: #859900;">for</span> o_h <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_height):
-        <span style="color: #859900;">for</span> o_w <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(o_width):
-            <span style="color: #6c71c4;">rect</span> = hist[:, o_h:o_h + 2, o_w:o_w + 2, :]
-            <span style="color: #6c71c4;">rest</span>[:, o_h, o_w, :] = (rect.flatten() / np.sqrt(np.<span style="color: #268bd2;">sum</span>(np.square(rect)))).reshape(channel, -1)
-    <span style="color: #859900;">return</span> rest
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">the 36 is 4 x 9, because each block have 9 histogram, and we split block 2x2</span>
+    <span style="color: #83a598;">rest</span> = np.zeros((channel, o_height, o_width, 36))
+    <span style="color: #fb4934;">for</span> o_h <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_height):
+        <span style="color: #fb4934;">for</span> o_w <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(o_width):
+            <span style="color: #83a598;">rect</span> = hist[:, o_h:o_h + 2, o_w:o_w + 2, :]
+            <span style="color: #83a598;">rest</span>[:, o_h, o_w, :] = (rect.flatten() / np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(rect)))).reshape(channel, -1)
+    <span style="color: #fb4934;">return</span> rest
 
-<span style="color: #6c71c4;">female_normalize_histogram</span> = hog_normalize(female_histogram)
+<span style="color: #83a598;">female_normalize_histogram</span> = hog_normalize(female_histogram)
 </pre>
 </div>
 </div>
@@ -525,29 +525,29 @@ female_oriented.<span style="color: #268bd2;">max</span>()
 这里使用前面定义的线性模型分类中的类函数。也可以使用ANN模型提取的特征建立模型。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">img_hog_feature</span>(img):
-    <span style="color: #6c71c4;">img_conv_gx</span> = convolution2d(img, kernel_x, zero_padding=1)
-    <span style="color: #6c71c4;">img_conv_gy</span> = convolution2d(img, kernel_y, zero_padding=1)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">img_hog_feature</span>(img):
+    <span style="color: #83a598;">img_conv_gx</span> = convolution2d(img, kernel_x, zero_padding=1)
+    <span style="color: #83a598;">img_conv_gy</span> = convolution2d(img, kernel_y, zero_padding=1)
 
-    <span style="color: #6c71c4;">img_conv_magnitude</span> = np.sqrt(np.square(img_conv_gx) + np.square(img_conv_gy))
-    <span style="color: #6c71c4;">img_conv_oriented</span> = np.arctan(np.divide(img_conv_gy, img_conv_gx))
+    <span style="color: #83a598;">img_conv_magnitude</span> = np.sqrt(np.square(img_conv_gx) + np.square(img_conv_gy))
+    <span style="color: #83a598;">img_conv_oriented</span> = np.arctan(np.divide(img_conv_gy, img_conv_gx))
 
-    <span style="color: #6c71c4;">img_conv_mblock</span> = split_block(img_conv_magnitude, 8)
-    <span style="color: #6c71c4;">img_conv_oblock</span> = split_block(img_conv_oriented, 8)
+    <span style="color: #83a598;">img_conv_mblock</span> = split_block(img_conv_magnitude, 8)
+    <span style="color: #83a598;">img_conv_oblock</span> = split_block(img_conv_oriented, 8)
 
-    <span style="color: #6c71c4;">img_conv_histogram</span> = computer_histogram(img_conv_mblock, img_conv_oblock)
-    <span style="color: #6c71c4;">img_hog_histogram</span> = hog_normalize(img_conv_histogram)
+    <span style="color: #83a598;">img_conv_histogram</span> = computer_histogram(img_conv_mblock, img_conv_oblock)
+    <span style="color: #83a598;">img_hog_histogram</span> = hog_normalize(img_conv_histogram)
 
-    <span style="color: #859900;">return</span> img_hog_histogram
+    <span style="color: #fb4934;">return</span> img_hog_histogram
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">cifar_extract_hog</span>(arr):
-    <span style="color: #6c71c4;">N</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">_</span>, <span style="color: #6c71c4;">_</span> = arr.shape
-    <span style="color: #6c71c4;">rest</span> = []
-    <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(N):
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">cifar_extract_hog</span>(arr):
+    <span style="color: #83a598;">N</span>, <span style="color: #83a598;">_</span>, <span style="color: #83a598;">_</span>, <span style="color: #83a598;">_</span> = arr.shape
+    <span style="color: #83a598;">rest</span> = []
+    <span style="color: #fb4934;">for</span> n <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(N):
         rest.append(img_hog_feature(arr[n, :, :, :]))
-        <span style="color: #859900;">if</span> n % 100 == 0:
-            <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"execute (%d / %d) %f"</span> %(n, N, n / N))
-    <span style="color: #859900;">return</span> rest
+        <span style="color: #fb4934;">if</span> n % 100 == 0:
+            <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"execute (%d / %d) %f"</span> %(n, N, n / N))
+    <span style="color: #fb4934;">return</span> rest
 </pre>
 </div>
 
@@ -557,28 +557,28 @@ female_oriented.<span style="color: #268bd2;">max</span>()
 np.vstack(), np.dstack()</code> 对列表进行合并，分别为(horizontal, vertical, depth)。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">X_train_hog</span> = cifar_extract_hog(X_train)
-<span style="color: #6c71c4;">X_test_hog</span> = cifar_extract_hog(X_test)
-<span style="color: #6c71c4;">X_vali_hog</span> = cifar_extract_hog(X_vali)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">X_train_hog</span> = cifar_extract_hog(X_train)
+<span style="color: #83a598;">X_test_hog</span> = cifar_extract_hog(X_test)
+<span style="color: #83a598;">X_vali_hog</span> = cifar_extract_hog(X_vali)
 
-<span style="color: #6c71c4;">X_train_rhog</span> = np.array(X_train_hog).reshape(49000, -1)
-<span style="color: #6c71c4;">X_test_rhog</span> = np.array(X_test_hog).reshape(10000, -1)
-<span style="color: #6c71c4;">X_vali_rhog</span> = np.array(X_vali_hog).reshape(1000, -1)
-<span style="color: #6c71c4;">X_mean_rhog</span> = np.mean(np.array(X_train_rhog), axis=0, keepdims=<span style="color: #d33682;">True</span>)
+<span style="color: #83a598;">X_train_rhog</span> = np.array(X_train_hog).reshape(49000, -1)
+<span style="color: #83a598;">X_test_rhog</span> = np.array(X_test_hog).reshape(10000, -1)
+<span style="color: #83a598;">X_vali_rhog</span> = np.array(X_vali_hog).reshape(1000, -1)
+<span style="color: #83a598;">X_mean_rhog</span> = np.mean(np.array(X_train_rhog), axis=0, keepdims=<span style="color: #fabd2f;">True</span>)
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_train_rhog -= X_mean_rhog</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_test_rhog -= X_mean_rhog</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_vali_rhog -= X_mean_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_train_rhog -= X_mean_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_test_rhog -= X_mean_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_vali_rhog -= X_mean_rhog</span>
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_std_rhog = np.std(X_train_rhog, axis=0, keepdims=True)</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_train_rhog /= X_std_rhog</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_test_rhog /= X_std_rhog</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_vali_rhog /= X_std_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_std_rhog = np.std(X_train_rhog, axis=0, keepdims=True)</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_train_rhog /= X_std_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_test_rhog /= X_std_rhog</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_vali_rhog /= X_std_rhog</span>
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">add bias columns.</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_train_rhog = np.hstack([X_train_rhog, np.ones((X_train_rhog.shape[0], 1))])</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_test_rhog = np.hstack([X_test_rhog, np.ones((X_test_rhog.shape[0], 1))])</span>
-<span style="color: #405A61;"># </span><span style="color: #405A61;">X_vali_rhog = np.hstack([X_vali_rhog, np.ones((X_vali_rhog.shape[0], 1))])</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">add bias columns.</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_train_rhog = np.hstack([X_train_rhog, np.ones((X_train_rhog.shape[0], 1))])</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_test_rhog = np.hstack([X_test_rhog, np.ones((X_test_rhog.shape[0], 1))])</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">X_vali_rhog = np.hstack([X_vali_rhog, np.ones((X_vali_rhog.shape[0], 1))])</span>
 </pre>
 </div>
 
@@ -586,34 +586,33 @@ np.vstack(), np.dstack()</code> 对列表进行合并，分别为(horizontal, ve
 使用支持向量机对提取的特征进行建模。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">learning_rates</span> = [1e-9, 1e-8, 1e-7]
-<span style="color: #6c71c4;">regularization_lambdas</span> = [5e4, 5e5, 5e6]
+<pre class="src src-jupyter-python"><span style="color: #83a598;">learning_rates</span> = [1e-9, 1e-8, 1e-7]
+<span style="color: #83a598;">regularization_lambdas</span> = [5e4, 5e5, 5e6]
 
-<span style="color: #6c71c4;">svm_mode_acc</span> = -1
-<span style="color: #6c71c4;">svm_mode</span> = <span style="color: #d33682;">None</span>
+<span style="color: #83a598;">svm_mode_acc</span> = -1
+<span style="color: #83a598;">svm_mode</span> = <span style="color: #fabd2f;">None</span>
 
-<span style="color: #6c71c4;">svm</span> = LinerSVM()
-<span style="color: #6c71c4;">test_acc</span> = -1
-<span style="color: #859900;">for</span> lr <span style="color: #859900;">in</span> learning_rates:
-    <span style="color: #859900;">for</span> reg <span style="color: #859900;">in</span> regularization_lambdas:
+<span style="color: #83a598;">svm</span> = LinerSVM()
+<span style="color: #83a598;">test_acc</span> = -1
+<span style="color: #fb4934;">for</span> lr <span style="color: #fb4934;">in</span> learning_rates:
+    <span style="color: #fb4934;">for</span> reg <span style="color: #fb4934;">in</span> regularization_lambdas:
         svm.train(X_train_rhog, Y_train, class_num=10, learning_rate=lr,
-                  regularization=reg, num_iters=1500, verbose=<span style="color: #d33682;">False</span>)
-        <span style="color: #6c71c4;">val_acc</span> = np.mean(svm.predict(X_vali_rhog) == Y_vali)
-        <span style="color: #859900;">print</span>(<span style="color: #2aa198;">"current validation accurary: %s"</span> %(val_acc, ))
-        <span style="color: #859900;">if</span> val_acc &gt; svm_mode_acc:
-            <span style="color: #6c71c4;">svm_mode_acc</span> = val_acc
-            <span style="color: #6c71c4;">test_acc</span> = np.mean(svm.predict(X_test_rhog) == Y_test)
+                  regularization=reg, num_iters=1500, verbose=<span style="color: #fabd2f;">False</span>)
+        <span style="color: #83a598;">val_acc</span> = np.mean(svm.predict(X_vali_rhog) == Y_vali)
+        <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"current validation accurary: %s"</span> %(val_acc, ))
+        <span style="color: #fb4934;">if</span> val_acc &gt; svm_mode_acc:
+            <span style="color: #83a598;">svm_mode_acc</span> = val_acc
+            <span style="color: #83a598;">test_acc</span> = np.mean(svm.predict(X_test_rhog) == Y_test)
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">'predict test accuracy: '</span>, test_acc)
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'predict test accuracy: '</span>, test_acc)
 </pre>
 </div>
 
 <pre class="example">
 predict test accuracy:  0.1674
-
 </pre>
 </div>
 </div>
@@ -626,147 +625,147 @@ predict test accuracy:  0.1674
 果寻找到合理的分箱值，验证集准确率可能达到44%。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">from</span> scipy.ndimage <span style="color: #859900;">import</span> uniform_filter
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">from</span> scipy.ndimage <span style="color: #fb4934;">import</span> uniform_filter
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">extract_features</span>(imgs, feature_fns, verbose=<span style="color: #d33682;">False</span>):
-    <span style="color: #35a69c;">"""</span>
-<span style="color: #35a69c;">    Given pixel data for images and several feature functions that can operate on</span>
-<span style="color: #35a69c;">    single images, apply all feature functions to all images, concatenating the</span>
-<span style="color: #35a69c;">    feature vectors for each image and storing the features for all images in</span>
-<span style="color: #35a69c;">    a single matrix.</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">extract_features</span>(imgs, feature_fns, verbose=<span style="color: #fabd2f;">False</span>):
+    <span style="color: #ada296;">"""</span>
+<span style="color: #ada296;">    Given pixel data for images and several feature functions that can operate on</span>
+<span style="color: #ada296;">    single images, apply all feature functions to all images, concatenating the</span>
+<span style="color: #ada296;">    feature vectors for each image and storing the features for all images in</span>
+<span style="color: #ada296;">    a single matrix.</span>
 
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    - imgs: N x H X W X C array of pixel data for N images.</span>
-<span style="color: #35a69c;">    - feature_fns: List of k feature functions. The ith feature function should</span>
-<span style="color: #35a69c;">      take as input an H x W x D array and return a (one-dimensional) array of</span>
-<span style="color: #35a69c;">      length F_i.</span>
-<span style="color: #35a69c;">    - verbose: Boolean; if true, print progress.</span>
+<span style="color: #ada296;">    Inputs:</span>
+<span style="color: #ada296;">    - imgs: N x H X W X C array of pixel data for N images.</span>
+<span style="color: #ada296;">    - feature_fns: List of k feature functions. The ith feature function should</span>
+<span style="color: #ada296;">      take as input an H x W x D array and return a (one-dimensional) array of</span>
+<span style="color: #ada296;">      length F_i.</span>
+<span style="color: #ada296;">    - verbose: Boolean; if true, print progress.</span>
 
-<span style="color: #35a69c;">    Returns:</span>
-<span style="color: #35a69c;">    An array of shape (N, F_1 + ... + F_k) where each column is the concatenation</span>
-<span style="color: #35a69c;">    of all features for a single image.</span>
-<span style="color: #35a69c;">    """</span>
-    <span style="color: #6c71c4;">num_images</span> = imgs.shape[0]
-    <span style="color: #859900;">if</span> num_images == 0:
-        <span style="color: #859900;">return</span> np.array([])
+<span style="color: #ada296;">    Returns:</span>
+<span style="color: #ada296;">    An array of shape (N, F_1 + ... + F_k) where each column is the concatenation</span>
+<span style="color: #ada296;">    of all features for a single image.</span>
+<span style="color: #ada296;">    """</span>
+    <span style="color: #83a598;">num_images</span> = imgs.shape[0]
+    <span style="color: #fb4934;">if</span> num_images == 0:
+        <span style="color: #fb4934;">return</span> np.array([])
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">Use the first image to determine feature dimensions</span>
-    <span style="color: #6c71c4;">feature_dims</span> = []
-    <span style="color: #6c71c4;">first_image_features</span> = []
-    <span style="color: #859900;">for</span> feature_fn <span style="color: #859900;">in</span> feature_fns:
-        <span style="color: #6c71c4;">feats</span> = feature_fn(imgs[0].squeeze())
-        <span style="color: #859900;">assert</span> <span style="color: #268bd2;">len</span>(feats.shape) == 1, <span style="color: #2aa198;">'Feature functions must be one-dimensional'</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Use the first image to determine feature dimensions</span>
+    <span style="color: #83a598;">feature_dims</span> = []
+    <span style="color: #83a598;">first_image_features</span> = []
+    <span style="color: #fb4934;">for</span> feature_fn <span style="color: #fb4934;">in</span> feature_fns:
+        <span style="color: #83a598;">feats</span> = feature_fn(imgs[0].squeeze())
+        <span style="color: #fb4934;">assert</span> <span style="color: #fe8019;">len</span>(feats.shape) == 1, <span style="color: #b8bb26;">'Feature functions must be one-dimensional'</span>
         feature_dims.append(feats.size)
         first_image_features.append(feats)
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">Now that we know the dimensions of the features, we can allocate a single</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">big array to store all features as columns.</span>
-    <span style="color: #6c71c4;">total_feature_dim</span> = <span style="color: #268bd2;">sum</span>(feature_dims)
-    <span style="color: #6c71c4;">imgs_features</span> = np.zeros((num_images, total_feature_dim))
-    <span style="color: #6c71c4;">imgs_features</span>[0] = np.hstack(first_image_features).T
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Now that we know the dimensions of the features, we can allocate a single</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">big array to store all features as columns.</span>
+    <span style="color: #83a598;">total_feature_dim</span> = <span style="color: #fe8019;">sum</span>(feature_dims)
+    <span style="color: #83a598;">imgs_features</span> = np.zeros((num_images, total_feature_dim))
+    <span style="color: #83a598;">imgs_features</span>[0] = np.hstack(first_image_features).T
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">Extract features for the rest of the images.</span>
-    <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(1, num_images):
-        <span style="color: #6c71c4;">idx</span> = 0
-        <span style="color: #859900;">for</span> feature_fn, feature_dim <span style="color: #859900;">in</span> <span style="color: #268bd2;">zip</span>(feature_fns, feature_dims):
-            <span style="color: #6c71c4;">next_idx</span> = idx + feature_dim
-            <span style="color: #6c71c4;">imgs_features</span>[i, idx:next_idx] = feature_fn(imgs[i].squeeze())
-            <span style="color: #6c71c4;">idx</span> = next_idx
-        <span style="color: #859900;">if</span> verbose <span style="color: #859900;">and</span> i % 1000 == 999:
-            <span style="color: #859900;">print</span>(<span style="color: #2aa198;">'Done extracting features for %d / %d images'</span> % (i+1, num_images))
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Extract features for the rest of the images.</span>
+    <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(1, num_images):
+        <span style="color: #83a598;">idx</span> = 0
+        <span style="color: #fb4934;">for</span> feature_fn, feature_dim <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">zip</span>(feature_fns, feature_dims):
+            <span style="color: #83a598;">next_idx</span> = idx + feature_dim
+            <span style="color: #83a598;">imgs_features</span>[i, idx:next_idx] = feature_fn(imgs[i].squeeze())
+            <span style="color: #83a598;">idx</span> = next_idx
+        <span style="color: #fb4934;">if</span> verbose <span style="color: #fb4934;">and</span> i % 1000 == 999:
+            <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'Done extracting features for %d / %d images'</span> % (i+1, num_images))
 
-    <span style="color: #859900;">return</span> imgs_features
-
-
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">rgb2gray</span>(rgb):
-    <span style="color: #35a69c;">"""Convert RGB image to grayscale</span>
-
-<span style="color: #35a69c;">      Parameters:</span>
-<span style="color: #35a69c;">        rgb : RGB image</span>
-
-<span style="color: #35a69c;">      Returns:</span>
-<span style="color: #35a69c;">        gray : grayscale image</span>
-
-<span style="color: #35a69c;">    """</span>
-    <span style="color: #859900;">return</span> np.dot(rgb[...,:3], [0.299, 0.587, 0.144])
+    <span style="color: #fb4934;">return</span> imgs_features
 
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">hog_feature</span>(im):
-    <span style="color: #35a69c;">"""Compute Histogram of Gradient (HOG) feature for an image</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">rgb2gray</span>(rgb):
+    <span style="color: #ada296;">"""Convert RGB image to grayscale</span>
 
-<span style="color: #35a69c;">         Modified from skimage.feature.hog</span>
-<span style="color: #35a69c;">         http://pydoc.net/Python/scikits-image/0.4.2/skimage.feature.hog</span>
+<span style="color: #ada296;">      Parameters:</span>
+<span style="color: #ada296;">        rgb : RGB image</span>
 
-<span style="color: #35a69c;">       Reference:</span>
-<span style="color: #35a69c;">         Histograms of Oriented Gradients for Human Detection</span>
-<span style="color: #35a69c;">         Navneet Dalal and Bill Triggs, CVPR 2005</span>
+<span style="color: #ada296;">      Returns:</span>
+<span style="color: #ada296;">        gray : grayscale image</span>
 
-<span style="color: #35a69c;">      Parameters:</span>
-<span style="color: #35a69c;">        im : an input grayscale or rgb image</span>
+<span style="color: #ada296;">    """</span>
+    <span style="color: #fb4934;">return</span> np.dot(rgb[...,:3], [0.299, 0.587, 0.144])
 
-<span style="color: #35a69c;">      Returns:</span>
-<span style="color: #35a69c;">        feat: Histogram of Gradient (HOG) feature</span>
 
-<span style="color: #35a69c;">    """</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">hog_feature</span>(im):
+    <span style="color: #ada296;">"""Compute Histogram of Gradient (HOG) feature for an image</span>
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">convert rgb to grayscale if needed</span>
-    <span style="color: #859900;">if</span> im.ndim == 3:
-        <span style="color: #6c71c4;">image</span> = rgb2gray(im)
-    <span style="color: #859900;">else</span>:
-        <span style="color: #6c71c4;">image</span> = np.atleast_2d(im)
+<span style="color: #ada296;">         Modified from skimage.feature.hog</span>
+<span style="color: #ada296;">         http://pydoc.net/Python/scikits-image/0.4.2/skimage.feature.hog</span>
 
-    <span style="color: #6c71c4;">sx</span>, <span style="color: #6c71c4;">sy</span> = image.shape <span style="color: #405A61;"># </span><span style="color: #405A61;">image size</span>
-    <span style="color: #6c71c4;">orientations</span> = 9 <span style="color: #405A61;"># </span><span style="color: #405A61;">number of gradient bins</span>
-    <span style="color: #6c71c4;">cx</span>, <span style="color: #6c71c4;">cy</span> = (8, 8) <span style="color: #405A61;"># </span><span style="color: #405A61;">pixels per cell</span>
+<span style="color: #ada296;">       Reference:</span>
+<span style="color: #ada296;">         Histograms of Oriented Gradients for Human Detection</span>
+<span style="color: #ada296;">         Navneet Dalal and Bill Triggs, CVPR 2005</span>
 
-    <span style="color: #6c71c4;">gx</span> = np.zeros(image.shape)
-    <span style="color: #6c71c4;">gy</span> = np.zeros(image.shape)
-    <span style="color: #6c71c4;">gx</span>[:, :-1] = np.diff(image, n=1, axis=1) <span style="color: #405A61;"># </span><span style="color: #405A61;">compute gradient on x-direction</span>
-    <span style="color: #6c71c4;">gy</span>[:-1, :] = np.diff(image, n=1, axis=0) <span style="color: #405A61;"># </span><span style="color: #405A61;">compute gradient on y-direction</span>
-    <span style="color: #6c71c4;">grad_mag</span> = np.sqrt(gx ** 2 + gy ** 2) <span style="color: #405A61;"># </span><span style="color: #405A61;">gradient magnitude</span>
-    <span style="color: #6c71c4;">grad_ori</span> = np.arctan2(gy, (gx + 1e-15)) * (180 / np.pi) + 90 <span style="color: #405A61;"># </span><span style="color: #405A61;">gradient orientation</span>
+<span style="color: #ada296;">      Parameters:</span>
+<span style="color: #ada296;">        im : an input grayscale or rgb image</span>
 
-    <span style="color: #6c71c4;">n_cellsx</span> = <span style="color: #268bd2;">int</span>(np.floor(sx / cx))  <span style="color: #405A61;"># </span><span style="color: #405A61;">number of cells in x</span>
-    <span style="color: #6c71c4;">n_cellsy</span> = <span style="color: #268bd2;">int</span>(np.floor(sy / cy))  <span style="color: #405A61;"># </span><span style="color: #405A61;">number of cells in y</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">compute orientations integral images</span>
-    <span style="color: #6c71c4;">orientation_histogram</span> = np.zeros((n_cellsx, n_cellsy, orientations))
-    <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(orientations):
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">create new integral image for this orientation</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">isolate orientations in this range</span>
-        <span style="color: #6c71c4;">temp_ori</span> = np.where(grad_ori &lt; 180 / orientations * (i + 1),
+<span style="color: #ada296;">      Returns:</span>
+<span style="color: #ada296;">        feat: Histogram of Gradient (HOG) feature</span>
+
+<span style="color: #ada296;">    """</span>
+
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">convert rgb to grayscale if needed</span>
+    <span style="color: #fb4934;">if</span> im.ndim == 3:
+        <span style="color: #83a598;">image</span> = rgb2gray(im)
+    <span style="color: #fb4934;">else</span>:
+        <span style="color: #83a598;">image</span> = np.atleast_2d(im)
+
+    <span style="color: #83a598;">sx</span>, <span style="color: #83a598;">sy</span> = image.shape <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">image size</span>
+    <span style="color: #83a598;">orientations</span> = 9 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">number of gradient bins</span>
+    <span style="color: #83a598;">cx</span>, <span style="color: #83a598;">cy</span> = (8, 8) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">pixels per cell</span>
+
+    <span style="color: #83a598;">gx</span> = np.zeros(image.shape)
+    <span style="color: #83a598;">gy</span> = np.zeros(image.shape)
+    <span style="color: #83a598;">gx</span>[:, :-1] = np.diff(image, n=1, axis=1) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">compute gradient on x-direction</span>
+    <span style="color: #83a598;">gy</span>[:-1, :] = np.diff(image, n=1, axis=0) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">compute gradient on y-direction</span>
+    <span style="color: #83a598;">grad_mag</span> = np.sqrt(gx ** 2 + gy ** 2) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">gradient magnitude</span>
+    <span style="color: #83a598;">grad_ori</span> = np.arctan2(gy, (gx + 1e-15)) * (180 / np.pi) + 90 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">gradient orientation</span>
+
+    <span style="color: #83a598;">n_cellsx</span> = <span style="color: #fe8019;">int</span>(np.floor(sx / cx))  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">number of cells in x</span>
+    <span style="color: #83a598;">n_cellsy</span> = <span style="color: #fe8019;">int</span>(np.floor(sy / cy))  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">number of cells in y</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">compute orientations integral images</span>
+    <span style="color: #83a598;">orientation_histogram</span> = np.zeros((n_cellsx, n_cellsy, orientations))
+    <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(orientations):
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">create new integral image for this orientation</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">isolate orientations in this range</span>
+        <span style="color: #83a598;">temp_ori</span> = np.where(grad_ori &lt; 180 / orientations * (i + 1),
                             grad_ori, 0)
-        <span style="color: #6c71c4;">temp_ori</span> = np.where(grad_ori &gt;= 180 / orientations * i,
+        <span style="color: #83a598;">temp_ori</span> = np.where(grad_ori &gt;= 180 / orientations * i,
                             temp_ori, 0)
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">select magnitudes for those orientations</span>
-        <span style="color: #6c71c4;">cond2</span> = temp_ori &gt; 0
-        <span style="color: #6c71c4;">temp_mag</span> = np.where(cond2, grad_mag, 0)
-        <span style="color: #6c71c4;">orientation_histogram</span>[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[<span style="color: #268bd2;">round</span>(cx/2)::cx, <span style="color: #268bd2;">round</span>(cy/2)::cy].T
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">select magnitudes for those orientations</span>
+        <span style="color: #83a598;">cond2</span> = temp_ori &gt; 0
+        <span style="color: #83a598;">temp_mag</span> = np.where(cond2, grad_mag, 0)
+        <span style="color: #83a598;">orientation_histogram</span>[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[<span style="color: #fe8019;">round</span>(cx/2)::cx, <span style="color: #fe8019;">round</span>(cy/2)::cy].T
 
-    <span style="color: #859900;">return</span> orientation_histogram.ravel()
+    <span style="color: #fb4934;">return</span> orientation_histogram.ravel()
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">color_histogram_hsv</span>(im, nbin=10, xmin=0, xmax=255, normalized=<span style="color: #d33682;">True</span>):
-    <span style="color: #35a69c;">"""</span>
-<span style="color: #35a69c;">    Compute color histogram for an image using hue.</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">color_histogram_hsv</span>(im, nbin=10, xmin=0, xmax=255, normalized=<span style="color: #fabd2f;">True</span>):
+    <span style="color: #ada296;">"""</span>
+<span style="color: #ada296;">    Compute color histogram for an image using hue.</span>
 
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    - im: H x W x C array of pixel data for an RGB image.</span>
-<span style="color: #35a69c;">    - nbin: Number of histogram bins. (default: 10)</span>
-<span style="color: #35a69c;">    - xmin: Minimum pixel value (default: 0)</span>
-<span style="color: #35a69c;">    - xmax: Maximum pixel value (default: 255)</span>
-<span style="color: #35a69c;">    - normalized: Whether to normalize the histogram (default: True)</span>
+<span style="color: #ada296;">    Inputs:</span>
+<span style="color: #ada296;">    - im: H x W x C array of pixel data for an RGB image.</span>
+<span style="color: #ada296;">    - nbin: Number of histogram bins. (default: 10)</span>
+<span style="color: #ada296;">    - xmin: Minimum pixel value (default: 0)</span>
+<span style="color: #ada296;">    - xmax: Maximum pixel value (default: 255)</span>
+<span style="color: #ada296;">    - normalized: Whether to normalize the histogram (default: True)</span>
 
-<span style="color: #35a69c;">    Returns:</span>
-<span style="color: #35a69c;">      1D vector of length nbin giving the color histogram over the hue of the</span>
-<span style="color: #35a69c;">      input image.</span>
-<span style="color: #35a69c;">    """</span>
-    <span style="color: #6c71c4;">ndim</span> = im.ndim
-    <span style="color: #6c71c4;">bins</span> = np.linspace(xmin, xmax, nbin+1)
-    <span style="color: #6c71c4;">hsv</span> = matplotlib.colors.rgb_to_hsv(im/xmax) * xmax
-    <span style="color: #6c71c4;">imhist</span>, <span style="color: #6c71c4;">bin_edges</span> = np.histogram(hsv[:,:,0], bins=bins, density=normalized)
-    <span style="color: #6c71c4;">imhist</span> = imhist * np.diff(bin_edges)
+<span style="color: #ada296;">    Returns:</span>
+<span style="color: #ada296;">      1D vector of length nbin giving the color histogram over the hue of the</span>
+<span style="color: #ada296;">      input image.</span>
+<span style="color: #ada296;">    """</span>
+    <span style="color: #83a598;">ndim</span> = im.ndim
+    <span style="color: #83a598;">bins</span> = np.linspace(xmin, xmax, nbin+1)
+    <span style="color: #83a598;">hsv</span> = matplotlib.colors.rgb_to_hsv(im/xmax) * xmax
+    <span style="color: #83a598;">imhist</span>, <span style="color: #83a598;">bin_edges</span> = np.histogram(hsv[:,:,0], bins=bins, density=normalized)
+    <span style="color: #83a598;">imhist</span> = imhist * np.diff(bin_edges)
 
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">return histogram</span>
-    <span style="color: #859900;">return</span> imhist
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">return histogram</span>
+    <span style="color: #fb4934;">return</span> imhist
 </pre>
 </div>
 
@@ -774,43 +773,43 @@ predict test accuracy:  0.1674
 寻找最优的分箱值。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">hog_and_svm</span>(lrs, regs, bins=9, num_iters=1500):
-    <span style="color: #6c71c4;">res</span> = {}
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">hog_and_svm</span>(lrs, regs, bins=9, num_iters=1500):
+    <span style="color: #83a598;">res</span> = {}
 
-    <span style="color: #6c71c4;">num_color_bins</span> = bins       <span style="color: #405A61;"># </span><span style="color: #405A61;">used the features functions</span>
-    <span style="color: #6c71c4;">feature_fns</span> = [hog_feature, <span style="color: #859900;">lambda</span> img: color_histogram_hsv(img, nbin=num_color_bins)]
-    <span style="color: #6c71c4;">rt</span> = extract_features(X_train.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #d33682;">True</span>)
-    <span style="color: #6c71c4;">rv</span> = extract_features(X_vali.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #d33682;">True</span>)
-    <span style="color: #6c71c4;">rte</span> = extract_features(X_test.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #d33682;">True</span>)
+    <span style="color: #83a598;">num_color_bins</span> = bins       <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">used the features functions</span>
+    <span style="color: #83a598;">feature_fns</span> = [hog_feature, <span style="color: #fb4934;">lambda</span> img: color_histogram_hsv(img, nbin=num_color_bins)]
+    <span style="color: #83a598;">rt</span> = extract_features(X_train.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #fabd2f;">True</span>)
+    <span style="color: #83a598;">rv</span> = extract_features(X_vali.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #fabd2f;">True</span>)
+    <span style="color: #83a598;">rte</span> = extract_features(X_test.transpose(0, 2, 3, 1), feature_fns, verbose=<span style="color: #fabd2f;">True</span>)
 
-    <span style="color: #6c71c4;">best_val_acc</span> = -1
+    <span style="color: #83a598;">best_val_acc</span> = -1
 
-    <span style="color: #859900;">print</span>(<span style="color: #2aa198;">'data preprocess end, train model begin...'</span>)
-    <span style="color: #6c71c4;">svm</span> = LinerSVM()
-    <span style="color: #859900;">for</span> lr <span style="color: #859900;">in</span> lrs:
-        <span style="color: #859900;">for</span> reg <span style="color: #859900;">in</span> regs:
-            <span style="color: #6c71c4;">loss_history</span> = svm.train(rt, Y_train, class_num=10, learning_rate=lr,
-                                     regularization=reg, num_iters=num_iters, verbose=<span style="color: #d33682;">True</span>)
-            <span style="color: #6c71c4;">res</span>[(lr, reg)] = loss_history
+    <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'data preprocess end, train model begin...'</span>)
+    <span style="color: #83a598;">svm</span> = LinerSVM()
+    <span style="color: #fb4934;">for</span> lr <span style="color: #fb4934;">in</span> lrs:
+        <span style="color: #fb4934;">for</span> reg <span style="color: #fb4934;">in</span> regs:
+            <span style="color: #83a598;">loss_history</span> = svm.train(rt, Y_train, class_num=10, learning_rate=lr,
+                                     regularization=reg, num_iters=num_iters, verbose=<span style="color: #fabd2f;">True</span>)
+            <span style="color: #83a598;">res</span>[(lr, reg)] = loss_history
 
-            <span style="color: #6c71c4;">val_acc</span> = np.mean(svm.predict(rv) == Y_vali)
-            <span style="color: #859900;">if</span> val_acc &gt; best_val_acc:
-                <span style="color: #6c71c4;">best_val_acc</span> = val_acc
-                <span style="color: #6c71c4;">res</span>[<span style="color: #2aa198;">'best_val_acc'</span>] = val_acc
-                <span style="color: #6c71c4;">res</span>[<span style="color: #2aa198;">'best_test_acc'</span>] = np.mean(svm.predict(rte) == Y_test)
-                <span style="color: #6c71c4;">res</span>[<span style="color: #2aa198;">'best_parameters'</span>] = (lr, reg, num_iters)
-    <span style="color: #859900;">print</span>(<span style="color: #2aa198;">'end'</span>)
-    <span style="color: #859900;">return</span> res
+            <span style="color: #83a598;">val_acc</span> = np.mean(svm.predict(rv) == Y_vali)
+            <span style="color: #fb4934;">if</span> val_acc &gt; best_val_acc:
+                <span style="color: #83a598;">best_val_acc</span> = val_acc
+                <span style="color: #83a598;">res</span>[<span style="color: #b8bb26;">'best_val_acc'</span>] = val_acc
+                <span style="color: #83a598;">res</span>[<span style="color: #b8bb26;">'best_test_acc'</span>] = np.mean(svm.predict(rte) == Y_test)
+                <span style="color: #83a598;">res</span>[<span style="color: #b8bb26;">'best_parameters'</span>] = (lr, reg, num_iters)
+    <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'end'</span>)
+    <span style="color: #fb4934;">return</span> res
 
-<span style="color: #6c71c4;">best_bins_resutls</span> = <span style="color: #d33682;">None</span>
-<span style="color: #6c71c4;">best_bin</span> = <span style="color: #d33682;">None</span>
-<span style="color: #6c71c4;">best_val_acc</span> = -1
-<span style="color: #859900;">for</span> b <span style="color: #859900;">in</span> [10]:
-    <span style="color: #6c71c4;">r</span> = hog_and_svm(learning_rates, regularization_lambdas, b)
-    <span style="color: #859900;">if</span> r[<span style="color: #2aa198;">'best_val_acc'</span>] &gt; best_val_acc:
-        <span style="color: #6c71c4;">best_val_acc</span> = r[<span style="color: #2aa198;">'best_val_acc'</span>]
-        <span style="color: #6c71c4;">best_bins_results</span> = r
-        <span style="color: #6c71c4;">best_bin</span> = b
+<span style="color: #83a598;">best_bins_resutls</span> = <span style="color: #fabd2f;">None</span>
+<span style="color: #83a598;">best_bin</span> = <span style="color: #fabd2f;">None</span>
+<span style="color: #83a598;">best_val_acc</span> = -1
+<span style="color: #fb4934;">for</span> b <span style="color: #fb4934;">in</span> [10]:
+    <span style="color: #83a598;">r</span> = hog_and_svm(learning_rates, regularization_lambdas, b)
+    <span style="color: #fb4934;">if</span> r[<span style="color: #b8bb26;">'best_val_acc'</span>] &gt; best_val_acc:
+        <span style="color: #83a598;">best_val_acc</span> = r[<span style="color: #b8bb26;">'best_val_acc'</span>]
+        <span style="color: #83a598;">best_bins_results</span> = r
+        <span style="color: #83a598;">best_bin</span> = b
 </pre>
 </div>
 
@@ -818,13 +817,12 @@ predict test accuracy:  0.1674
 还是没有达到提示中44%验证集准确率。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">print</span>(<span style="color: #2aa198;">'best_bin: %s, best_val_acc: %s, best_test_acc: %s'</span> %(best_bin, best_val_acc, best_bins_results[<span style="color: #2aa198;">'best_test_acc'</span>]))
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'best_bin: %s, best_val_acc: %s, best_test_acc: %s'</span> %(best_bin, best_val_acc, best_bins_results[<span style="color: #b8bb26;">'best_test_acc'</span>]))
 </pre>
 </div>
 
 <pre class="example">
 best_bin: 10, best_val_acc: 0.235, best_test_acc: 0.2227
-
 </pre>
 </div>
 </div>
@@ -891,7 +889,7 @@ represents the color of input images while ignoring the texture.
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>

@@ -38,7 +38,7 @@ TensorFlow中的Tensor具有三个属性：
 #+END_SRC
 
 #+RESULTS:
-: Tensor("Const_6:0", shape=(), dtype=float32)
+: Tensor("Const:0", shape=(), dtype=float32)
 : Tensor("float_to_int:0", shape=(), dtype=int32)
 
 TensorFlow中内置许多基本操作函数，像绝对值、指数、对数、开方等。值得注意的是，这
@@ -55,7 +55,7 @@ TensorFlow中内置许多基本操作函数，像绝对值、指数、对数、�
 
 我们需要用一个变量实时更新结果，可以使用=tf.get_variable= 创建变量或者获取变量。
 
-Note: TensorFlow中默认是不允许重复定义统一 =name= 的变量。
+Note: TensorFlow中默认是不允许重复定义同一 =name= 的变量。
 #+BEGIN_SRC jupyter-python :session py :results output :exports both
   var_int_1 = tf.get_variable("tensor_var_1", shape=[1, 2], dtype=tf.int32, initializer=tf.zeros_initializer)
   print(var_int_1.shape)
@@ -89,4 +89,7 @@ Note: TensorFlow中默认是不允许重复定义统一 =name= 的变量。
 : [8]
 
 TensorFlow如此流行还有一个原因，其提供 `TensorBoard' 可视化工具，对调试、优化都
-有很大的帮助。
+有很大的帮助。TensorFlow 中将计算等操作视为底层 API, 而将一些集成的机器学习算法
+视为高层API(估计器estimator)。
+
+

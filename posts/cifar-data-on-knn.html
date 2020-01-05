@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-11-03 Sun 11:52 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KNN算法预测CIFAR(01)</title>
@@ -15,7 +15,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -38,20 +38,20 @@
 <h2 id="orgc09f51c">依赖加载</h2>
 <div class="outline-text-2" id="text-orgc09f51c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">import</span> numpy <span style="color: #859900;">as</span> np
-<span style="color: #859900;">import</span> matplotlib.pyplot <span style="color: #859900;">as</span> plt
-<span style="color: #859900;">from</span> collections <span style="color: #859900;">import</span> Counter
-<span style="color: #859900;">import</span> pickle
-<span style="color: #859900;">import</span> os
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
+<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
+<span style="color: #fb4934;">from</span> collections <span style="color: #fb4934;">import</span> Counter
+<span style="color: #fb4934;">import</span> pickle
+<span style="color: #fb4934;">import</span> os
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#35774;&#32622;&#40664;&#35748;&#30340;&#22270;&#29255;&#22823;&#23567;</span>
-<span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'figure.figsize'</span>] = (10.0, 8.0)
-<span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'image.cmap'</span>] = <span style="color: #2aa198;">'gray'</span>
-<span style="color: #6c71c4;">plt.rcParams</span>[<span style="color: #2aa198;">'image.interpolation'</span>] = <span style="color: #2aa198;">'nearest'</span>
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35774;&#32622;&#40664;&#35748;&#30340;&#22270;&#29255;&#22823;&#23567;</span>
+<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'figure.figsize'</span>] = (10.0, 8.0)
+<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'image.cmap'</span>] = <span style="color: #b8bb26;">'gray'</span>
+<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'image.interpolation'</span>] = <span style="color: #b8bb26;">'nearest'</span>
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">relative_error</span>(x, y):
-    <span style="color: #35a69c;">'''&#35745;&#31639;x&#19982;y&#20043;&#38388;&#30340;&#30456;&#23545;&#35823;&#24046;&#65292;x&#19982;y&#21487;&#20197;&#26159;&#25968;&#20540;&#65292;&#20063;&#21487;&#20197;&#26159;&#25968;&#32452;'''</span>
-    <span style="color: #859900;">return</span> np.<span style="color: #268bd2;">max</span>(np.<span style="color: #268bd2;">abs</span>(x - y) / (np.maximum(1e-8, np.<span style="color: #268bd2;">abs</span>(x) + np.<span style="color: #268bd2;">abs</span>(y))))
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">relative_error</span>(x, y):
+    <span style="color: #ada296;">'''&#35745;&#31639;x&#19982;y&#20043;&#38388;&#30340;&#30456;&#23545;&#35823;&#24046;&#65292;x&#19982;y&#21487;&#20197;&#26159;&#25968;&#20540;&#65292;&#20063;&#21487;&#20197;&#26159;&#25968;&#32452;'''</span>
+    <span style="color: #fb4934;">return</span> np.<span style="color: #fe8019;">max</span>(np.<span style="color: #fe8019;">abs</span>(x - y) / (np.maximum(1e-8, np.<span style="color: #fe8019;">abs</span>(x) + np.<span style="color: #fe8019;">abs</span>(y))))
 </pre>
 </div>
 </div>
@@ -69,82 +69,82 @@
 <h3 id="org1b6bed5">数据加载函数</h3>
 <div class="outline-text-3" id="text-org1b6bed5">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">unpickle</span>(file_name):
-    <span style="color: #35a69c;">'''&#35299;&#30721;&#25968;&#25454;'''</span>
-    <span style="color: #859900;">with</span> <span style="color: #268bd2;">open</span>(file_name, <span style="color: #2aa198;">'rb'</span>) <span style="color: #859900;">as</span> f:
-        <span style="color: #6c71c4;">d</span> = pickle.load(f, encoding=<span style="color: #2aa198;">'bytes'</span>)
-    <span style="color: #859900;">return</span> d
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">unpickle</span>(file_name):
+    <span style="color: #ada296;">'''&#35299;&#30721;&#25968;&#25454;'''</span>
+    <span style="color: #fb4934;">with</span> <span style="color: #fe8019;">open</span>(file_name, <span style="color: #b8bb26;">'rb'</span>) <span style="color: #fb4934;">as</span> f:
+        <span style="color: #83a598;">d</span> = pickle.load(f, encoding=<span style="color: #b8bb26;">'bytes'</span>)
+    <span style="color: #fb4934;">return</span> d
 
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">load_data_batch</span>(file_name):
-    <span style="color: #35a69c;">'''The CIFAR DATA is a 10000x3072 numpy array of uint8s. Each row of the array</span>
-<span style="color: #35a69c;">    stores a 32x32 colour image. The first 1024 entries contain the red channel</span>
-<span style="color: #35a69c;">    values, the next 1024 the green, and the final 1024 the blue. The image is</span>
-<span style="color: #35a69c;">    stored in row-major order, so that the first 32 entries of the array are the</span>
-<span style="color: #35a69c;">    red channel values of the first row of the image. &#27599;&#19968;&#20010;&#22270;&#29255;&#37117;&#20855;&#26377;3&#23618;&#65292;&#20998;&#21035;</span>
-<span style="color: #35a69c;">    &#20195;&#34920;RGB&#12290;&#32780;&#25968;&#32452;&#20013;&#30340;&#27599;&#19968;&#34892;&#20648;&#23384;&#19968;&#20010;&#22270;&#29255;&#65292;&#20854;&#20013;&#21069;1024&#21508;&#20540;&#20195;&#34920;&#22270;&#29255;&#30340;&#32418;&#33394;&#23618;&#65292;&#32780;&#25509;</span>
-<span style="color: #35a69c;">    &#30528;&#20026;&#32511;&#33394;&#20540;&#65292;&#26368;&#21518;1024&#20010;&#20540;&#20026;&#34013;&#33394;&#12290;&#22240;&#27492;&#21487;&#20197;&#23558;&#22270;&#29255;&#37325;&#35774;&#25104;(3, 32, 32)&#65292;&#20877;&#32463;&#36807;&#35013;&#32622;</span>
-<span style="color: #35a69c;">    &#25104;(32, 32, 3)&#23601;&#26159;&#25105;&#20204;&#24120;&#35265;&#30340;&#23485; X &#39640; X &#28145;&#24230;&#12290;</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">load_data_batch</span>(file_name):
+    <span style="color: #ada296;">'''The CIFAR DATA is a 10000x3072 numpy array of uint8s. Each row of the array</span>
+<span style="color: #ada296;">    stores a 32x32 colour image. The first 1024 entries contain the red channel</span>
+<span style="color: #ada296;">    values, the next 1024 the green, and the final 1024 the blue. The image is</span>
+<span style="color: #ada296;">    stored in row-major order, so that the first 32 entries of the array are the</span>
+<span style="color: #ada296;">    red channel values of the first row of the image. &#27599;&#19968;&#20010;&#22270;&#29255;&#37117;&#20855;&#26377;3&#23618;&#65292;&#20998;&#21035;</span>
+<span style="color: #ada296;">    &#20195;&#34920;RGB&#12290;&#32780;&#25968;&#32452;&#20013;&#30340;&#27599;&#19968;&#34892;&#20648;&#23384;&#19968;&#20010;&#22270;&#29255;&#65292;&#20854;&#20013;&#21069;1024&#21508;&#20540;&#20195;&#34920;&#22270;&#29255;&#30340;&#32418;&#33394;&#23618;&#65292;&#32780;&#25509;</span>
+<span style="color: #ada296;">    &#30528;&#20026;&#32511;&#33394;&#20540;&#65292;&#26368;&#21518;1024&#20010;&#20540;&#20026;&#34013;&#33394;&#12290;&#22240;&#27492;&#21487;&#20197;&#23558;&#22270;&#29255;&#37325;&#35774;&#25104;(3, 32, 32)&#65292;&#20877;&#32463;&#36807;&#35013;&#32622;</span>
+<span style="color: #ada296;">    &#25104;(32, 32, 3)&#23601;&#26159;&#25105;&#20204;&#24120;&#35265;&#30340;&#23485; X &#39640; X &#28145;&#24230;&#12290;</span>
 
-<span style="color: #35a69c;">    labels is a list of 10000 numbers in the range 0-9. The number at index i</span>
-<span style="color: #35a69c;">    indicates the label of the ith image in the array data.</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">d</span> = unpickle(file_name)
-    <span style="color: #859900;">print</span>(d.keys())
-    <span style="color: #6c71c4;">X</span> = d[b<span style="color: #2aa198;">'data'</span>]
-    <span style="color: #6c71c4;">Y</span> = d[b<span style="color: #2aa198;">'labels'</span>]
-    <span style="color: #6c71c4;">X</span> = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype(<span style="color: #2aa198;">'float'</span>)
-    <span style="color: #6c71c4;">Y</span> = np.array(Y)
-    <span style="color: #859900;">return</span> X, Y
+<span style="color: #ada296;">    labels is a list of 10000 numbers in the range 0-9. The number at index i</span>
+<span style="color: #ada296;">    indicates the label of the ith image in the array data.</span>
+<span style="color: #ada296;">    '''</span>
+    <span style="color: #83a598;">d</span> = unpickle(file_name)
+    <span style="color: #fb4934;">print</span>(d.keys())
+    <span style="color: #83a598;">X</span> = d[b<span style="color: #b8bb26;">'data'</span>]
+    <span style="color: #83a598;">Y</span> = d[b<span style="color: #b8bb26;">'labels'</span>]
+    <span style="color: #83a598;">X</span> = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype(<span style="color: #b8bb26;">'float'</span>)
+    <span style="color: #83a598;">Y</span> = np.array(Y)
+    <span style="color: #fb4934;">return</span> X, Y
 
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">load_CIFAR_data</span>(CIFAR_path):
-    <span style="color: #35a69c;">'''&#21152;&#36733;CIFAR&#25968;&#25454;&#65292;&#24182;&#23558;&#23567;&#25209;&#37327;&#30340;&#25968;&#25454;&#21512;&#24182;&#22312;&#19968;&#36215;&#12290;'''</span>
-    <span style="color: #6c71c4;">xs</span> = []
-    <span style="color: #6c71c4;">ys</span> = []
-    <span style="color: #859900;">for</span> b <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(1, 6):
-        <span style="color: #6c71c4;">f</span> = os.path.join(CIFAR_path, <span style="color: #2aa198;">'data_batch_%d'</span> % b)
-        <span style="color: #6c71c4;">X</span>, <span style="color: #6c71c4;">Y</span> = load_data_batch(f)
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">load_CIFAR_data</span>(CIFAR_path):
+    <span style="color: #ada296;">'''&#21152;&#36733;CIFAR&#25968;&#25454;&#65292;&#24182;&#23558;&#23567;&#25209;&#37327;&#30340;&#25968;&#25454;&#21512;&#24182;&#22312;&#19968;&#36215;&#12290;'''</span>
+    <span style="color: #83a598;">xs</span> = []
+    <span style="color: #83a598;">ys</span> = []
+    <span style="color: #fb4934;">for</span> b <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(1, 6):
+        <span style="color: #83a598;">f</span> = os.path.join(CIFAR_path, <span style="color: #b8bb26;">'data_batch_%d'</span> % b)
+        <span style="color: #83a598;">X</span>, <span style="color: #83a598;">Y</span> = load_data_batch(f)
         xs.append(X)
         ys.append(Y)
-    <span style="color: #6c71c4;">Xtr</span> = np.concatenate(xs)
-    <span style="color: #6c71c4;">Ytr</span> = np.concatenate(ys)
-    <span style="color: #859900;">del</span> X, Y
-    <span style="color: #6c71c4;">f</span> = os.path.join(CIFAR_path, <span style="color: #2aa198;">'test_batch'</span>)
-    <span style="color: #6c71c4;">Xte</span>, <span style="color: #6c71c4;">Yte</span> = load_data_batch(f)
-    <span style="color: #859900;">return</span> Xtr, Ytr, Xte, Yte
+    <span style="color: #83a598;">Xtr</span> = np.concatenate(xs)
+    <span style="color: #83a598;">Ytr</span> = np.concatenate(ys)
+    <span style="color: #fb4934;">del</span> X, Y
+    <span style="color: #83a598;">f</span> = os.path.join(CIFAR_path, <span style="color: #b8bb26;">'test_batch'</span>)
+    <span style="color: #83a598;">Xte</span>, <span style="color: #83a598;">Yte</span> = load_data_batch(f)
+    <span style="color: #fb4934;">return</span> Xtr, Ytr, Xte, Yte
 
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">get_CIFAR_data</span>(num_training=49000, num_validation=1000, num_test=10000,
-                   subtract_mean=<span style="color: #d33682;">True</span>):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    &#25972;&#20010;CIFAR&#20849;&#26377;60000&#24352;&#22270;&#29255;&#65292;&#20854;&#20013;50000&#20316;&#20026;&#35757;&#32451;&#38598;&#65292;10000&#20316;&#20026;&#27979;&#35797;&#38598;&#12290;&#23545;&#21152;&#36733;&#30340;&#25968;&#25454;</span>
-<span style="color: #35a69c;">    &#36827;&#34892;&#39044;&#22788;&#29702;&#25805;&#20316;&#65292;&#24182;&#36820;&#22238;&#23383;&#20856;&#24418;&#24335;&#12290;</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">cifar_dir</span> = <span style="color: #2aa198;">"/home/luhuaei/Data/cifar-10-batches-py/"</span>
-    <span style="color: #6c71c4;">X_train</span>, <span style="color: #6c71c4;">Y_train</span>, <span style="color: #6c71c4;">X_test</span>, <span style="color: #6c71c4;">Y_test</span> = load_CIFAR_data(cifar_dir)
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">get_CIFAR_data</span>(num_training=49000, num_validation=1000, num_test=1000,
+                   subtract_mean=<span style="color: #fabd2f;">True</span>):
+    <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">    &#25972;&#20010;CIFAR&#20849;&#26377;60000&#24352;&#22270;&#29255;&#65292;&#20854;&#20013;50000&#20316;&#20026;&#35757;&#32451;&#38598;&#65292;1000&#20316;&#20026;&#27979;&#35797;&#38598;&#12290;&#23545;&#21152;&#36733;&#30340;&#25968;&#25454;</span>
+<span style="color: #ada296;">    &#36827;&#34892;&#39044;&#22788;&#29702;&#25805;&#20316;&#65292;&#24182;&#36820;&#22238;&#23383;&#20856;&#24418;&#24335;&#12290;</span>
+<span style="color: #ada296;">    '''</span>
+    <span style="color: #83a598;">cifar_dir</span> = <span style="color: #b8bb26;">"/home/luhuaei/Data/cifar-10-batches-py/"</span>
+    <span style="color: #83a598;">X_train</span>, <span style="color: #83a598;">Y_train</span>, <span style="color: #83a598;">X_test</span>, <span style="color: #83a598;">Y_test</span> = load_CIFAR_data(cifar_dir)
 
-    <span style="color: #6c71c4;">xtrain</span> = X_train[:num_training]
-    <span style="color: #6c71c4;">ytrain</span> = Y_train[:num_training]
-    <span style="color: #6c71c4;">xtest</span> = X_test[:num_test]
-    <span style="color: #6c71c4;">ytest</span> = Y_test[:num_test]
-    <span style="color: #6c71c4;">xvalidation</span> = X_train[num_training:num_training + num_validation]
-    <span style="color: #6c71c4;">yvalidation</span> = Y_train[num_training:num_training + num_validation]
+    <span style="color: #83a598;">xtrain</span> = X_train[:num_training]
+    <span style="color: #83a598;">ytrain</span> = Y_train[:num_training]
+    <span style="color: #83a598;">xtest</span> = X_test[:num_test]
+    <span style="color: #83a598;">ytest</span> = Y_test[:num_test]
+    <span style="color: #83a598;">xvalidation</span> = X_train[num_training:num_training + num_validation]
+    <span style="color: #83a598;">yvalidation</span> = Y_train[num_training:num_training + num_validation]
 
-    <span style="color: #859900;">if</span> subtract_mean:
-        <span style="color: #6c71c4;">mean_image</span> = np.mean(xtrain, axis=0)
-        <span style="color: #6c71c4;">xtrain</span> -= mean_image
-        <span style="color: #6c71c4;">xvalidation</span> -= mean_image
-        <span style="color: #6c71c4;">xtest</span> -= mean_image
+    <span style="color: #fb4934;">if</span> subtract_mean:
+        <span style="color: #83a598;">mean_image</span> = np.mean(xtrain, axis=0)
+        <span style="color: #83a598;">xtrain</span> -= mean_image
+        <span style="color: #83a598;">xvalidation</span> -= mean_image
+        <span style="color: #83a598;">xtest</span> -= mean_image
 
-        <span style="color: #6c71c4;">xtrain</span> = xtrain.transpose(0, 3, 1, 2).copy()
-        <span style="color: #6c71c4;">xtest</span> = xtest.transpose(0, 3, 1, 2).copy()
-        <span style="color: #6c71c4;">xvalidation</span> = xvalidation.transpose(0, 3, 1, 2).copy()
+        <span style="color: #83a598;">xtrain</span> = xtrain.transpose(0, 3, 1, 2).copy()
+        <span style="color: #83a598;">xtest</span> = xtest.transpose(0, 3, 1, 2).copy()
+        <span style="color: #83a598;">xvalidation</span> = xvalidation.transpose(0, 3, 1, 2).copy()
 
-    <span style="color: #859900;">return</span> {
-        <span style="color: #2aa198;">'x_train'</span>: xtrain, <span style="color: #2aa198;">'y_train'</span>: ytrain,
-        <span style="color: #2aa198;">'x_validation'</span>: xvalidation, <span style="color: #2aa198;">'y_validation'</span>: yvalidation,
-        <span style="color: #2aa198;">'x_test'</span>: xtest, <span style="color: #2aa198;">'y_test'</span>: ytest
+    <span style="color: #fb4934;">return</span> {
+        <span style="color: #b8bb26;">'x_train'</span>: xtrain, <span style="color: #b8bb26;">'y_train'</span>: ytrain,
+        <span style="color: #b8bb26;">'x_validation'</span>: xvalidation, <span style="color: #b8bb26;">'y_validation'</span>: yvalidation,
+        <span style="color: #b8bb26;">'x_test'</span>: xtest, <span style="color: #b8bb26;">'y_test'</span>: ytest
     }
 </pre>
 </div>
@@ -158,16 +158,16 @@
 试集。一些模型需要用到2维的数据形式。 <code>np.prod()</code> 为将元素累积。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">DATA</span> = get_CIFAR_data()
-<span style="color: #6c71c4;">X_train</span> = DATA[<span style="color: #2aa198;">'x_train'</span>]
-<span style="color: #6c71c4;">Y_train</span> = DATA[<span style="color: #2aa198;">'y_train'</span>]
-<span style="color: #6c71c4;">X_test</span> = DATA[<span style="color: #2aa198;">'x_test'</span>]
-<span style="color: #6c71c4;">Y_test</span> = DATA[<span style="color: #2aa198;">'y_test'</span>]
-<span style="color: #6c71c4;">X_vali</span> = DATA[<span style="color: #2aa198;">'x_validation'</span>]
-<span style="color: #6c71c4;">Y_vali</span> = DATA[<span style="color: #2aa198;">'y_validation'</span>]
-<span style="color: #6c71c4;">X_train2d</span> = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
-<span style="color: #6c71c4;">X_test2d</span> = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
-<span style="color: #6c71c4;">X_vali2d</span> = X_vali.reshape(X_vali.shape[0], -1)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">DATA</span> = get_CIFAR_data()
+<span style="color: #83a598;">X_train</span> = DATA[<span style="color: #b8bb26;">'x_train'</span>]
+<span style="color: #83a598;">Y_train</span> = DATA[<span style="color: #b8bb26;">'y_train'</span>]
+<span style="color: #83a598;">X_test</span> = DATA[<span style="color: #b8bb26;">'x_test'</span>]
+<span style="color: #83a598;">Y_test</span> = DATA[<span style="color: #b8bb26;">'y_test'</span>]
+<span style="color: #83a598;">X_vali</span> = DATA[<span style="color: #b8bb26;">'x_validation'</span>]
+<span style="color: #83a598;">Y_vali</span> = DATA[<span style="color: #b8bb26;">'y_validation'</span>]
+<span style="color: #83a598;">X_train2d</span> = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
+<span style="color: #83a598;">X_test2d</span> = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
+<span style="color: #83a598;">X_vali2d</span> = X_vali.reshape(X_vali.shape[0], -1)
 </pre>
 </div>
 </div>
@@ -180,24 +180,24 @@
 <code>np.flatnonzero()</code> 将函数变平，并返回非零元素的索引。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">classes</span> = [<span style="color: #2aa198;">'plane'</span>, <span style="color: #2aa198;">'car'</span>, <span style="color: #2aa198;">'bird'</span>, <span style="color: #2aa198;">'cat'</span>, <span style="color: #2aa198;">'deer'</span>, <span style="color: #2aa198;">'dog'</span>, <span style="color: #2aa198;">'frog'</span>, <span style="color: #2aa198;">'horse'</span>, <span style="color: #2aa198;">'ship'</span>, <span style="color: #2aa198;">'truck'</span>]
-<span style="color: #6c71c4;">num_classes</span> = <span style="color: #268bd2;">len</span>(classes)
-<span style="color: #6c71c4;">sample_per_class</span> = 7
-<span style="color: #859900;">for</span> y_index, cls <span style="color: #859900;">in</span> <span style="color: #268bd2;">enumerate</span>(classes):
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36820;&#22238;index&#23545;&#24212;&#30340;&#31867;&#30340;&#25968;&#25454;&#65292;&#24182;&#21033;&#29992;np.flatnonzero()&#21464;&#24179;&#12290;</span>
-    <span style="color: #6c71c4;">idxs</span> = np.flatnonzero(Y_train == y_index)
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#19981;&#25918;&#22238;&#25277;&#21462;&#25351;&#23450;&#20010;&#25968;&#26679;&#26412;&#65292;</span>
-    <span style="color: #6c71c4;">idxs</span> = np.random.choice(idxs, sample_per_class, replace=<span style="color: #d33682;">False</span>)
-    <span style="color: #859900;">for</span> i, idx <span style="color: #859900;">in</span> <span style="color: #268bd2;">enumerate</span>(idxs):
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36825;&#37324;&#22270;&#29255;&#23637;&#31034;&#25104;7x10&#65292;&#35745;&#31639;&#22270;&#29255;&#20986;&#29616;&#30340;&#20301;&#32622;</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">i * num_classes&#35745;&#31639;&#34892;&#25968;&#65292;y_index + 1&#35745;&#31639;&#21015;&#25968;</span>
-        <span style="color: #6c71c4;">img_index</span> = i * num_classes + y_index + 1
+<pre class="src src-jupyter-python"><span style="color: #83a598;">classes</span> = [<span style="color: #b8bb26;">'plane'</span>, <span style="color: #b8bb26;">'car'</span>, <span style="color: #b8bb26;">'bird'</span>, <span style="color: #b8bb26;">'cat'</span>, <span style="color: #b8bb26;">'deer'</span>, <span style="color: #b8bb26;">'dog'</span>, <span style="color: #b8bb26;">'frog'</span>, <span style="color: #b8bb26;">'horse'</span>, <span style="color: #b8bb26;">'ship'</span>, <span style="color: #b8bb26;">'truck'</span>]
+<span style="color: #83a598;">num_classes</span> = <span style="color: #fe8019;">len</span>(classes)
+<span style="color: #83a598;">sample_per_class</span> = 7
+<span style="color: #fb4934;">for</span> y_index, cls <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(classes):
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36820;&#22238;index&#23545;&#24212;&#30340;&#31867;&#30340;&#25968;&#25454;&#65292;&#24182;&#21033;&#29992;np.flatnonzero()&#21464;&#24179;&#12290;</span>
+    <span style="color: #83a598;">idxs</span> = np.flatnonzero(Y_train == y_index)
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#19981;&#25918;&#22238;&#25277;&#21462;&#25351;&#23450;&#20010;&#25968;&#26679;&#26412;&#65292;</span>
+    <span style="color: #83a598;">idxs</span> = np.random.choice(idxs, sample_per_class, replace=<span style="color: #fabd2f;">False</span>)
+    <span style="color: #fb4934;">for</span> i, idx <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(idxs):
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#22270;&#29255;&#23637;&#31034;&#25104;7x10&#65292;&#35745;&#31639;&#22270;&#29255;&#20986;&#29616;&#30340;&#20301;&#32622;</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">i * num_classes&#35745;&#31639;&#34892;&#25968;&#65292;y_index + 1&#35745;&#31639;&#21015;&#25968;</span>
+        <span style="color: #83a598;">img_index</span> = i * num_classes + y_index + 1
         plt.subplot(sample_per_class, num_classes, img_index)
-        plt.imshow(X_train[idx].astype(<span style="color: #2aa198;">'uint8'</span>))
-        plt.axis(<span style="color: #2aa198;">'off'</span>)
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35774;&#32622;&#22270;&#29255;&#30340;&#31867;&#21517;</span>
-        <span style="color: #859900;">if</span> i == 0:
-            plt.title(cls, color=<span style="color: #2aa198;">'green'</span>)
+        plt.imshow(X_train[idx].astype(<span style="color: #b8bb26;">'uint8'</span>))
+        plt.axis(<span style="color: #b8bb26;">'off'</span>)
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35774;&#32622;&#22270;&#29255;&#30340;&#31867;&#21517;</span>
+        <span style="color: #fb4934;">if</span> i == 0:
+            plt.title(cls, color=<span style="color: #b8bb26;">'green'</span>)
 plt.show()
 </pre>
 </div>
@@ -223,30 +223,30 @@ plt.show()
 的距离。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">NearesNeighbor</span>():
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>, method=<span style="color: #2aa198;">"L1"</span>):
-        <span style="color: #859900;">self</span>.method = method
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">NearesNeighbor</span>():
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>, method=<span style="color: #b8bb26;">"L1"</span>):
+        <span style="color: #fb4934;">self</span>.method = method
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, x_train, y_train):
-        <span style="color: #859900;">self</span>.x_train = x_train
-        <span style="color: #859900;">self</span>.y_train = y_train
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
+        <span style="color: #fb4934;">self</span>.x_train = x_train
+        <span style="color: #fb4934;">self</span>.y_train = y_train
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict</span>(<span style="color: #859900;">self</span>, x_pred):
-        <span style="color: #6c71c4;">out_num</span> = x_pred.shape[0]
-        <span style="color: #6c71c4;">out</span> = np.zeros(out_num, dtype=<span style="color: #859900;">self</span>.y_train.dtype)
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(out_num):
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(x_train_num, 1)</span>
-            <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">"L1"</span>:
-                <span style="color: #6c71c4;">distance</span> = np.<span style="color: #268bd2;">sum</span>(np.<span style="color: #268bd2;">abs</span>(<span style="color: #859900;">self</span>.x_train - x_pred[i, :]), axis=1)
-            <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">"L2"</span>:
-                <span style="color: #6c71c4;">distance</span> = np.sqrt(np.<span style="color: #268bd2;">sum</span>(np.square(<span style="color: #859900;">self</span>.x_train - x_pred[i, :]), axis=1))
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23547;&#25214;&#26368;&#23567;&#36317;&#31163;&#30340;&#20301;&#32622;</span>
-            <span style="color: #6c71c4;">min_index</span> = np.argmin(distance)
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#24403;&#21069;&#30340;&#27979;&#35797;&#26679;&#26412;&#26631;&#35760;&#20026;&#26368;&#23567;&#36317;&#31163;&#23545;&#24212;&#30340;&#35757;&#32451;&#26679;&#26412;&#26631;&#31614;</span>
-            <span style="color: #6c71c4;">out</span>[i] = <span style="color: #859900;">self</span>.y_train[min_index]
-            <span style="color: #859900;">print</span>(i)
-        <span style="color: #859900;">return</span> out
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, x_pred):
+        <span style="color: #83a598;">out_num</span> = x_pred.shape[0]
+        <span style="color: #83a598;">out</span> = np.zeros(out_num, dtype=<span style="color: #fb4934;">self</span>.y_train.dtype)
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(out_num):
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(x_train_num, 1)</span>
+            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L1"</span>:
+                <span style="color: #83a598;">distance</span> = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train - x_pred[i, :]), axis=1)
+            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L2"</span>:
+                <span style="color: #83a598;">distance</span> = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train - x_pred[i, :]), axis=1))
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23547;&#25214;&#26368;&#23567;&#36317;&#31163;&#30340;&#20301;&#32622;</span>
+            <span style="color: #83a598;">min_index</span> = np.argmin(distance)
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#24403;&#21069;&#30340;&#27979;&#35797;&#26679;&#26412;&#26631;&#35760;&#20026;&#26368;&#23567;&#36317;&#31163;&#23545;&#24212;&#30340;&#35757;&#32451;&#26679;&#26412;&#26631;&#31614;</span>
+            <span style="color: #83a598;">out</span>[i] = <span style="color: #fb4934;">self</span>.y_train[min_index]
+            <span style="color: #fb4934;">print</span>(i)
+        <span style="color: #fb4934;">return</span> out
 </pre>
 </div>
 </div>
@@ -302,23 +302,23 @@ Evaluate on the test set only a single time, at the very end.
 并。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">cross_validation</span>(Xtr, Ytr, ks, folds, classifier):
-    <span style="color: #6c71c4;">xtrf</span> = np.split(Xtr, folds)
-    <span style="color: #6c71c4;">ytrf</span> = np.split(Ytr, folds)
-    <span style="color: #6c71c4;">num_split</span> = Xtr.shape[0] / folds
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">cross_validation</span>(Xtr, Ytr, ks, folds, classifier):
+    <span style="color: #83a598;">xtrf</span> = np.split(Xtr, folds)
+    <span style="color: #83a598;">ytrf</span> = np.split(Ytr, folds)
+    <span style="color: #83a598;">num_split</span> = Xtr.shape[0] / folds
 
-    <span style="color: #6c71c4;">k_acc</span> = {}
+    <span style="color: #83a598;">k_acc</span> = {}
 
-    <span style="color: #859900;">for</span> ik, k <span style="color: #859900;">in</span> <span style="color: #268bd2;">enumerate</span>(ks):
-        <span style="color: #6c71c4;">acc</span> = np.zeros(folds, dtype=np.<span style="color: #268bd2;">float</span>)
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(folds):
-            <span style="color: #6c71c4;">train</span> = np.concatenate((xtrf[:i] + xtrf[i+1:]))
-            <span style="color: #6c71c4;">label</span> = np.concatenate((ytrf[:i] + ytrf[i+1:]))
+    <span style="color: #fb4934;">for</span> ik, k <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(ks):
+        <span style="color: #83a598;">acc</span> = np.zeros(folds, dtype=np.<span style="color: #fe8019;">float</span>)
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(folds):
+            <span style="color: #83a598;">train</span> = np.concatenate((xtrf[:i] + xtrf[i+1:]))
+            <span style="color: #83a598;">label</span> = np.concatenate((ytrf[:i] + ytrf[i+1:]))
             classifier.train(train, label)
-            <span style="color: #6c71c4;">pred</span> = classifier.predict(xtrf[i], k)
-            <span style="color: #6c71c4;">acc</span>[i] = np.mean(pred == ytrf[i])
-        <span style="color: #6c71c4;">k_acc</span>[k] = acc
-    <span style="color: #859900;">return</span> k_acc
+            <span style="color: #83a598;">pred</span> = classifier.predict(xtrf[i], k)
+            <span style="color: #83a598;">acc</span>[i] = np.mean(pred == ytrf[i])
+        <span style="color: #83a598;">k_acc</span>[k] = acc
+    <span style="color: #fb4934;">return</span> k_acc
 </pre>
 </div>
 </div>
@@ -327,83 +327,83 @@ Evaluate on the test set only a single time, at the very end.
 <h3 id="org003297c">算法实现</h3>
 <div class="outline-text-3" id="text-org003297c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">KNearesNeighbor</span>():
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>, method=<span style="color: #2aa198;">'L2'</span>, loop_way=0):
-        <span style="color: #859900;">self</span>.method = method
-        <span style="color: #859900;">self</span>.loop_way = loop_way
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">KNearesNeighbor</span>():
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>, method=<span style="color: #b8bb26;">'L2'</span>, loop_way=0):
+        <span style="color: #fb4934;">self</span>.method = method
+        <span style="color: #fb4934;">self</span>.loop_way = loop_way
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, x_train, y_train):
-        <span style="color: #859900;">self</span>.x_train = x_train
-        <span style="color: #859900;">self</span>.y_train = y_train
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
+        <span style="color: #fb4934;">self</span>.x_train = x_train
+        <span style="color: #fb4934;">self</span>.y_train = y_train
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict</span>(<span style="color: #859900;">self</span>, x_pred, k):
-        <span style="color: #859900;">self</span>.k = k
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.loop_way == 0:
-            <span style="color: #6c71c4;">distance</span> = <span style="color: #859900;">self</span>.predict_no_loop(x_pred)
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.loop_way == 1:
-            <span style="color: #6c71c4;">distance</span> = <span style="color: #859900;">self</span>.predict_one_loop(x_pred)
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.loop_way == 2:
-            <span style="color: #6c71c4;">distance</span> = <span style="color: #859900;">self</span>.predict_two_loop(x_pred)
-        <span style="color: #859900;">return</span> <span style="color: #859900;">self</span>.predict_label(distance)
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, x_pred, k):
+        <span style="color: #fb4934;">self</span>.k = k
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 0:
+            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_no_loop(x_pred)
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 1:
+            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_one_loop(x_pred)
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 2:
+            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_two_loop(x_pred)
+        <span style="color: #fb4934;">return</span> <span style="color: #fb4934;">self</span>.predict_label(distance)
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict_no_loop</span>(<span style="color: #859900;">self</span>, x_pred):
-        <span style="color: #35a69c;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #6c71c4;">xth</span>, <span style="color: #6c71c4;">xtw</span> = <span style="color: #859900;">self</span>.x_train.shape
-        <span style="color: #6c71c4;">xph</span>, <span style="color: #6c71c4;">xpw</span> = x_pred.shape
-        <span style="color: #6c71c4;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36825;&#37324;&#21033;&#29992;numpy&#20013;&#24403;&#19968;&#20010;&#30697;&#38453;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#25110;&#32773;&#19968;&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#26102;&#65292;&#25968;&#32452;</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20013;&#27599;&#19968;&#20010;&#20540;&#37117;&#20250;&#34987;&#24212;&#29992;&#65292;&#22914;(5, 1) - (2, 1)&#34920;&#31034;&#25104;5&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;2&#32500;&#30340;&#25968;&#20540;&#65292;</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#20250;&#24471;&#21040;(5, 2)&#65292;&#22312;numpy&#20013;&#20250;&#23558;(2, 1)&#35013;&#32622;&#25104;(1, 2)&#65292;&#20174;&#32780;(5, 1) - (1, 2)&#24471;&#21040;&#19968;&#20010;5x2&#30340;&#30697;&#38453;&#65292;</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#22914;&#26524;&#19968;&#20010;&#30697;&#38453;&#26159;&#26174;&#24335;&#25351;&#23450;&#20026;(5,1)&#21478;&#19968;&#20010;&#26174;&#24335;&#25351;&#23450;&#20026;(2, 1)&#30456;&#21152;&#23558;&#20250;&#20986;&#38169;</span>
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">'L1'</span>:
-            <span style="color: #6c71c4;">distance</span> = np.<span style="color: #268bd2;">abs</span>(np.<span style="color: #268bd2;">sum</span>(x_pred, axis=1).reshape(xph, 1)
-                              - np.<span style="color: #268bd2;">sum</span>(<span style="color: #859900;">self</span>.x_train, axis=1).reshape(1, xth))
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">'L2'</span>:
-            <span style="color: #6c71c4;">distance</span> = np.sqrt(np.<span style="color: #268bd2;">sum</span>(x_pred**2, axis=1).reshape(xph, 1)
-                               + np.<span style="color: #268bd2;">sum</span>(<span style="color: #859900;">self</span>.x_train**2, axis=1).reshape(1, xth) <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36825;&#37324;&#35201;&#20040;&#19981;&#35201;reshape(xth, -1)&#65292;&#35201;&#20040;&#25351;&#23450;&#20026;(1, xth)&#21542;&#21017;&#20986;&#38169;</span>
-                               - 2 * x_pred.dot(<span style="color: #859900;">self</span>.x_train.T))
-        <span style="color: #859900;">return</span> distance
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_no_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
+        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
+        <span style="color: #83a598;">xth</span>, <span style="color: #83a598;">xtw</span> = <span style="color: #fb4934;">self</span>.x_train.shape
+        <span style="color: #83a598;">xph</span>, <span style="color: #83a598;">xpw</span> = x_pred.shape
+        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#21033;&#29992;numpy&#20013;&#24403;&#19968;&#20010;&#30697;&#38453;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#25110;&#32773;&#19968;&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#26102;&#65292;&#25968;&#32452;</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20013;&#27599;&#19968;&#20010;&#20540;&#37117;&#20250;&#34987;&#24212;&#29992;&#65292;&#22914;(5, 1) - (2, 1)&#34920;&#31034;&#25104;5&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;2&#32500;&#30340;&#25968;&#20540;&#65292;</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#20250;&#24471;&#21040;(5, 2)&#65292;&#22312;numpy&#20013;&#20250;&#23558;(2, 1)&#35013;&#32622;&#25104;(1, 2)&#65292;&#20174;&#32780;(5, 1) - (1, 2)&#24471;&#21040;&#19968;&#20010;5x2&#30340;&#30697;&#38453;&#65292;</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22914;&#26524;&#19968;&#20010;&#30697;&#38453;&#26159;&#26174;&#24335;&#25351;&#23450;&#20026;(5,1)&#21478;&#19968;&#20010;&#26174;&#24335;&#25351;&#23450;&#20026;(2, 1)&#30456;&#21152;&#23558;&#20250;&#20986;&#38169;</span>
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L1'</span>:
+            <span style="color: #83a598;">distance</span> = np.<span style="color: #fe8019;">abs</span>(np.<span style="color: #fe8019;">sum</span>(x_pred, axis=1).reshape(xph, 1)
+                              - np.<span style="color: #fe8019;">sum</span>(<span style="color: #fb4934;">self</span>.x_train, axis=1).reshape(1, xth))
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L2'</span>:
+            <span style="color: #83a598;">distance</span> = np.sqrt(np.<span style="color: #fe8019;">sum</span>(x_pred**2, axis=1).reshape(xph, 1)
+                               + np.<span style="color: #fe8019;">sum</span>(<span style="color: #fb4934;">self</span>.x_train**2, axis=1).reshape(1, xth) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#35201;&#20040;&#19981;&#35201;reshape(xth, -1)&#65292;&#35201;&#20040;&#25351;&#23450;&#20026;(1, xth)&#21542;&#21017;&#20986;&#38169;</span>
+                               - 2 * x_pred.dot(<span style="color: #fb4934;">self</span>.x_train.T))
+        <span style="color: #fb4934;">return</span> distance
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict_one_loop</span>(<span style="color: #859900;">self</span>, x_pred):
-        <span style="color: #35a69c;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #6c71c4;">xph</span> = x_pred.shape[0]
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35757;&#32451;&#38598;&#30340;&#26679;&#26412;&#20010;&#25968;&#65292;&#36825;&#37324;&#22240;&#20026;&#25972;&#20010;&#35757;&#32451;&#38598;&#26679;&#26412;&#37117;&#23545;&#27979;&#35797;&#38598;&#20013;&#30340;&#27599;&#19968;&#20010;&#22270;&#29255;&#36941;&#21382;</span>
-        <span style="color: #6c71c4;">xth</span> = <span style="color: #859900;">self</span>.x_train.shape[0]
-        <span style="color: #6c71c4;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(xph):
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(num, 1)</span>
-            <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">"L1"</span>:
-                <span style="color: #6c71c4;">distance</span>[i] = np.<span style="color: #268bd2;">sum</span>(np.<span style="color: #268bd2;">abs</span>(<span style="color: #859900;">self</span>.x_train - x_pred[i]), axis=1)
-            <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">"L2"</span>:
-                <span style="color: #6c71c4;">distance</span>[i] = np.sqrt(np.<span style="color: #268bd2;">sum</span>(np.square(<span style="color: #859900;">self</span>.x_train - x_pred[i]), axis=1))
-        <span style="color: #859900;">return</span> distance
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_one_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
+        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
+        <span style="color: #83a598;">xph</span> = x_pred.shape[0]
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35757;&#32451;&#38598;&#30340;&#26679;&#26412;&#20010;&#25968;&#65292;&#36825;&#37324;&#22240;&#20026;&#25972;&#20010;&#35757;&#32451;&#38598;&#26679;&#26412;&#37117;&#23545;&#27979;&#35797;&#38598;&#20013;&#30340;&#27599;&#19968;&#20010;&#22270;&#29255;&#36941;&#21382;</span>
+        <span style="color: #83a598;">xth</span> = <span style="color: #fb4934;">self</span>.x_train.shape[0]
+        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xph):
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(num, 1)</span>
+            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L1"</span>:
+                <span style="color: #83a598;">distance</span>[i] = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train - x_pred[i]), axis=1)
+            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L2"</span>:
+                <span style="color: #83a598;">distance</span>[i] = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train - x_pred[i]), axis=1))
+        <span style="color: #fb4934;">return</span> distance
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict_two_loop</span>(<span style="color: #859900;">self</span>, x_pred):
-        <span style="color: #35a69c;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #6c71c4;">xth</span>, <span style="color: #6c71c4;">xtw</span> = <span style="color: #859900;">self</span>.x_train.shape
-        <span style="color: #6c71c4;">xph</span>, <span style="color: #6c71c4;">xpw</span> = x_pred.shape
-        <span style="color: #6c71c4;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #859900;">for</span> y <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(xph):
-            <span style="color: #859900;">for</span> x <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(xth):
-                <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">'L1'</span>:
-                    <span style="color: #6c71c4;">distance</span>[y, x] = np.<span style="color: #268bd2;">sum</span>(np.<span style="color: #268bd2;">abs</span>(<span style="color: #859900;">self</span>.x_train[x] - x_pred[y]))
-                <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.method == <span style="color: #2aa198;">'L2'</span>:
-                    <span style="color: #6c71c4;">distance</span>[y, x] = np.sqrt(np.<span style="color: #268bd2;">sum</span>(np.square(<span style="color: #859900;">self</span>.x_train[x] - x_pred[y])))
-        <span style="color: #859900;">return</span> distance
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_two_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
+        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
+        <span style="color: #83a598;">xth</span>, <span style="color: #83a598;">xtw</span> = <span style="color: #fb4934;">self</span>.x_train.shape
+        <span style="color: #83a598;">xph</span>, <span style="color: #83a598;">xpw</span> = x_pred.shape
+        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
+        <span style="color: #fb4934;">for</span> y <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xph):
+            <span style="color: #fb4934;">for</span> x <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xth):
+                <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L1'</span>:
+                    <span style="color: #83a598;">distance</span>[y, x] = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train[x] - x_pred[y]))
+                <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L2'</span>:
+                    <span style="color: #83a598;">distance</span>[y, x] = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train[x] - x_pred[y])))
+        <span style="color: #fb4934;">return</span> distance
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict_label</span>(<span style="color: #859900;">self</span>, distance):
-        <span style="color: #6c71c4;">out_num</span> = distance.shape[0]
-        <span style="color: #6c71c4;">out</span> = np.zeros(out_num)
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(out_num):
-            <span style="color: #6c71c4;">top_k_index</span> = np.argsort(distance[i])[:<span style="color: #859900;">self</span>.k]
-            <span style="color: #6c71c4;">top_k_label</span> = <span style="color: #859900;">self</span>.y_train[top_k_index]
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20174;&#20960;&#20010;&#26631;&#31614;&#20013;&#36873;&#25321;&#26368;&#22810;&#25237;&#31080;(&#20986;&#29616;&#26368;&#22810;)&#30340;&#26631;&#31614;</span>
-            <span style="color: #6c71c4;">vote</span> = Counter(top_k_label)
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36820;&#22238;&#19968;&#20010;&#21015;&#34920;&#65292;&#21015;&#34920;&#20013;&#20026;&#20803;&#32452;&#65292;&#20803;&#32452;&#31532;&#19968;&#20010;&#20803;&#32032;&#20026;&#26631;&#31614;&#65292;&#31532;&#20108;&#20010;&#20026;&#20986;&#29616;&#30340;&#27425;&#25968;</span>
-            <span style="color: #6c71c4;">count</span> = vote.most_common()
-            <span style="color: #6c71c4;">out</span>[i] = count[0][0]
-        <span style="color: #859900;">return</span> out
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_label</span>(<span style="color: #fb4934;">self</span>, distance):
+        <span style="color: #83a598;">out_num</span> = distance.shape[0]
+        <span style="color: #83a598;">out</span> = np.zeros(out_num)
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(out_num):
+            <span style="color: #83a598;">top_k_index</span> = np.argsort(distance[i])[:<span style="color: #fb4934;">self</span>.k]
+            <span style="color: #83a598;">top_k_label</span> = <span style="color: #fb4934;">self</span>.y_train[top_k_index]
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20174;&#20960;&#20010;&#26631;&#31614;&#20013;&#36873;&#25321;&#26368;&#22810;&#25237;&#31080;(&#20986;&#29616;&#26368;&#22810;)&#30340;&#26631;&#31614;</span>
+            <span style="color: #83a598;">vote</span> = Counter(top_k_label)
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36820;&#22238;&#19968;&#20010;&#21015;&#34920;&#65292;&#21015;&#34920;&#20013;&#20026;&#20803;&#32452;&#65292;&#20803;&#32452;&#31532;&#19968;&#20010;&#20803;&#32032;&#20026;&#26631;&#31614;&#65292;&#31532;&#20108;&#20010;&#20026;&#20986;&#29616;&#30340;&#27425;&#25968;</span>
+            <span style="color: #83a598;">count</span> = vote.most_common()
+            <span style="color: #83a598;">out</span>[i] = count[0][0]
+        <span style="color: #fb4934;">return</span> out
 </pre>
 </div>
 </div>
@@ -440,16 +440,16 @@ Evaluate on the test set only a single time, at the very end.
 不使用循环速度真的提升很多。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">nn</span> = NearesNeighbor(<span style="color: #2aa198;">"L2"</span>)
+<pre class="src src-jupyter-python"><span style="color: #83a598;">nn</span> = NearesNeighbor(<span style="color: #b8bb26;">"L2"</span>)
 nn.train(X_train2d, Y_train)
-<span style="color: #6c71c4;">nn_pred</span> = nn.predict(X_test2d)
-<span style="color: #6c71c4;">nn_accurary</span> = np.mean(nn_pred == Y_test)
+<span style="color: #83a598;">nn_pred</span> = nn.predict(X_test2d)
+<span style="color: #83a598;">nn_accurary</span> = np.mean(nn_pred == Y_test)
 
-<span style="color: #6c71c4;">knn</span> = KNearesNeighbor(method=<span style="color: #2aa198;">'L2'</span>, loop_way=0)
+<span style="color: #83a598;">knn</span> = KNearesNeighbor(method=<span style="color: #b8bb26;">'L2'</span>, loop_way=0)
 knn.train(X_train2d, Y_train)
-<span style="color: #6c71c4;">knn_pred</span> = knn.predict(X_test2d, k=10)
-<span style="color: #6c71c4;">knn_accurary</span> = np.mean(knn_pred == Y_test)
-<span style="color: #859900;">print</span>(<span style="color: #2aa198;">"NN: %.2f, KNN: %.2f"</span> %(nn_accurary, knn_accurary))
+<span style="color: #83a598;">knn_pred</span> = knn.predict(X_test2d, k=10)
+<span style="color: #83a598;">knn_accurary</span> = np.mean(knn_pred == Y_test)
+<span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"NN: %.2f, KNN: %.2f"</span> %(nn_accurary, knn_accurary))
 </pre>
 </div>
 
@@ -464,11 +464,11 @@ NN: 0.27, KNN: 0.29
 <h3 id="orgb9c270e">使用交叉验证选择最优的k</h3>
 <div class="outline-text-3" id="text-orgb9c270e">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">num_folds</span> = 5
-<span style="color: #6c71c4;">k_choices</span> = [1, 3, 5, 7, 10, 25, 50, 100]
+<pre class="src src-jupyter-python"><span style="color: #83a598;">num_folds</span> = 5
+<span style="color: #83a598;">k_choices</span> = [1, 3, 5, 7, 10, 25, 50, 100]
 
-<span style="color: #6c71c4;">knn</span> = KNearesNeighbor()
-<span style="color: #6c71c4;">kacc</span> = cross_validation(X_train2d, Y_train, k_choices, num_folds, knn)
+<span style="color: #83a598;">knn</span> = KNearesNeighbor()
+<span style="color: #83a598;">kacc</span> = cross_validation(X_train2d, Y_train, k_choices, num_folds, knn)
 </pre>
 </div>
 </div>
@@ -477,17 +477,17 @@ NN: 0.27, KNN: 0.29
 <h3 id="org75a142c">准确率可视化</h3>
 <div class="outline-text-3" id="text-org75a142c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">for</span> k <span style="color: #859900;">in</span> k_choices:
-    <span style="color: #6c71c4;">acc</span> = kacc[k]
-    plt.scatter([k] * <span style="color: #268bd2;">len</span>(acc), acc) <span style="color: #405A61;"># </span><span style="color: #405A61;">&#22266;&#23450;x&#65292;&#25551;&#32472;acc</span>
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">for</span> k <span style="color: #fb4934;">in</span> k_choices:
+    <span style="color: #83a598;">acc</span> = kacc[k]
+    plt.scatter([k] * <span style="color: #fe8019;">len</span>(acc), acc) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22266;&#23450;x&#65292;&#25551;&#32472;acc</span>
 
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#27599;&#19968;&#20010;k&#23545;&#24212;&#30340;folds&#30340;&#24179;&#22343;&#20540;&#19982;&#26631;&#20934;&#24046;</span>
-<span style="color: #6c71c4;">acc_mean</span> = [np.mean(v) <span style="color: #859900;">for</span> k, v <span style="color: #859900;">in</span> <span style="color: #268bd2;">sorted</span>(kacc.items())]
-<span style="color: #6c71c4;">acc_std</span> = [np.std(v) <span style="color: #859900;">for</span> k, v <span style="color: #859900;">in</span> <span style="color: #268bd2;">sorted</span>(kacc.items())]
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#27599;&#19968;&#20010;k&#23545;&#24212;&#30340;folds&#30340;&#24179;&#22343;&#20540;&#19982;&#26631;&#20934;&#24046;</span>
+<span style="color: #83a598;">acc_mean</span> = [np.mean(v) <span style="color: #fb4934;">for</span> k, v <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">sorted</span>(kacc.items())]
+<span style="color: #83a598;">acc_std</span> = [np.std(v) <span style="color: #fb4934;">for</span> k, v <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">sorted</span>(kacc.items())]
 plt.errorbar(k_choices, acc_mean, yerr=acc_std)
-plt.title(<span style="color: #2aa198;">'Cross Validation of k'</span>)
-plt.xlabel(<span style="color: #2aa198;">'k'</span>)
-plt.ylabel(<span style="color: #2aa198;">'accurary'</span>)
+plt.title(<span style="color: #b8bb26;">'Cross Validation of k'</span>)
+plt.xlabel(<span style="color: #b8bb26;">'k'</span>)
+plt.ylabel(<span style="color: #b8bb26;">'accurary'</span>)
 plt.show()
 </pre>
 </div>
@@ -505,7 +505,7 @@ plt.show()
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-10-29 Tue 09:57 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用梯度下降求解线性回归问题</title>
@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -149,70 +149,70 @@ over time to get lower loss
 所以推荐使用2h求导。\(g = \frac{f(x + h) - f(x - h)}{2h}\)
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">eval_gradient_numerical</span>(f, x, verbose=<span style="color: #d33682;">True</span>, h=0.00001):
-      <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">      Inputs:</span>
-<span style="color: #35a69c;">      ------------------------------------------------------------</span>
-<span style="color: #35a69c;">      - f: (accept one paramter) loss function.</span>
-<span style="color: #35a69c;">      - x: (data set) The point to evaluate the gardient at</span>
-<span style="color: #35a69c;">      Outputs:</span>
-<span style="color: #35a69c;">      ------------------------------------------------------------</span>
-<span style="color: #35a69c;">      - grad: (shape same with x) The gradient on each point of x.</span>
-<span style="color: #35a69c;">      '''</span>
-      <span style="color: #405A61;"># </span><span style="color: #405A61;">&#29983;&#25104;&#19968;&#20010;&#19982;&#36755;&#20837;x&#30456;&#21516;&#32500;&#24230;&#30340;0&#25968;&#32452;</span>
-      <span style="color: #6c71c4;">grad</span> = np.zeros_like(x)
-      <span style="color: #405A61;"># </span><span style="color: #405A61;">&#22810;&#32500;&#36845;&#20195;&#65292;&#36825;&#37324;&#23545;x&#30340;&#27599;&#19968;&#20010;&#32500;&#24230;&#37117;&#36827;&#34892;&#36845;&#20195;</span>
-      <span style="color: #405A61;"># </span><span style="color: #405A61;">&#20808;&#23545;&#26368;&#21518;&#30340;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;&#65292;&#24403;&#23436;&#25104;&#21518;&#65292;&#20877;&#23545;&#21069;&#19968;&#20010;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;</span>
-      <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36845;&#20195;&#23436;&#25104;&#21518;&#65292;&#20351;&#29992;finished&#21028;&#26029;</span>
-      <span style="color: #6c71c4;">it</span> = np.nditer(x, flags=[<span style="color: #2aa198;">'multi_index'</span>], op_flags=[<span style="color: #2aa198;">'readwrite'</span>])
-      <span style="color: #859900;">while</span> <span style="color: #859900;">not</span> it.finished:
-          <span style="color: #6c71c4;">ix</span> = it.multi_index
-          <span style="color: #6c71c4;">old_val</span> = x[ix]
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">eval_gradient_numerical</span>(f, x, verbose=<span style="color: #fabd2f;">True</span>, h=0.00001):
+      <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">      Inputs:</span>
+<span style="color: #ada296;">      ------------------------------------------------------------</span>
+<span style="color: #ada296;">      - f: (accept one paramter) loss function.</span>
+<span style="color: #ada296;">      - x: (data set) The point to evaluate the gardient at</span>
+<span style="color: #ada296;">      Outputs:</span>
+<span style="color: #ada296;">      ------------------------------------------------------------</span>
+<span style="color: #ada296;">      - grad: (shape same with x) The gradient on each point of x.</span>
+<span style="color: #ada296;">      '''</span>
+      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#29983;&#25104;&#19968;&#20010;&#19982;&#36755;&#20837;x&#30456;&#21516;&#32500;&#24230;&#30340;0&#25968;&#32452;</span>
+      <span style="color: #83a598;">grad</span> = np.zeros_like(x)
+      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22810;&#32500;&#36845;&#20195;&#65292;&#36825;&#37324;&#23545;x&#30340;&#27599;&#19968;&#20010;&#32500;&#24230;&#37117;&#36827;&#34892;&#36845;&#20195;</span>
+      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20808;&#23545;&#26368;&#21518;&#30340;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;&#65292;&#24403;&#23436;&#25104;&#21518;&#65292;&#20877;&#23545;&#21069;&#19968;&#20010;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;</span>
+      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36845;&#20195;&#23436;&#25104;&#21518;&#65292;&#20351;&#29992;finished&#21028;&#26029;</span>
+      <span style="color: #83a598;">it</span> = np.nditer(x, flags=[<span style="color: #b8bb26;">'multi_index'</span>], op_flags=[<span style="color: #b8bb26;">'readwrite'</span>])
+      <span style="color: #fb4934;">while</span> <span style="color: #fb4934;">not</span> it.finished:
+          <span style="color: #83a598;">ix</span> = it.multi_index
+          <span style="color: #83a598;">old_val</span> = x[ix]
 
-          <span style="color: #6c71c4;">x</span>[ix] = old_val + h
-          <span style="color: #6c71c4;">fxph</span> = f(x)
+          <span style="color: #83a598;">x</span>[ix] = old_val + h
+          <span style="color: #83a598;">fxph</span> = f(x)
 
-          <span style="color: #6c71c4;">x</span>[ix] = old_val - h
-          <span style="color: #6c71c4;">fxmh</span> = f(x)
+          <span style="color: #83a598;">x</span>[ix] = old_val - h
+          <span style="color: #83a598;">fxmh</span> = f(x)
 
-          <span style="color: #6c71c4;">x</span>[ix] = old_val
+          <span style="color: #83a598;">x</span>[ix] = old_val
 
-          <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#26012;&#29575;&#65292;&#36825;&#37324;&#20351;&#29992;&#26012;&#29575;&#30340;&#21407;&#22987;&#23450;&#20041;&#35745;&#31639;&#65292;&#36890;&#36807;&#24494;&#23567;&#30340;&#38754;&#31215;&#19982;h&#23485;&#24230;&#12290;</span>
-          <span style="color: #6c71c4;">grad</span>[ix] = (fxph - fxmh) / (2 * h)
+          <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#26012;&#29575;&#65292;&#36825;&#37324;&#20351;&#29992;&#26012;&#29575;&#30340;&#21407;&#22987;&#23450;&#20041;&#35745;&#31639;&#65292;&#36890;&#36807;&#24494;&#23567;&#30340;&#38754;&#31215;&#19982;h&#23485;&#24230;&#12290;</span>
+          <span style="color: #83a598;">grad</span>[ix] = (fxph - fxmh) / (2 * h)
 
-          <span style="color: #859900;">if</span> verbose:
-              <span style="color: #859900;">print</span>(ix, grad[ix])
+          <span style="color: #fb4934;">if</span> verbose:
+              <span style="color: #fb4934;">print</span>(ix, grad[ix])
           it.iternext()
-      <span style="color: #859900;">return</span> grad
+      <span style="color: #fb4934;">return</span> grad
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">eval_gradient_array</span>(f, x, df, h=1e-5):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - f: loss function</span>
-<span style="color: #35a69c;">    - x: input data set</span>
-<span style="color: #35a69c;">    - df: the loss function output gradient array</span>
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">eval_gradient_array</span>(f, x, df, h=1e-5):
+    <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">    Inputs:</span>
+<span style="color: #ada296;">    ------------------------------------------------------------</span>
+<span style="color: #ada296;">    - f: loss function</span>
+<span style="color: #ada296;">    - x: input data set</span>
+<span style="color: #ada296;">    - df: the loss function output gradient array</span>
 
-<span style="color: #35a69c;">    Outputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - grad: the grad is the gradient array.</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">grad</span> = np.zeros_like(x)
-    <span style="color: #6c71c4;">it</span> = np.nditer(x, flags=[<span style="color: #2aa198;">'multi_index'</span>], op_flags=[<span style="color: #2aa198;">'readwrite'</span>])
-    <span style="color: #859900;">while</span> <span style="color: #859900;">not</span> it.finished:
-        <span style="color: #6c71c4;">ix</span> = it.multi_index
-        <span style="color: #6c71c4;">old_val</span> = x[ix]
+<span style="color: #ada296;">    Outputs:</span>
+<span style="color: #ada296;">    ------------------------------------------------------------</span>
+<span style="color: #ada296;">    - grad: the grad is the gradient array.</span>
+<span style="color: #ada296;">    '''</span>
+    <span style="color: #83a598;">grad</span> = np.zeros_like(x)
+    <span style="color: #83a598;">it</span> = np.nditer(x, flags=[<span style="color: #b8bb26;">'multi_index'</span>], op_flags=[<span style="color: #b8bb26;">'readwrite'</span>])
+    <span style="color: #fb4934;">while</span> <span style="color: #fb4934;">not</span> it.finished:
+        <span style="color: #83a598;">ix</span> = it.multi_index
+        <span style="color: #83a598;">old_val</span> = x[ix]
 
-        <span style="color: #6c71c4;">x</span>[ix] = old_val + h
-        <span style="color: #6c71c4;">pos</span> = f(x).copy()
+        <span style="color: #83a598;">x</span>[ix] = old_val + h
+        <span style="color: #83a598;">pos</span> = f(x).copy()
 
-        <span style="color: #6c71c4;">x</span>[ix] = old_val - h
-        <span style="color: #6c71c4;">neg</span> = f(x).copy()
+        <span style="color: #83a598;">x</span>[ix] = old_val - h
+        <span style="color: #83a598;">neg</span> = f(x).copy()
 
-        <span style="color: #6c71c4;">x</span>[ix] = old_val
-        <span style="color: #6c71c4;">grad</span>[ix] = np.<span style="color: #268bd2;">sum</span>((pos - neg) * df) / (2 * h)
+        <span style="color: #83a598;">x</span>[ix] = old_val
+        <span style="color: #83a598;">grad</span>[ix] = np.<span style="color: #fe8019;">sum</span>((pos - neg) * df) / (2 * h)
         it.iternext()
-    <span style="color: #859900;">return</span> grad
+    <span style="color: #fb4934;">return</span> grad
 </pre>
 </div>
 </div>
@@ -328,12 +328,12 @@ learning_rate * grad</code> 注意到这里对权重更新是那当前的权重�
 <h3 id="org9cf20c9">加载数据</h3>
 <div class="outline-text-3" id="text-org9cf20c9">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">import</span> numpy <span style="color: #859900;">as</span> np
-<span style="color: #859900;">import</span> matplotlib.pyplot <span style="color: #859900;">as</span> plt
-<span style="color: #859900;">from</span> matplotlib.animation <span style="color: #859900;">import</span> FuncAnimation
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
+<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
+<span style="color: #fb4934;">from</span> matplotlib.animation <span style="color: #fb4934;">import</span> FuncAnimation
 
-plt.style.use(<span style="color: #2aa198;">'ggplot'</span>)
-<span style="color: #6c71c4;">DATA</span> = np.array(np.genfromtxt(<span style="color: #2aa198;">"data/gd-line-regression.csv"</span>, delimiter=<span style="color: #2aa198;">','</span>))
+plt.style.use(<span style="color: #b8bb26;">'ggplot'</span>)
+<span style="color: #83a598;">DATA</span> = np.array(np.genfromtxt(<span style="color: #b8bb26;">"data/gd-line-regression.csv"</span>, delimiter=<span style="color: #b8bb26;">','</span>))
 </pre>
 </div>
 </div>
@@ -342,12 +342,12 @@ plt.style.use(<span style="color: #2aa198;">'ggplot'</span>)
 <h3 id="orgf7a2530">数据预览</h3>
 <div class="outline-text-3" id="text-orgf7a2530">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">x</span> = DATA[:, 0]
-<span style="color: #6c71c4;">y</span> = DATA[:, 1]
+<pre class="src src-jupyter-python"><span style="color: #83a598;">x</span> = DATA[:, 0]
+<span style="color: #83a598;">y</span> = DATA[:, 1]
 plt.figure(figsize=(9.0, 6.0))
-plt.plot(x, y, <span style="color: #2aa198;">'o'</span>)
-plt.xlabel(<span style="color: #2aa198;">'x'</span>)
-plt.ylabel(<span style="color: #2aa198;">'y'</span>)
+plt.plot(x, y, <span style="color: #b8bb26;">'o'</span>)
+plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
+plt.ylabel(<span style="color: #b8bb26;">'y'</span>)
 plt.tight_layout(pad=0.0)
 </pre>
 </div>
@@ -363,77 +363,77 @@ plt.tight_layout(pad=0.0)
 <h3 id="orgefe8be6">梯度下降函数</h3>
 <div class="outline-text-3" id="text-orgefe8be6">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">LinearRegression</span>():
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>):
-        <span style="color: #859900;">self</span>.weights_list = []
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">LinearRegression</span>():
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>):
+        <span style="color: #fb4934;">self</span>.weights_list = []
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">model</span>(<span style="color: #859900;">self</span>, x_train, y_train):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - x_train: (N, D)</span>
-<span style="color: #35a69c;">        - y_train: (N, 1)</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #859900;">self</span>.x_train = x_train
-        <span style="color: #859900;">self</span>.y_train = y_train
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">model</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - x_train: (N, D)</span>
+<span style="color: #ada296;">        - y_train: (N, 1)</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #fb4934;">self</span>.x_train = x_train
+        <span style="color: #fb4934;">self</span>.y_train = y_train
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, weights, learning_rate=0.0001, iter_count=1000):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - weights: (D, 1)</span>
-<span style="color: #35a69c;">        - learning_rate: (float)</span>
-<span style="color: #35a69c;">        - iter_count: (integer)</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        update the weights on self weights.</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(0, iter_count):
-            <span style="color: #6c71c4;">gw</span> = <span style="color: #859900;">self</span>.gradient_descent(weights)
-            <span style="color: #6c71c4;">weights</span> -= learning_rate * gw
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">if don't copy will lead all values will the last update value.</span>
-            <span style="color: #859900;">self</span>.weights_list.append(weights.copy())
-        <span style="color: #859900;">self</span>.weights = weights
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, weights, learning_rate=0.0001, iter_count=1000):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - weights: (D, 1)</span>
+<span style="color: #ada296;">        - learning_rate: (float)</span>
+<span style="color: #ada296;">        - iter_count: (integer)</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        update the weights on self weights.</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(0, iter_count):
+            <span style="color: #83a598;">gw</span> = <span style="color: #fb4934;">self</span>.gradient_descent(weights)
+            <span style="color: #83a598;">weights</span> -= learning_rate * gw
+            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if don't copy will lead all values will the last update value.</span>
+            <span style="color: #fb4934;">self</span>.weights_list.append(weights.copy())
+        <span style="color: #fb4934;">self</span>.weights = weights
 
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">gradient_descent</span>(<span style="color: #859900;">self</span>, w):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        use forward and backward pass computer the gradient</span>
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">gradient_descent</span>(<span style="color: #fb4934;">self</span>, w):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        use forward and backward pass computer the gradient</span>
 
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - w: (D, 1) weights</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - dw: (D, 1) gradient weights</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">forward pass</span>
-        <span style="color: #6c71c4;">w_mul_x</span> = <span style="color: #859900;">self</span>.x_train.dot(w)                           <span style="color: #405A61;"># </span><span style="color: #405A61;">1 (N, 1)</span>
-        <span style="color: #6c71c4;">w_mul_x_sub_y</span> = w_mul_x - <span style="color: #859900;">self</span>.y_train                  <span style="color: #405A61;"># </span><span style="color: #405A61;">2 (N, 1)</span>
-        <span style="color: #6c71c4;">w_mul_x_sub_y_square</span> = np.square(w_mul_x_sub_y)         <span style="color: #405A61;"># </span><span style="color: #405A61;">3 (N, 1)</span>
-        <span style="color: #6c71c4;">sum_w_mul_x_sub_y_square</span> = np.<span style="color: #268bd2;">sum</span>(w_mul_x_sub_y_square) <span style="color: #405A61;"># </span><span style="color: #405A61;">4 (1, 1)</span>
-        <span style="color: #6c71c4;">mse</span> = sum_w_mul_x_sub_y_square / <span style="color: #859900;">self</span>.x_train.shape[0]  <span style="color: #405A61;"># </span><span style="color: #405A61;">5 (1, 1)</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - w: (D, 1) weights</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - dw: (D, 1) gradient weights</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">forward pass</span>
+        <span style="color: #83a598;">w_mul_x</span> = <span style="color: #fb4934;">self</span>.x_train.dot(w)                           <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">1 (N, 1)</span>
+        <span style="color: #83a598;">w_mul_x_sub_y</span> = w_mul_x - <span style="color: #fb4934;">self</span>.y_train                  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">2 (N, 1)</span>
+        <span style="color: #83a598;">w_mul_x_sub_y_square</span> = np.square(w_mul_x_sub_y)         <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">3 (N, 1)</span>
+        <span style="color: #83a598;">sum_w_mul_x_sub_y_square</span> = np.<span style="color: #fe8019;">sum</span>(w_mul_x_sub_y_square) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">4 (1, 1)</span>
+        <span style="color: #83a598;">mse</span> = sum_w_mul_x_sub_y_square / <span style="color: #fb4934;">self</span>.x_train.shape[0]  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">5 (1, 1)</span>
 
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">backward pass</span>
-        <span style="color: #6c71c4;">dsum_w_mul_x_sub_y_square</span> = 1 / <span style="color: #859900;">self</span>.x_train.shape[0] <span style="color: #405A61;"># </span><span style="color: #405A61;">5</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]</span>
-        <span style="color: #6c71c4;">dw_mul_x_sub_y_square</span> = 1
-        <span style="color: #6c71c4;">dw_mul_x_sub_y</span> = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square <span style="color: #405A61;"># </span><span style="color: #405A61;">3 (N, 1)</span>
-        <span style="color: #6c71c4;">dw_mul_x</span> = dw_mul_x_sub_y                                  <span style="color: #405A61;"># </span><span style="color: #405A61;">2 (N, 1)</span>
-        <span style="color: #6c71c4;">dw</span> = <span style="color: #859900;">self</span>.x_train.T.dot(dw_mul_x)                          <span style="color: #405A61;"># </span><span style="color: #405A61;">1 (D, 1)</span>
-        <span style="color: #859900;">return</span> dw
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">backward pass</span>
+        <span style="color: #83a598;">dsum_w_mul_x_sub_y_square</span> = 1 / <span style="color: #fb4934;">self</span>.x_train.shape[0] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">5</span>
+        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]</span>
+        <span style="color: #83a598;">dw_mul_x_sub_y_square</span> = 1
+        <span style="color: #83a598;">dw_mul_x_sub_y</span> = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">3 (N, 1)</span>
+        <span style="color: #83a598;">dw_mul_x</span> = dw_mul_x_sub_y                                  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">2 (N, 1)</span>
+        <span style="color: #83a598;">dw</span> = <span style="color: #fb4934;">self</span>.x_train.T.dot(dw_mul_x)                          <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">1 (D, 1)</span>
+        <span style="color: #fb4934;">return</span> dw
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">MSE</span>(<span style="color: #859900;">self</span>):
-        <span style="color: #35a69c;">'''computer the mean square error'''</span>
-        <span style="color: #6c71c4;">y_pred</span> = np.dot(<span style="color: #859900;">self</span>.x_train, <span style="color: #859900;">self</span>.weights)
-        <span style="color: #859900;">return</span> np.mean(np.square(<span style="color: #859900;">self</span>.y_train - y_pred))
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">MSE</span>(<span style="color: #fb4934;">self</span>):
+        <span style="color: #ada296;">'''computer the mean square error'''</span>
+        <span style="color: #83a598;">y_pred</span> = np.dot(<span style="color: #fb4934;">self</span>.x_train, <span style="color: #fb4934;">self</span>.weights)
+        <span style="color: #fb4934;">return</span> np.mean(np.square(<span style="color: #fb4934;">self</span>.y_train - y_pred))
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">plot</span>(<span style="color: #859900;">self</span>, w):
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">plot</span>(<span style="color: #fb4934;">self</span>, w):
         plt.figure(figsize=(9.0, 6.0))
-        plt.plot(<span style="color: #859900;">self</span>.x_train[:, 1], <span style="color: #859900;">self</span>.y_train, <span style="color: #2aa198;">'bo'</span>)
-        plt.plot(<span style="color: #859900;">self</span>.x_train[:, 1], np.dot(<span style="color: #859900;">self</span>.x_train, w), <span style="color: #2aa198;">'r-'</span>)
-        plt.xlabel(<span style="color: #2aa198;">'x'</span>)
-        plt.ylabel(<span style="color: #2aa198;">'y'</span>)
+        plt.plot(<span style="color: #fb4934;">self</span>.x_train[:, 1], <span style="color: #fb4934;">self</span>.y_train, <span style="color: #b8bb26;">'bo'</span>)
+        plt.plot(<span style="color: #fb4934;">self</span>.x_train[:, 1], np.dot(<span style="color: #fb4934;">self</span>.x_train, w), <span style="color: #b8bb26;">'r-'</span>)
+        plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
+        plt.ylabel(<span style="color: #b8bb26;">'y'</span>)
         plt.tight_layout(pad=0.0)
         plt.show()
 </pre>
@@ -447,13 +447,13 @@ plt.tight_layout(pad=0.0)
 这里已经将截距项合并到x中以及weights中。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#22312;&#25968;&#25454;&#21069;&#38754;&#28155;&#21152;&#19968;&#21015;&#65292;&#29992;&#26469;&#35745;&#31639;&#25130;&#36317;&#39033;</span>
-<span style="color: #6c71c4;">xt</span> = np.c_[np.ones((x.shape[0])), x]
-<span style="color: #6c71c4;">yt</span> = y.reshape(y.shape[0], -1)
-<span style="color: #405A61;"># </span><span style="color: #405A61;">&#20004;&#20010;&#31995;&#25968;&#65292;&#19968;&#20010;&#25130;&#36317;&#39033;&#65292;&#19968;&#20010;&#31995;&#25968;</span>
-<span style="color: #6c71c4;">weights</span> = np.zeros((2, 1))
+<pre class="src src-jupyter-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22312;&#25968;&#25454;&#21069;&#38754;&#28155;&#21152;&#19968;&#21015;&#65292;&#29992;&#26469;&#35745;&#31639;&#25130;&#36317;&#39033;</span>
+<span style="color: #83a598;">xt</span> = np.c_[np.ones((x.shape[0])), x]
+<span style="color: #83a598;">yt</span> = y.reshape(y.shape[0], -1)
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20004;&#20010;&#31995;&#25968;&#65292;&#19968;&#20010;&#25130;&#36317;&#39033;&#65292;&#19968;&#20010;&#31995;&#25968;</span>
+<span style="color: #83a598;">weights</span> = np.zeros((2, 1))
 
-<span style="color: #6c71c4;">linear</span> = LinearRegression()
+<span style="color: #83a598;">linear</span> = LinearRegression()
 linear.model(xt, yt)
 linear.train(weights.copy(), learning_rate=0.000001, iter_count=10)
 linear.plot(linear.weights)
@@ -471,17 +471,17 @@ linear.plot(linear.weights)
 <h3 id="org2f7ad39">优化过程</h3>
 <div class="outline-text-3" id="text-org2f7ad39">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #6c71c4;">fig</span>, <span style="color: #6c71c4;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+<pre class="src src-jupyter-python"><span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
 ax.scatter(x, y)
-line, = ax.plot(x, np.dot(xt, weights), <span style="color: #2aa198;">'r-'</span>, lw=3)
+line, = ax.plot(x, np.dot(xt, weights), <span style="color: #b8bb26;">'r-'</span>, lw=3)
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">update</span>(i):
-    <span style="color: #6c71c4;">y_pred</span> = np.dot(xt, linear.weights_list[i])
+<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">update</span>(i):
+    <span style="color: #83a598;">y_pred</span> = np.dot(xt, linear.weights_list[i])
     line.set_ydata(y_pred)
-    <span style="color: #859900;">return</span> line,
+    <span style="color: #fb4934;">return</span> line,
 
-<span style="color: #6c71c4;">anim</span> = FuncAnimation(fig, update, frames=<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(10)), interval=500)
-anim.save(<span style="color: #2aa198;">'./images/update-line-for-gradient-descent.gif'</span>, fps=60, writer=<span style="color: #2aa198;">'imagemagick'</span>)
+<span style="color: #83a598;">anim</span> = FuncAnimation(fig, update, frames=<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(10)), interval=500)
+anim.save(<span style="color: #b8bb26;">'./images/update-line-for-gradient-descent.gif'</span>, fps=60, writer=<span style="color: #b8bb26;">'imagemagick'</span>)
 </pre>
 </div>
 
@@ -499,7 +499,7 @@ anim.save(<span style="color: #2aa198;">'./images/update-line-for-gradient-desce
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>

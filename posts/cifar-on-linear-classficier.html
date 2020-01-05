@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2019-11-03 Sun 11:52 -->
+<!-- 2020-01-05 Sun 22:27 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>线性分类器训练CIFAR(02)</title>
@@ -37,7 +37,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
 <div id="preamble" class="status">
 
 <div class="">
@@ -54,203 +54,157 @@
 <header>
 <h1 class="title">线性分类器训练CIFAR(02)</h1>
 </header><p>
-直觉上看，我们希望通过训练，得到一个模型，这个模型可以快速的应用到新的测试数据上，
-而不用遍历整个训练数据集。
+由于 KNN 每一次分类预测都使用到所有的数据样本，导致计算量很大，不利于模型的快速
+部署。在实际应用中，我们希望用户直接输入需要预测的数据，而可以马上输出结果，而不
+用重新训练模型。所以，我们需要保留训练过的模型，而可以完全丢弃训练过的数据。
 </p>
 
-<div id="outline-container-org7ca51af" class="outline-2">
-<h2 id="org7ca51af">得分函数(score function)</h2>
-<div class="outline-text-2" id="text-org7ca51af">
 <p>
-就拿图片数据来说，score function就是将图片中的元素值映射到每一个类的得分上，通俗
-来讲，就是输入元素值，输出属于每一个类的概率。
+一个线性分类器具有两个部分：
+</p>
+<ul class="org-ul">
+<li>scores function(得分函数)，从原始数据计算各个类的得分。</li>
+<li>loss function(损失函数)，表示预测值与真实值之间的得分差距。</li>
+</ul>
+
+<div id="outline-container-org5c68c52" class="outline-2">
+<h2 id="org5c68c52">scores</h2>
+<div class="outline-text-2" id="text-org5c68c52">
+<p>
+权重，在网络中看，就是两两节点之间的连接线，其大小代表着线的粗细，表示着两个点之
+间的关系。而一个节点的得分(scores)等于前一层的节点的加权和。
 </p>
 </div>
+<div id="outline-container-org8e31257" class="outline-3">
+<h3 id="org8e31257">线性组合得分</h3>
+<div class="outline-text-3" id="text-org8e31257">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">forward_scores</span>(x, w, b):
+    <span style="color: #83a598;">x</span> = x.reshape(x.shape[0], -1)
+    <span style="color: #83a598;">scores</span> = x.dot(w) + b
+    <span style="color: #83a598;">cache</span> = (x, w, b)
+    <span style="color: #fb4934;">return</span> scores, cache
+</pre>
 </div>
-<div id="outline-container-orgfba8795" class="outline-2">
-<h2 id="orgfba8795">损失函数(loss function)</h2>
-<div class="outline-text-2" id="text-orgfba8795">
+</div>
+</div>
+<div id="outline-container-orgd33a064" class="outline-3">
+<h3 id="orgd33a064">反向传播</h3>
+<div class="outline-text-3" id="text-orgd33a064">
+<div class="org-src-container">
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">backward_scores</span>(dscores, cache):
+    <span style="color: #83a598;">x</span>, <span style="color: #83a598;">w</span>, <span style="color: #83a598;">b</span> = cache
+    <span style="color: #83a598;">dx</span> = dscores.dot(w.T)
+    <span style="color: #83a598;">dw</span> = x.T.dot(dscores)
+    <span style="color: #83a598;">db</span> = np.<span style="color: #fe8019;">sum</span>(dscores, axis=0)
+    <span style="color: #fb4934;">return</span> dx, dw, db
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcebf546" class="outline-2">
+<h2 id="orgcebf546">loss functions</h2>
+<div class="outline-text-2" id="text-orgcebf546">
 <p>
-计算真实值与预测值之间的误差，而训练的目的在于使整个模型的损失最小(最优化问题)。
+对于一个分类问题，可以计算出正确类与预测类之间的得分(scores)差距。作为一个学习的
+过程，我们希望模型前面的权重可以根据得分差距进行调整，经过调整后的权重值，可以使
+得模型的损失值更小。
 </p>
 </div>
-</div>
-<div id="outline-container-orgafe8117" class="outline-2">
-<h2 id="orgafe8117">多分类支持向量机(MSVM)</h2>
-<div class="outline-text-2" id="text-orgafe8117">
+<div id="outline-container-orgafe8117" class="outline-3">
+<h3 id="orgafe8117">多分类支持向量机(MSVM)</h3>
+<div class="outline-text-3" id="text-orgafe8117">
 <p>
-支持向量机也是损失函数的一种，通过利用预测的类与真实的类计算损失函数。
+多分类支持向量机从二分类扩展而来，属于监督学习方法中的一种，经过改进，也可以使用
+在无监督学习中(支持向量机聚类)。
 </p>
 </div>
-<div id="outline-container-org7c26145" class="outline-3">
-<h3 id="org7c26145">原理</h3>
-<div class="outline-text-3" id="text-org7c26145">
+<div id="outline-container-org7c26145" class="outline-4">
+<h4 id="org7c26145">原理</h4>
+<div class="outline-text-4" id="text-org7c26145">
 <p>
-\(L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta)\) 其中\(i\)代表第\(i\)
+\(L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta) \) 其中\(i\)代表第\(i\)
 个样本，\(j\)表示成当前样本所需要预测的类个数，\(y_j\)代表正确类的得分，根据上面
 的公式来看，Supports Vector Machine 的原理在于计算当前样本属于每一个类的得分，然
 后通过将其他不正确类的得分减去正确类的得分后加上偏差的总和。
 </p>
 </div>
 </div>
-<div id="outline-container-org4ba2bb3" class="outline-3">
-<h3 id="org4ba2bb3">算法实现</h3>
-<div class="outline-text-3" id="text-org4ba2bb3">
+<div id="outline-container-org4ba2bb3" class="outline-4">
+<h4 id="org4ba2bb3">算法实现</h4>
+<div class="outline-text-4" id="text-org4ba2bb3">
 <p>
-<code>np.reshape(a, newshape</code>-1)= 其中-1代表根据给出的值，推断出后面的值。
-</p>
-
-<p>
-下面两个函数用来计算数据损失部分。(loss = data loss + regularization loss)
+<code>np.reshape(a, newshape</code>-1)= 其中-1代表根据给出的值，推断出后面的值。下面函数用
+来计算数据损失部分。整个 <code>SVM</code> 计算出来的损失函数值，并计算梯度。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">svm_li_unvectorized</span>(X, Y, W):
-    <span style="color: #35a69c;">'''&#37319;&#29992;&#24490;&#29615;'''</span>
-    <span style="color: #6c71c4;">delta</span> = 1.0
-    <span style="color: #6c71c4;">scores</span> = X.dot(W)
-    <span style="color: #6c71c4;">correct_class_scores</span> = scores[Y]
-    <span style="color: #6c71c4;">class_num</span> = W.shape[1]
-    <span style="color: #6c71c4;">loss_i</span> = 0.0
-    <span style="color: #859900;">for</span> j <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(class_num):
-        <span style="color: #859900;">if</span> j == Y:
-            <span style="color: #859900;">continue</span>
-        <span style="color: #6c71c4;">loss_i</span> += <span style="color: #268bd2;">max</span>(0, scores[j] - correct_class_scores + delta)
-    <span style="color: #859900;">return</span> loss_i
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">svm_loss</span>(scores, y, delta=1):
+    <span style="color: #83a598;">N</span> = scores.shape[0]
+    <span style="color: #83a598;">correct_class_scores</span> = scores[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(N)), y].reshape(N, -1)
+    <span style="color: #83a598;">margins</span> = scores - correct_class_scores + delta
+    <span style="color: #83a598;">margins</span>[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(N)), y] = 0
+    <span style="color: #83a598;">loss</span> = np.<span style="color: #fe8019;">sum</span>(np.maximum(margins, 0)) / N
 
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">svm_li_vectorized</span>(X, Y, W):
-    <span style="color: #35a69c;">'''&#29992;&#21521;&#37327;&#26367;&#25442;&#24490;&#29615;&#65292;&#25552;&#39640;&#36895;&#24230;'''</span>
-    <span style="color: #6c71c4;">delta</span> = 1.0
-    <span style="color: #6c71c4;">scores</span> = X.dot(W)
-    <span style="color: #6c71c4;">margins</span> = <span style="color: #268bd2;">max</span>(0, scores - scores[Y] + delta)
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#30001;&#20110;&#21069;&#38754;&#26159;&#30452;&#25509;&#23545;&#25972;&#20010;&#21521;&#37327;&#36827;&#34892;&#20943;&#21435;scores[Y], &#23548;&#33268;&#20854;&#20013;&#27491;&#30830;&#30340;&#31867;&#20063;&#30456;&#20943;&#65292;&#22312;&#21152;&#19978;delta</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#32780;&#25439;&#22833;&#20989;&#25968;&#35745;&#31639;&#30340;&#20165;&#20165;&#26159;&#19981;&#27491;&#30830;&#30340;&#31867;&#30340;&#35823;&#24046;&#65292;&#25152;&#20197;&#23558;&#31532;Y&#20010;margins&#37325;&#26032;&#36171;&#20540;&#20026;0</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#36991;&#20813;&#24490;&#29615;&#21028;&#26029;</span>
-    <span style="color: #6c71c4;">margins</span>[Y] = 0
-    <span style="color: #6c71c4;">loss_i</span> = np.<span style="color: #268bd2;">sum</span>(margins)
-    <span style="color: #859900;">return</span> loss_i
-</pre>
-</div>
-
-<p>
-整个 <code>SVM</code> 计算出来的损失函数值。并计算梯度。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">svm_loss_function_loop</span>(X, Y, W, reg, delta=1):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --&gt; (50000, 3072)</span>
-<span style="color: #35a69c;">    - Y: (N, 1) label. eg CIFAR (50000, 1)</span>
-<span style="color: #35a69c;">    - W: (D, C) weights.</span>
-<span style="color: #35a69c;">    - reg: (float) lambda. regularization strgenth</span>
-
-<span style="color: #35a69c;">    Outputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - loss: as sigle float.</span>
-<span style="color: #35a69c;">    - gradient:  with respect to weights W; with same shape of inputs W</span>
-<span style="color: #35a69c;">    return (loss, gradient)</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">dW</span> = np.zeros(W.shape)
-    <span style="color: #6c71c4;">x_num</span> = X.shape[0]
-    <span style="color: #6c71c4;">w_num</span> = W.shape[1]
-    <span style="color: #6c71c4;">loss</span> = 0.0
-    <span style="color: #859900;">for</span> n <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(x_num):
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#27599;&#19968;&#20010;&#26679;&#26412;</span>
-        <span style="color: #6c71c4;">scores</span> = X[n].dot(W)
-        <span style="color: #6c71c4;">correct_class_score</span> = scores[Y[n]]
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#19982;&#27491;&#30830;&#31867;&#21035;&#19981;&#21516;&#19988;&#27604;&#24403;&#21069;&#31867;&#25439;&#22833;&#26356;&#23567;&#30340;&#31867;&#30340;&#20010;&#25968;</span>
-        <span style="color: #6c71c4;">loss_contribution_count</span> = 0
-        <span style="color: #859900;">for</span> w <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(w_num):
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#22914;&#26524;&#24403;&#21069;&#30340;&#31867;&#19982;&#27491;&#30830;&#31867;&#30456;&#21516;&#65292;&#21017;&#19979;&#19968;&#27493;</span>
-            <span style="color: #859900;">if</span> w == Y[n]:
-                <span style="color: #859900;">continue</span>
-            <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#24403;&#21069;&#31867;&#19982;&#27491;&#30830;&#31867;&#30340;&#36317;&#31163;</span>
-            <span style="color: #6c71c4;">margin</span> = scores[w] - scores[Y[n]] + delta
-            <span style="color: #859900;">if</span> margin &gt; 0:
-                <span style="color: #6c71c4;">loss</span> += margin
-                <span style="color: #405A61;"># </span><span style="color: #405A61;">&#39044;&#27979;&#38169;&#35823;&#65292;&#20294;margin&#22823;&#20110;0&#65292;&#25152;&#20197;&#23545;&#36825;&#20010;&#39044;&#27979;&#38169;&#35823;&#30340;&#31867;&#36827;&#34892;&#26435;&#37325;&#26356;&#26032;</span>
-                <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26356;&#26032;&#30340;&#26041;&#24335;&#20026;&#65306;&#23545;&#39044;&#27979;&#38169;&#35823;&#30340;&#25968;&#25454;&#36827;&#34892;&#32047;&#21152;</span>
-                <span style="color: #6c71c4;">dW</span>[:, w] += X[n]
-                <span style="color: #6c71c4;">loss_contribution_count</span> += 1
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23545;&#20110;&#39044;&#27979;&#27491;&#30830;&#30340;&#31867;&#65292;&#20063;&#36827;&#34892;&#26435;&#37325;&#26356;&#26032;&#65292;&#26356;&#26032;&#30340;&#26041;&#24335;&#26159;&#65306;</span>
-        <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#24403;&#21069;&#30340;&#26435;&#37325;&#20540;&#20943;&#21435;&#38169;&#35823;&#39044;&#27979;&#31867;&#20013;margin&#22823;&#20110;0&#30340;&#20010;&#25968;&#20056;&#20197;&#24403;&#21069;&#39044;&#27979;&#30340;&#25968;&#25454;</span>
-        dW[:, Y[n]] += (-1) * loss_contribution_count * X[n]
-
-    <span style="color: #6c71c4;">loss</span> /= x_num
-    <span style="color: #6c71c4;">dW</span> /= x_num
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#27491;&#21017;&#21270;</span>
-    <span style="color: #6c71c4;">loss</span> += reg * np.<span style="color: #268bd2;">sum</span>(W * W)
-    <span style="color: #6c71c4;">dW</span> += 2 * reg * W
-    <span style="color: #859900;">return</span> loss, dW
-
-<span style="color: #859900;">def</span> <span style="color: #268bd2;">svm_loss_function_vectorized</span>(X, Y, W, reg, delta=1):
-    <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">    don't has loop, faster than with loop</span>
-
-<span style="color: #35a69c;">    Inputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - X: (N, D) input volumes. eg CIFAR is (50000, 32, 32, 3) --&gt; (50000, 3072)</span>
-<span style="color: #35a69c;">    - Y: (N, 1) label. eg CIFAR (50000, 1)</span>
-<span style="color: #35a69c;">    - W: (D, C) weights. eg CIFAR (32, 32, 3, 10) --&gt; (3072, 10)</span>
-<span style="color: #35a69c;">    - reg: (float) lambda. regularization strgenth</span>
-<span style="color: #35a69c;">    Outputs:</span>
-<span style="color: #35a69c;">    ------------------------------------------------------------</span>
-<span style="color: #35a69c;">    - loss: as sigle float.</span>
-<span style="color: #35a69c;">    - gradient:  with respect to weights W; with same shape of inputs W</span>
-<span style="color: #35a69c;">    return (loss, gradient)</span>
-<span style="color: #35a69c;">    '''</span>
-    <span style="color: #6c71c4;">x_num</span> = X.shape[0]
-    <span style="color: #6c71c4;">w_num</span> = W.shape[1]
-    <span style="color: #6c71c4;">loss</span> = 0.0
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#22312;scores&#30697;&#38453;&#20013;&#65292;&#27599;&#19968;&#34892;&#20855;&#26377;C&#20010;&#31867;&#65292;&#20854;&#20013;&#19968;&#20010;&#23646;&#20110;&#27491;&#30830;&#30340;&#31867;,  &#32780;&#27491;&#30830;&#31867;&#20301;&#20110;Y</span>
-    <span style="color: #6c71c4;">scores</span> = X.dot(W)          <span style="color: #405A61;"># </span><span style="color: #405A61;">(N, C)</span>
-    <span style="color: #6c71c4;">correct_class_scores</span> = scores[<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(x_num)), Y].reshape(x_num, -1) <span style="color: #405A61;"># </span><span style="color: #405A61;">(N, 1)</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#31639;&#27599;&#19968;&#20010;&#20803;&#32032;&#23545;&#24212;&#30340;margin&#20540;</span>
-    <span style="color: #6c71c4;">scores</span> += delta - correct_class_scores
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#27491;&#30830;&#31867;&#23545;&#24212;&#30340;margin&#36171;&#20540;&#20026;0</span>
-    <span style="color: #6c71c4;">scores</span>[<span style="color: #268bd2;">list</span>(<span style="color: #268bd2;">range</span>(x_num)), Y] = 0
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#25226;scores&#20013;&#25152;&#26377;&#30340;&#22823;&#20110;0&#30340;margin&#37117;&#21152;&#36215;&#26469;</span>
-    <span style="color: #6c71c4;">loss</span> = np.<span style="color: #268bd2;">sum</span>(np.fmax(scores, 0)) / x_num
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21152;&#19978;&#27491;&#35268;&#21270;&#26435;&#37325;</span>
-    <span style="color: #6c71c4;">loss</span> += reg * np.<span style="color: #268bd2;">sum</span>(W * W)
-
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">dW&#20027;&#35201;&#23558;&#27599;&#20010;&#31867;&#20013;margin&#22823;&#20110;0&#30340;&#25968;&#25454;&#32047;&#21152;&#36215;&#26469;&#65292;&#24182;&#22312;&#26368;&#21518;</span>
-    <span style="color: #6c71c4;">dW</span> = np.zeros(W.shape)      <span style="color: #405A61;"># </span><span style="color: #405A61;">(D, C)</span>
-    <span style="color: #6c71c4;">xmask</span> = np.zeros(scores.shape) <span style="color: #405A61;"># </span><span style="color: #405A61;">(N, C)</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#20854;&#20013;margin&#22823;&#20110;0&#30340;&#26631;&#35760;&#20026;1</span>
-    <span style="color: #6c71c4;">xmask</span>[scores &gt; 0] = 1
-    <span style="color: #6c71c4;">xmask</span>[np.arange(x_num), Y] = -np.<span style="color: #268bd2;">sum</span>(xmask, axis=1) <span style="color: #405A61;"># </span><span style="color: #405A61;">&#35745;&#25968; loss_contribution_count</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">xmask&#20195;&#34920;&#27599;&#19968;&#34892;&#34920;&#31034;&#19968;&#24352;&#22270;&#29255;&#30340;&#39044;&#27979;&#25928;&#26524;&#65292;&#20849;C&#21015;&#65292;&#20854;&#20013;margin&#22823;&#20110;0&#30340;&#34987;&#36171;&#20540;&#20026;1</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#21033;&#29992;X.T(D, N)&#19982;xmask(N, C)&#36827;&#34892;&#28857;&#31215;&#30340;&#36807;&#31243;&#20013;&#65292;xmask&#20013;&#31532;&#19968;&#21015;&#20195;&#34920;&#31532;&#19968;&#20010;&#31867;&#65292;&#20854;&#20013;margin&gt;0&#34987;</span>
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#26631;&#35760;&#20026;1&#65292;&#21542;&#21017;&#20026;0&#12290;</span>
-    <span style="color: #6c71c4;">dW</span> = X.T.dot(xmask)
-    <span style="color: #405A61;"># </span><span style="color: #405A61;">&#27714;&#24179;&#22343;&#20540;</span>
-    <span style="color: #6c71c4;">dW</span> /= x_num
-    <span style="color: #6c71c4;">dW</span> += 2 * reg * W
-    <span style="color: #859900;">return</span> loss, dW
+    <span style="color: #83a598;">dscores</span> = np.zeros(scores.shape)
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if margins &gt; 0, the \frac{d L_i}{d y_j} = 1</span>
+    <span style="color: #83a598;">dscores</span>[margins &gt; 0] = 1
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if margins &gt; 0, the \frac{d L_i}{d y_i} = \sum -1</span>
+    <span style="color: #83a598;">dscores</span>[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(N)), y] -= np.<span style="color: #fe8019;">sum</span>(margins &gt; 0, axis=1)
+    <span style="color: #83a598;">dscores</span> /= N
+    <span style="color: #fb4934;">return</span> loss, dscores
 </pre>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-org8e7dc58" class="outline-2">
-<h2 id="org8e7dc58">归一化指数函数(softmax)</h2>
-<div class="outline-text-2" id="text-org8e7dc58">
+<div id="outline-container-orgd1a0477" class="outline-3">
+<h3 id="orgd1a0477">Softmax classifier</h3>
+<div class="outline-text-3" id="text-orgd1a0477">
 <p>
-\(L_i = -log( \frac { e^{ y_{f_i} } } { \sum_j e^{ f_{j} } } ) \)
+对数Softmax 函数为二项分布Logistic回归的推广，使用于多分类，当仅仅有两个类时，退化为
+Logistic回归。Logistic输出的结果是两个分类的对数发生比。
+</p>
+
+<p>
+Softmax classifier 结合交互熵(cross-entropy)和Softmax函数。根据定义softmax的定义
+应该为 \(S_i = \frac{ e^{f_{y_i}} }{ \sum_k e^{f_{y_k}}}\), 而在加上交互熵\(C
+= - \sum_i y_i log scores_i\)， \(y_i\)表示当前正确的类。\(f_{y_i}\)表示正确类的
+得分。当前正确的类表示为1, 否则为0。
+</p>
+
+<p>
+对Softmax classifier求导的过程中，可以分情况求导\(\frac{d L_i}{d score_j}\)，一
+种情况为: \(i = j\)，还有一种情况是：\(i \neq j\)，再进行合并。
+</p>
+
+<p>
+由于\(e^{f_{y_i}}\)会导致很大的数，从而使得计算机在计算时不稳定，所以我们需要对
+其进行正规化，对\(S_i\)方程上下同乘一个常数\(C\)，C为任意参数，普遍的选择\(C =
+-max_j f_j\)，使得最大的得分为0。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">def</span> <span style="color: #268bd2;">softmax_loss_function_vectorized</span>(X, Y, W, reg):
-    <span style="color: #6c71c4;">N</span> = X.shape[0]
-    <span style="color: #6c71c4;">scores</span> = np.exp(np.dot(X, W))
-    <span style="color: #6c71c4;">sum_scores</span> = scores.<span style="color: #268bd2;">sum</span>(axis=1)
-    <span style="color: #6c71c4;">data_loss</span> = -1 * np.log(scores[<span style="color: #268bd2;">range</span>(N), Y] / sum_scores)
-    <span style="color: #6c71c4;">reg_loss</span> = 1 / 2 * reg * np.<span style="color: #268bd2;">sum</span>(W * W)
-    <span style="color: #6c71c4;">loss</span> = data_loss + reg_loss
-    <span style="color: #859900;">return</span> loss
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">softmax_loss</span>(scores, Y):
+    <span style="color: #83a598;">N</span> = scores.shape[0]
+    <span style="color: #83a598;">scores</span> -= np.<span style="color: #fe8019;">max</span>(scores, axis=1, keepdims=<span style="color: #fabd2f;">True</span>)
+    <span style="color: #83a598;">exp_scores_sum</span> = np.<span style="color: #fe8019;">sum</span>(np.exp(scores), axis=1, keepdims=<span style="color: #fabd2f;">True</span>)
+
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">np.log(np.exp(scores) / exp_scores_sum)</span>
+    <span style="color: #83a598;">log_probs</span> = scores - np.log(exp_scores_sum)
+    <span style="color: #83a598;">loss</span> = -np.<span style="color: #fe8019;">sum</span>(log_probs[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(N)), Y]) / N
+
+    <span style="color: #83a598;">probs</span> = np.exp(log_probs)
+    <span style="color: #83a598;">dscores</span> = probs.copy()
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if i = j, \frac{d L_i}{d e^{scores_i}} = 0</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">because the max value is become 0, then exp(0) = 1</span>
+    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if i != j, will equal itself.</span>
+    <span style="color: #83a598;">dscores</span>[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(N)), Y] -= 1
+    <span style="color: #83a598;">dscores</span> /= N
+
+    <span style="color: #fb4934;">return</span> loss, dscores
 </pre>
+</div>
 </div>
 </div>
 </div>
@@ -258,95 +212,109 @@
 <h2 id="orga542d75">线性分类器</h2>
 <div class="outline-text-2" id="text-orga542d75">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #859900;">class</span> <span style="color: #b58900;">LinerClassifier</span>():
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">__init__</span>(<span style="color: #859900;">self</span>):
-        <span style="color: #859900;">self</span>.W = <span style="color: #d33682;">None</span>
+<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">LinerClassifier</span>():
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>):
+        <span style="color: #fb4934;">self</span>.W = <span style="color: #fabd2f;">None</span>
+        <span style="color: #fb4934;">self</span>.b = <span style="color: #fabd2f;">None</span>
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">train</span>(<span style="color: #859900;">self</span>, X, Y, class_num, learning_rate=1e-3, regularization=1e-5, num_iters=100,
-              batch_size=128, verbose=<span style="color: #d33682;">False</span>):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - X: (N, D) train set, eg CIFAR is (50000, 32, 32, 3) --&gt; (50000, 3072)</span>
-<span style="color: #35a69c;">        - Y: (N, 1) label set, eg CIFAR is (50000, 1)</span>
-<span style="color: #35a69c;">        - learning_rate: (float) SGD learning rate.</span>
-<span style="color: #35a69c;">        - regularization: (float) regularization lambda.</span>
-<span style="color: #35a69c;">        - num_iters: (integer) SGD iters num.</span>
-<span style="color: #35a69c;">        - batch_size: (integer) SGD splits each batch size.</span>
-<span style="color: #35a69c;">        - verbose: (boolen) whether print details infomations.</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #6c71c4;">x_num</span>, <span style="color: #6c71c4;">x_dim</span> = X.shape
-        <span style="color: #859900;">if</span> <span style="color: #859900;">self</span>.W <span style="color: #859900;">is</span> <span style="color: #d33682;">None</span>:
-            <span style="color: #859900;">self</span>.W = 0.001 * np.random.randn(x_dim, class_num)
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, X, Y, class_num, learning_rate=1e-3, regularization=1e-5, num_iters=100,
+              batch_size=128, verbose=<span style="color: #fabd2f;">False</span>):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - X: (N, D) train set.</span>
+<span style="color: #ada296;">        - Y: (N, 1) label set.</span>
+<span style="color: #ada296;">        - learning_rate: (float) SGD learning rate.</span>
+<span style="color: #ada296;">        - regularization: (float) regularization lambda.</span>
+<span style="color: #ada296;">        - num_iters: (integer) SGD iters num.</span>
+<span style="color: #ada296;">        - batch_size: (integer) SGD splits each batch size.</span>
+<span style="color: #ada296;">        - verbose: (boolen) whether print details infomations.</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - loss_history: (list).</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #83a598;">x_num</span>, <span style="color: #83a598;">x_dim</span> = X.shape
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.W <span style="color: #fb4934;">is</span> <span style="color: #fabd2f;">None</span>:
+            <span style="color: #fb4934;">self</span>.W = 0.001 * np.random.randn(x_dim, class_num)
+        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.b <span style="color: #fb4934;">is</span> <span style="color: #fabd2f;">None</span>:
+            <span style="color: #fb4934;">self</span>.b = np.zeros(class_num)
 
-        <span style="color: #6c71c4;">loss_history</span> = []
-        <span style="color: #859900;">for</span> i <span style="color: #859900;">in</span> <span style="color: #268bd2;">range</span>(num_iters):
-            <span style="color: #6c71c4;">batch_idx</span> = np.random.choice(x_num, batch_size)
-            <span style="color: #6c71c4;">X_batch</span> = X[batch_idx]
-            <span style="color: #6c71c4;">Y_batch</span> = Y[batch_idx]
+        <span style="color: #83a598;">loss_history</span> = []
+        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(num_iters):
+            <span style="color: #83a598;">batch_idx</span> = np.random.choice(x_num, batch_size)
+            <span style="color: #83a598;">X_batch</span> = X[batch_idx]
+            <span style="color: #83a598;">Y_batch</span> = Y[batch_idx]
 
-            <span style="color: #6c71c4;">loss</span>, <span style="color: #6c71c4;">grad</span> = <span style="color: #859900;">self</span>.loss(X_batch, Y_batch, regularization)
+            <span style="color: #83a598;">scores</span>, <span style="color: #83a598;">cache</span> = forward_scores(X_batch, <span style="color: #fb4934;">self</span>.W, <span style="color: #fb4934;">self</span>.b)
+            <span style="color: #83a598;">data_loss</span>, <span style="color: #83a598;">dscores</span> = <span style="color: #fb4934;">self</span>.loss(scores, Y_batch)
+            <span style="color: #83a598;">loss</span> = data_loss + 0.5 * regularization * np.<span style="color: #fe8019;">sum</span>(<span style="color: #fb4934;">self</span>.W ** 2)
+
+            <span style="color: #83a598;">_</span>, <span style="color: #83a598;">dw</span>, <span style="color: #83a598;">db</span> = backward_scores(dscores, cache)
+            <span style="color: #83a598;">dw</span> += regularization * <span style="color: #fb4934;">self</span>.W
+
             loss_history.append(loss)
 
-            <span style="color: #859900;">self</span>.W += (-1) * learning_rate * grad
+            <span style="color: #fb4934;">self</span>.W += (-1) * learning_rate * dw
+            <span style="color: #fb4934;">self</span>.b += (-1) * learning_rate * db
 
-            <span style="color: #859900;">if</span> verbose:
-                <span style="color: #859900;">print</span>(<span style="color: #2aa198;">'Current iters informarion count: %s  loss: %s'</span> %(i, loss))
-        <span style="color: #859900;">return</span> loss_history
+            <span style="color: #fb4934;">if</span> verbose:
+                <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">'Current iters informarion count: %s  loss: %s'</span> %(i, loss))
+        <span style="color: #fb4934;">return</span> loss_history
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">loss</span>(<span style="color: #859900;">self</span>, X, Y, reg):
-        <span style="color: #859900;">pass</span>
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">loss</span>(<span style="color: #fb4934;">self</span>, scores, y):
+        <span style="color: #fb4934;">pass</span>
 
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">predict</span>(<span style="color: #859900;">self</span>, X):
-        <span style="color: #35a69c;">'''</span>
-<span style="color: #35a69c;">        Inputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - X: (N, D) is the test set.</span>
-<span style="color: #35a69c;">        Outputs:</span>
-<span style="color: #35a69c;">        ------------------------------------------------------------</span>
-<span style="color: #35a69c;">        - pred: (N, 1) is the predict label.</span>
-<span style="color: #35a69c;">        '''</span>
-        <span style="color: #6c71c4;">pred</span> = np.zeros(X.shape[0])
-        <span style="color: #6c71c4;">scores</span> = X.dot(<span style="color: #859900;">self</span>.W)
-        <span style="color: #6c71c4;">pred</span> = np.argmax(scores, axis=1)
-        <span style="color: #859900;">return</span> pred
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, X):
+        <span style="color: #ada296;">'''</span>
+<span style="color: #ada296;">        Inputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - X: (N, D) is the test set.</span>
+<span style="color: #ada296;">        Outputs:</span>
+<span style="color: #ada296;">        ------------------------------------------------------------</span>
+<span style="color: #ada296;">        - pred: (N, 1) is the predict label.</span>
+<span style="color: #ada296;">        '''</span>
+        <span style="color: #83a598;">pred</span> = np.zeros(X.shape[0])
+        <span style="color: #83a598;">scores</span> = X.dot(<span style="color: #fb4934;">self</span>.W)
+        <span style="color: #83a598;">pred</span> = np.argmax(scores, axis=1)
+        <span style="color: #fb4934;">return</span> pred
 
-<span style="color: #859900;">class</span> <span style="color: #b58900;">LinerSVM</span>(LinerClassifier):
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">loss</span>(<span style="color: #859900;">self</span>, X, Y, reg):
-        <span style="color: #859900;">return</span> svm_loss_function_vectorized(X, Y, <span style="color: #859900;">self</span>.W, reg)
+<span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">LinerSVM</span>(LinerClassifier):
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">loss</span>(<span style="color: #fb4934;">self</span>, scores, y):
+        <span style="color: #fb4934;">return</span> svm_loss(scores, y)
 
-<span style="color: #859900;">class</span> <span style="color: #b58900;">LinerSoftmax</span>(LinerClassifier):
-    <span style="color: #859900;">def</span> <span style="color: #268bd2;">loss</span>(<span style="color: #859900;">self</span>, X, Y, reg):
-        <span style="color: #859900;">return</span> softmax_loss_function_vectorized(X, Y, <span style="color: #859900;">self</span>.W, reg)
+<span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">LinerSoftmax</span>(LinerClassifier):
+    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">loss</span>(<span style="color: #fb4934;">self</span>, scores, y):
+        <span style="color: #fb4934;">return</span> softmax_loss(scores, y)
 </pre>
 </div>
 </div>
 </div>
-
 <div id="outline-container-org9caee1a" class="outline-2">
 <h2 id="org9caee1a">测试数据</h2>
 <div class="outline-text-2" id="text-org9caee1a">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #405A61;"># </span><span style="color: #405A61;">&#23558;&#25968;&#25454;&#28155;&#21152;&#19968;&#32452;&#20559;&#24046;</span>
-<span style="color: #6c71c4;">X_train2d_dev</span> = np.hstack([X_train2d, np.ones((X_train2d.shape[0], 1))])
-<span style="color: #6c71c4;">X_test2d_dev</span> = np.hstack([X_test2d, np.ones((X_test2d.shape[0], 1))])
-<span style="color: #6c71c4;">W</span> = np.random.randn(10, X_train2d_dev.shape[1]) * 0.0001
+<pre class="src src-jupyter-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#25968;&#25454;&#28155;&#21152;&#19968;&#32452;&#20559;&#24046;</span>
+<span style="color: #83a598;">X_train2d_dev</span> = np.hstack([X_train2d, np.ones((X_train2d.shape[0], 1))])
+<span style="color: #83a598;">X_test2d_dev</span> = np.hstack([X_test2d, np.ones((X_test2d.shape[0], 1))])
 
-<span style="color: #6c71c4;">svm</span> = LinerSVM()
-<span style="color: #405A61;"># </span><span style="color: #405A61;">train return loss_history</span>
-<span style="color: #6c71c4;">loss_hist</span> = svm.train(X_train2d_dev, Y_train, class_num=10, learning_rate=1e-7, regularization=2.5e4,
-                      num_iters=500, verbose=<span style="color: #d33682;">False</span>)
-<span style="color: #6c71c4;">ypred</span> = svm.predict(X_test2d_dev)
-<span style="color: #6c71c4;">svm_acc</span> = np.mean(ypred == Y_test)
-<span style="color: #859900;">print</span>(<span style="color: #2aa198;">"svm accurary: %.2f"</span> %(svm_acc))
+<span style="color: #83a598;">svm</span> = LinerSVM()
+<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">train return loss_history</span>
+<span style="color: #83a598;">loss_hist</span> = svm.train(X_train2d_dev, Y_train, class_num=10, learning_rate=1e-7, regularization=2.5e4,
+                      num_iters=500, verbose=<span style="color: #fabd2f;">False</span>)
+<span style="color: #83a598;">ypred</span> = svm.predict(X_test2d_dev)
+<span style="color: #83a598;">svm_acc</span> = np.mean(ypred == Y_test)
+
+<span style="color: #83a598;">softmax</span> = LinerSoftmax()
+<span style="color: #83a598;">softmax_loss_history</span> = softmax.train(X_train2d_dev, Y_train, class_num=10, learning_rate=1e-7, regularization=2.5e4,
+                                 num_iters=500, verbose=<span style="color: #fabd2f;">False</span>)
+<span style="color: #83a598;">softmax_ypred</span> = softmax.predict(X_test2d_dev)
+<span style="color: #83a598;">softmax_acc</span> = np.mean(softmax_ypred == Y_test)
+<span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"svm accurary: %.2f, softmax accurary: %.2f"</span> %(svm_acc, softmax_acc))
 </pre>
 </div>
 
 <pre class="example">
-svm accurary: 0.35
-
+svm accurary: 0.33, softmax accurary: 0.26
 </pre>
 </div>
 </div>
@@ -357,9 +325,10 @@ svm accurary: 0.35
 <div class="org-src-container">
 <pre class="src src-jupyter-python">plt.figure(figsize=(9.0, 6.0))
 plt.plot(loss_hist)
-plt.title(<span style="color: #2aa198;">'Loss function'</span>)
-plt.ylabel(<span style="color: #2aa198;">'Loss value'</span>)
-plt.xlabel(<span style="color: #2aa198;">'iters num'</span>)
+plt.plot(softmax_loss_history)
+plt.title(<span style="color: #b8bb26;">'Loss function'</span>)
+plt.ylabel(<span style="color: #b8bb26;">'Loss value'</span>)
+plt.xlabel(<span style="color: #b8bb26;">'iters num'</span>)
 plt.show()
 </pre>
 </div>
@@ -371,13 +340,22 @@ plt.show()
 </figure>
 </div>
 </div>
+<div id="outline-container-orgaffd6b0" class="outline-2">
+<h2 id="orgaffd6b0">reference</h2>
+<div class="outline-text-2" id="text-orgaffd6b0">
+<ol class="org-ol">
+<li><a href="https://cs231n.github.io/linear-classify/">CS231N linear classifier</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%94%AF%E6%8C%81%E5%90%91%E9%87%8F%E6%9C%BA">wiki supports vectors machine</a></li>
+</ol>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <footer class="footer">
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
+  <!-- Google Analytics Js --><!-- Disqua JS --> 
 </div>
 
 </div>
