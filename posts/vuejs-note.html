@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-02-28 Fri 10:57 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vue.js 学习笔记</title>
@@ -15,7 +15,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -126,6 +126,18 @@ Vue.filter("even", (arr) =&gt; {
 留原来页面的渲染数据不变。比如，当一个用户在等待一个加载的时候，这是他可能感
 到不耐烦，切换到其他的页面，当他再次切换回来，可以保持进度条，或者已经渲染的
 数据不被刷新，或者重新计算渲染。</li>
+
+<li>store 管理， <code>mutation</code> 接收参数必须只能两个，超出的都无法获取；第二个参数推荐传
+递的是一个对象，来接收更多的信息。</li>
+
+<li>slot 插槽, 用于组件层次的复用, 可以通过 <code>slot</code> 来自定义布局. 关于插槽, 通常将
+使用具有插槽的组件(子组件)的组件(父组件). 子组件可以通过 <code>插槽prop</code> 来实现与
+父组件之间的数据传递.</li>
+
+<li>动态组件, 适用于多标签页面, 加上 <code>&lt;keep-alive&gt;</code> 可以保存原有的状态,而不会自
+动更新,从而导致重新加载.</li>
+
+<li>&lt;keep-alive&gt; 的原理</li>
 </ol>
 </div>
 <div id="postamble" class="status">
@@ -133,7 +145,7 @@ Vue.filter("even", (arr) =&gt; {
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>

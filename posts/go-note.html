@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2020-02-28 Fri 10:57 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GO 踩坑指南</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="luhuaei">
+
+<meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+<div class="content-wrapper container">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+<div id="preamble" class="status">
+
+<div class="">
+    <a href="/"> Luhua.ei </a>
+</div>
+<ul class="">
+  <li><a href="/about.html"> About Me </a> </li>
+  <li><a href="https://github.com/luhuaei"> Github </a> </li>
+  <li><a href="/archive.html"> Posts </a> </li>
+</ul>
+  <hr>
+</div>
+<div id="content">
+<header>
+<h1 class="title">GO 踩坑指南</h1>
+</header>
+<div id="outline-container-org3a4191f" class="outline-2">
+<h2 id="org3a4191f">包</h2>
+<div class="outline-text-2" id="text-org3a4191f">
+<p>
+GO 中通过 <code>package</code> 的形式来管理包，包由文件夹的形式组成。在同一个包中，同一文件
+夹下，文件中作用域互通。
+</p>
+
+<p>
+注意一点，如果需要在其他包中调用另一个包中的变量或者函数，则这个函数或者变量
+必须是 <code>exported</code> ， <b>即需要变量的第一个名字大写</b>
+</p>
+
+<p>
+GO 文件中，第一个声明必须为 <code>package name</code> ，而对于可执行的文件必须使用 <code>package
+main</code> .
+</p>
+
+<p>
+GO 支持一个简单的测试文件，测试文件必须是 <code>xxx_test.go</code> 结尾.
+</p>
+</div>
+</div>
+
+<div id="outline-container-org445b8ef" class="outline-2">
+<h2 id="org445b8ef">高效GO</h2>
+<div class="outline-text-2" id="text-org445b8ef">
+<ol class="org-ol">
+<li>GO 中 if, switch, for 都不需要括号.</li>
+<li>注释使用 <i>/ 行注释，/* xxx *</i> 块注释.</li>
+<li>godoc 将回用声明函数上面的注释作为文档输出.</li>
+<li>每一个可导出的变量或者函数都应该使用在起上面添加一个注释。文档每一个最好是一
+个完整的句子。</li>
+<li>GO 中允许使用()声明多个变量.</li>
+<li>包中变量是否可用于外面的函数，取决于函数的第一个名字是否大写。</li>
+<li>与其他语言类似，当导入一个包时，这个包名成为了包中所有内容的访问器。所以这个包
+名必须需要简洁、易懂。包名最好为一个简单的单词，不用下划线，不用大写。</li>
+<li>通过路径导入包时，将仅仅取最后一个作为实际的包。</li>
+<li>长的名字不会使得程序更具有可读性，一份好的说明文档更具有价值.</li>
+<li>在if的条件表达式中使用初始化语句的情况很常见。</li>
+<li>短声明语句一定要确保其中一个变量是没有被申明的。</li>
+<li>一个for循环，三种用法，带分号的，带条件，什么都不带的。</li>
+<li>遍历对象可以使用 <code>range</code> 支持同时返回多个值，像 <code>Python</code> 中的 <code>for index,
+    value in enumerate(list)</code></li>
+<li><code>switch</code> 中判断条件处于 <code>case</code> 子句上。使用 <code>,</code> 分割多个条件，不用加 <code>break</code>
+结束. 但也可以像其他语言中使用，将条件子句放在 <code>switch</code> 后面。</li>
+<li>GO 中支持直接跳出多层循环，在 <code>break</code> 后面添加一个标签。</li>
+<li><p>
+可以将函数返回值命名，当函数执行过程中，如果触发 <code>return</code> 不带任何实参，将按
+照现有的值，将结果放回。如下面的例子中，默认返回 <code>result</code> 这样很方便。
+</p>
+<div class="org-src-container">
+<pre class="src src-go"><span style="color: #fb4934;">func</span> <span style="color: #8ec07c;">add</span>(<span style="color: #83a598;">x</span> <span style="color: #8ec07c;">int</span>, <span style="color: #83a598;">y</span> <span style="color: #8ec07c;">int</span>) (<span style="color: #83a598;">result</span> <span style="color: #8ec07c;">int</span>) {
+        result = x + y
+        <span style="color: #fb4934;">return</span>
+}
+</pre>
+</div>
+<p>
+一旦该函数开始执行，结果参数将会被初始化。
+</p></li>
+<li>defer 语句可将一个函数推迟执行，类似于钩子或者回调，推迟函数将会在执行函数即将结果之前执
+行。但推迟函数包含的实参将在预设推迟的时候求值，而不是最后才求值。</li>
+<li>GO 中可以返回局部变量的地址。</li>
+<li>GO 中将数组视为值，将数组传入函数中，将是一个副本而不是一个指针。</li>
+<li></li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<footer class="footer">
+      <!-- Footer Definition -->
+   </footer>
+
+  <!-- Google Analytics Js --><!-- Disqua JS -->
+</div>
+
+</div>
+<div class="col"></div></div>
+</div>
+</body>
+</html>
