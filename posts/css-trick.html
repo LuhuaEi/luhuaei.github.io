@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-02-28 Fri 10:55 -->
+<!-- 2020-04-21 Tue 22:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CSS 不常见的用法</title>
@@ -55,9 +55,9 @@
 </div>
 </div>
 
-<div id="outline-container-org8b3422c" class="outline-3">
-<h3 id="org8b3422c">再次分析问题：</h3>
-<div class="outline-text-3" id="text-org8b3422c">
+<div id="outline-container-org2dc3041" class="outline-3">
+<h3 id="org2dc3041">再次分析问题：</h3>
+<div class="outline-text-3" id="text-org2dc3041">
 <ol class="org-ol">
 <li>需要具有滚动条，就要给定元素一个绝对的高度，当元素溢出的时候才会出现滚动条</li>
 <li>需要两个元素对齐，且其中一个元素的高度是动态变化的。即一个元素的高度依赖于另
@@ -66,9 +66,9 @@
 </div>
 </div>
 
-<div id="outline-container-org458ec19" class="outline-3">
-<h3 id="org458ec19">尝试方法:</h3>
-<div class="outline-text-3" id="text-org458ec19">
+<div id="outline-container-org4e8a4f9" class="outline-3">
+<h3 id="org4e8a4f9">尝试方法:</h3>
+<div class="outline-text-3" id="text-org4e8a4f9">
 <ol class="org-ol">
 <li>用JS获取视频元素的高度，动态设定另一个元素的高度，但不能确保成功，如果视频元
 素的渲染速度较慢，那就会出现第二个元素的高度为0</li>
@@ -76,9 +76,9 @@
 </div>
 </div>
 
-<div id="outline-container-org2dc3041" class="outline-3">
-<h3 id="org2dc3041">再次分析问题：</h3>
-<div class="outline-text-3" id="text-org2dc3041">
+<div id="outline-container-org26666fa" class="outline-3">
+<h3 id="org26666fa">再次分析问题：</h3>
+<div class="outline-text-3" id="text-org26666fa">
 <ol class="org-ol">
 <li>如果需要两个元素的高度同样，将其一起放在同一个容器中，两个元素都使用容器的高度，
 这时两个元素的高度是一样。</li>
@@ -90,9 +90,9 @@
 </div>
 </div>
 
-<div id="outline-container-org4e8a4f9" class="outline-3">
-<h3 id="org4e8a4f9">尝试方法:</h3>
-<div class="outline-text-3" id="text-org4e8a4f9">
+<div id="outline-container-orgbbd2192" class="outline-3">
+<h3 id="orgbbd2192">尝试方法:</h3>
+<div class="outline-text-3" id="text-orgbbd2192">
 <ol class="org-ol">
 <li>在父容器上使用 flex 将 flex 的方向设为 row，其子元素将具有同一高度</li>
 <li>聊天容器设定高度 100% 将具有于视频元素同一高度</li>
