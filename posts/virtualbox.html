@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 2020-06-13 Sat 10:14 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arch VirtualBox使用错误</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="luhuaei">
+
+<meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
+<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+</head>
+<body>
+<div class="content-wrapper container">
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
+<div id="preamble" class="status">
+
+<div class="">
+    <a href="/"> Luhua.ei </a>
+</div>
+<ul class="">
+  <li><a href="/about.html"> About Me </a> </li>
+  <li><a href="https://github.com/luhuaei"> Github </a> </li>
+  <li><a href="/archive.html"> Posts </a> </li>
+</ul>
+  <hr>
+</div>
+<div id="content">
+<header>
+<h1 class="title">Arch VirtualBox使用错误</h1>
+</header><pre class="example">
+WARNING: The vboxdrv kernel module is not loaded. Either there is no module
+         available for the current kernel (xxx) or it failed to
+         load. Please recompile the kernel module and install it by
+
+           sudo /etc/init.d/vboxdrv setup
+
+         You will not be able to start VMs until this problem is fixed.
+</pre>
+<p>
+刚开始还以为是Arch的内核太新了，导致virtualbox不支持，后面将过切换到低级的内核还
+是不能解决这个问题。最后在<a href="https://stackoverflow.com/questions/23740932/warning-vboxdrv-kernel-module-is-not-loaded">stackover flow</a>上面找到了一个解决方案。
+</p>
+
+<pre class="example">
+sudo pacman -S virtualbox-host-modules-arch
+sudo modprobe vboxdrv
+</pre>
+<p>
+这样就可以解决上面出现的错误了。
+</p>
+
+<pre class="example">
+Stderr: 0%...
+Progress state: NS_ERROR_FAILURE
+VBoxManage: error: Failed to create the host-only adapter
+VBoxManage: error: VBoxNetAdpCtl: Error while adding new interface: VBoxNetAdpCtl: ioctl failed for /dev/vboxnetctl: Inappropriate ioctl for devic
+VBoxManage: error: Details: code NS_ERROR_FAILURE (0x80004005), component HostNetworkInterface, interface IHostNetworkInterface
+VBoxManage: error: Context: "int handleCreate(HandlerArg*, int, int*)" at line
+66 of file VBoxManageHostonly.cpp
+</pre>
+<p>
+这个问题是host地址的引起的错误，在linux系统下面执行 <code>sudo vboxreload</code>
+</p>
+</div>
+<div id="postamble" class="status">
+<footer class="footer">
+      <!-- Footer Definition -->
+   </footer>
+
+  <!-- Google Analytics Js --><!-- Disqua JS -->
+</div>
+
+</div>
+<div class="col"></div></div>
+</div>
+</body>
+</html>
