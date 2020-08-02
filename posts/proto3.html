@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-05-17 Sun 14:12 -->
+<!-- 2020-08-02 Sun 12:45 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How: proto3</title>
@@ -330,155 +330,132 @@ service SearchRequest () {
 <col  class="org-left">
 
 <col  class="org-left">
-
-<col  class="org-left">
 </colgroup>
 <tbody>
 <tr>
 <td class="org-left">proto3</td>
 <td class="org-left">JSON</td>
 <td class="org-left">JSON example</td>
-<td class="org-left">Notes</td>
 </tr>
 
 <tr>
 <td class="org-left">message</td>
 <td class="org-left">object</td>
 <td class="org-left">{"fooBar": v,"g": null,…}</td>
-<td class="org-left">Generates JSON objects. Message field names are mapped to lowerCamelCase and become JSON object keys. If the json<sub>name</sub> field option is specified, the specified value will be used as the key instead. Parsers accept both the lowerCamelCase name (or the one specified by the json<sub>name</sub> option) and the original proto field name. null is an accepted value for all field types and treated as the default value of the corresponding field type.</td>
 </tr>
 
 <tr>
 <td class="org-left">enum</td>
 <td class="org-left">string</td>
 <td class="org-left">"FOO<sub>BAR</sub>"</td>
-<td class="org-left">The name of the enum value as specified in proto is used. Parsers accept both enum names and integer values.</td>
 </tr>
 
 <tr>
 <td class="org-left">map&lt;K,V&gt;</td>
 <td class="org-left">object</td>
 <td class="org-left">{"k": v, …}</td>
-<td class="org-left">All keys are converted to strings.</td>
 </tr>
 
 <tr>
 <td class="org-left">repeated V</td>
 <td class="org-left">array</td>
 <td class="org-left">[v, …]</td>
-<td class="org-left">null is accepted as the empty list [].</td>
 </tr>
 
 <tr>
 <td class="org-left">bool</td>
 <td class="org-left">true, false</td>
 <td class="org-left">true, false</td>
-<td class="org-left">&#xa0;</td>
 </tr>
 
 <tr>
 <td class="org-left">string</td>
 <td class="org-left">string</td>
 <td class="org-left">"Hello World!"</td>
-<td class="org-left">&#xa0;</td>
 </tr>
 
 <tr>
 <td class="org-left">bytes</td>
 <td class="org-left">base64 string</td>
 <td class="org-left">"YWJjMTIzIT8kKiYoKSctPUB+"</td>
-<td class="org-left">JSON value will be the data encoded as a string using standard base64 encoding with paddings. Either standard or URL-safe base64 encoding with/without paddings are accepted.</td>
 </tr>
 
 <tr>
 <td class="org-left">int32, fixed32, uint32</td>
 <td class="org-left">number</td>
 <td class="org-left">1, -10, 0</td>
-<td class="org-left">JSON value will be a decimal number. Either numbers or strings are accepted.</td>
 </tr>
 
 <tr>
 <td class="org-left">int64, fixed64, uint64</td>
 <td class="org-left">string</td>
 <td class="org-left">"1", "-10"</td>
-<td class="org-left">JSON value will be a decimal string. Either numbers or strings are accepted.</td>
 </tr>
 
 <tr>
 <td class="org-left">float, double</td>
 <td class="org-left">number</td>
 <td class="org-left">1.1, -10.0, 0, "NaN", "Infinity"</td>
-<td class="org-left">JSON value will be a number or one of the special string values "NaN", "Infinity", and "-Infinity". Either numbers or strings are accepted. Exponent notation is also accepted.</td>
 </tr>
 
 <tr>
 <td class="org-left">Any</td>
 <td class="org-left">object</td>
 <td class="org-left">{"@type": "url", "f": v, … }</td>
-<td class="org-left">If the Any contains a value that has a special JSON mapping, it will be converted as follows: {"@type": xxx, "value": yyy}. Otherwise, the value will be converted into a JSON object, and the "@type" field will be inserted to indicate the actual data type.</td>
 </tr>
 
 <tr>
 <td class="org-left">Timestamp</td>
 <td class="org-left">string</td>
 <td class="org-left">"1972-01-01T10:00:20.021Z"</td>
-<td class="org-left">Uses RFC 3339, where generated output will always be Z-normalized and uses 0, 3, 6 or 9 fractional digits. Offsets other than "Z" are also accepted.</td>
 </tr>
 
 <tr>
 <td class="org-left">Duration</td>
 <td class="org-left">string</td>
 <td class="org-left">"1.000340012s", "1s"</td>
-<td class="org-left">Generated output always contains 0, 3, 6, or 9 fractional digits, depending on required precision, followed by the suffix "s". Accepted are any fractional digits (also none) as long as they fit into nano-seconds precision and the suffix "s" is required.</td>
 </tr>
 
 <tr>
 <td class="org-left">Struct</td>
 <td class="org-left">object</td>
 <td class="org-left">{ … }</td>
-<td class="org-left">Any JSON object. See struct.proto.</td>
 </tr>
 
 <tr>
 <td class="org-left">Wrapper types</td>
 <td class="org-left">various types</td>
 <td class="org-left">2, "2", "foo", true, "true", null, 0, …</td>
-<td class="org-left">Wrappers use the same representation in JSON as the wrapped primitive type, except that null is allowed and preserved during data conversion and transfer.</td>
 </tr>
 
 <tr>
 <td class="org-left">FieldMask</td>
 <td class="org-left">string</td>
 <td class="org-left">"f.fooBar,h"</td>
-<td class="org-left">See field<sub>mask.proto</sub>.</td>
 </tr>
 
 <tr>
 <td class="org-left">ListValue</td>
 <td class="org-left">array</td>
 <td class="org-left">[foo, bar, …]</td>
-<td class="org-left">&#xa0;</td>
 </tr>
 
 <tr>
 <td class="org-left">Value</td>
 <td class="org-left">value</td>
 <td class="org-left">&#xa0;</td>
-<td class="org-left">Any JSON value</td>
 </tr>
 
 <tr>
 <td class="org-left">NullValue</td>
 <td class="org-left">null</td>
 <td class="org-left">&#xa0;</td>
-<td class="org-left">JSON null</td>
 </tr>
 
 <tr>
 <td class="org-left">Empty</td>
 <td class="org-left">object</td>
 <td class="org-left">{}</td>
-<td class="org-left">An empty JSON object</td>
 </tr>
 </tbody>
 </table>
@@ -515,226 +492,118 @@ option go_package = "../foo/bar";
 <col  class="org-left">
 
 <col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
 </colgroup>
 <tbody>
 <tr>
 <td class="org-left">.proto Type</td>
-<td class="org-left">Notes</td>
 <td class="org-left">C++ Type</td>
-<td class="org-left">Java Type</td>
 <td class="org-left">Python Type[2]</td>
 <td class="org-left">Go Type</td>
-<td class="org-left">Ruby Type</td>
-<td class="org-left">C# Type</td>
-<td class="org-left">PHP Type</td>
-<td class="org-left">Dart Type</td>
 </tr>
 
 <tr>
-<td class="org-left">double</td>
-<td class="org-left">&#xa0;</td>
 <td class="org-left">double</td>
 <td class="org-left">double</td>
 <td class="org-left">float</td>
 <td class="org-left">float64</td>
-<td class="org-left">Float</td>
-<td class="org-left">double</td>
-<td class="org-left">float</td>
-<td class="org-left">double</td>
 </tr>
 
 <tr>
-<td class="org-left">float</td>
-<td class="org-left">&#xa0;</td>
 <td class="org-left">float</td>
 <td class="org-left">float</td>
 <td class="org-left">float</td>
 <td class="org-left">float32</td>
-<td class="org-left">Float</td>
-<td class="org-left">float</td>
-<td class="org-left">float</td>
-<td class="org-left">double</td>
 </tr>
 
 <tr>
 <td class="org-left">int32</td>
-<td class="org-left">Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead.</td>
 <td class="org-left">int32</td>
 <td class="org-left">int</td>
-<td class="org-left">int</td>
 <td class="org-left">int32</td>
-<td class="org-left">Fixnum or Bignum (as required)</td>
-<td class="org-left">int</td>
-<td class="org-left">integer</td>
-<td class="org-left">int</td>
 </tr>
 
 <tr>
 <td class="org-left">int64</td>
-<td class="org-left">Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead.</td>
 <td class="org-left">int64</td>
-<td class="org-left">long</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">int64</td>
-<td class="org-left">Bignum</td>
-<td class="org-left">long</td>
-<td class="org-left">integer/string[5]</td>
-<td class="org-left">Int64</td>
 </tr>
 
 <tr>
 <td class="org-left">uint32</td>
-<td class="org-left">Uses variable-length encoding.</td>
 <td class="org-left">uint32</td>
-<td class="org-left">int[1]</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">uint32</td>
-<td class="org-left">Fixnum or Bignum (as required)</td>
-<td class="org-left">uint</td>
-<td class="org-left">integer</td>
-<td class="org-left">int</td>
 </tr>
 
 <tr>
 <td class="org-left">uint64</td>
-<td class="org-left">Uses variable-length encoding.</td>
 <td class="org-left">uint64</td>
-<td class="org-left">long[1]</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">uint64</td>
-<td class="org-left">Bignum</td>
-<td class="org-left">ulong</td>
-<td class="org-left">integer/string[5]</td>
-<td class="org-left">Int64</td>
 </tr>
 
 <tr>
 <td class="org-left">sint32</td>
-<td class="org-left">Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s.</td>
 <td class="org-left">int32</td>
 <td class="org-left">int</td>
-<td class="org-left">int</td>
 <td class="org-left">int32</td>
-<td class="org-left">Fixnum or Bignum (as required)</td>
-<td class="org-left">int</td>
-<td class="org-left">integer</td>
-<td class="org-left">int</td>
 </tr>
 
 <tr>
 <td class="org-left">sint64</td>
-<td class="org-left">Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s.</td>
 <td class="org-left">int64</td>
-<td class="org-left">long</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">int64</td>
-<td class="org-left">Bignum</td>
-<td class="org-left">long</td>
-<td class="org-left">integer/string[5]</td>
-<td class="org-left">Int64</td>
 </tr>
 
 <tr>
 <td class="org-left">fixed32</td>
-<td class="org-left">Always four bytes. More efficient than uint32 if values are often greater than 228.</td>
 <td class="org-left">uint32</td>
-<td class="org-left">int[1]</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">uint32</td>
-<td class="org-left">Fixnum or Bignum (as required)</td>
-<td class="org-left">uint</td>
-<td class="org-left">integer</td>
-<td class="org-left">int</td>
 </tr>
 
 <tr>
 <td class="org-left">fixed64</td>
-<td class="org-left">Always eight bytes. More efficient than uint64 if values are often greater than 256.</td>
 <td class="org-left">uint64</td>
-<td class="org-left">long[1]</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">uint64</td>
-<td class="org-left">Bignum</td>
-<td class="org-left">ulong</td>
-<td class="org-left">integer/string[5]</td>
-<td class="org-left">Int64</td>
 </tr>
 
 <tr>
 <td class="org-left">sfixed32</td>
-<td class="org-left">Always four bytes.</td>
 <td class="org-left">int32</td>
 <td class="org-left">int</td>
-<td class="org-left">int</td>
 <td class="org-left">int32</td>
-<td class="org-left">Fixnum or Bignum (as required)</td>
-<td class="org-left">int</td>
-<td class="org-left">integer</td>
-<td class="org-left">int</td>
 </tr>
 
 <tr>
 <td class="org-left">sfixed64</td>
-<td class="org-left">Always eight bytes.</td>
 <td class="org-left">int64</td>
-<td class="org-left">long</td>
 <td class="org-left">int/long[3]</td>
 <td class="org-left">int64</td>
-<td class="org-left">Bignum</td>
-<td class="org-left">long</td>
-<td class="org-left">integer/string[5]</td>
-<td class="org-left">Int64</td>
 </tr>
 
 <tr>
 <td class="org-left">bool</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">bool</td>
-<td class="org-left">boolean</td>
 <td class="org-left">bool</td>
 <td class="org-left">bool</td>
-<td class="org-left">TrueClass/FalseClass</td>
-<td class="org-left">bool</td>
-<td class="org-left">boolean</td>
 <td class="org-left">bool</td>
 </tr>
 
 <tr>
 <td class="org-left">string</td>
-<td class="org-left">A string must always contain UTF-8 encoded or 7-bit ASCII text, and cannot be longer than 232.</td>
 <td class="org-left">string</td>
-<td class="org-left">String</td>
 <td class="org-left">str/unicode[4]</td>
 <td class="org-left">string</td>
-<td class="org-left">String (UTF-8)</td>
-<td class="org-left">string</td>
-<td class="org-left">string</td>
-<td class="org-left">String</td>
 </tr>
 
 <tr>
 <td class="org-left">bytes</td>
-<td class="org-left">May contain any arbitrary sequence of bytes no longer than 232.</td>
 <td class="org-left">string</td>
-<td class="org-left">ByteString</td>
 <td class="org-left">str</td>
 <td class="org-left">[]byte</td>
-<td class="org-left">String (ASCII-8BIT)</td>
-<td class="org-left">ByteString</td>
-<td class="org-left">string</td>
-<td class="org-left">List&lt;int&gt;</td>
 </tr>
 </tbody>
 </table>
