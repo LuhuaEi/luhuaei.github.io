@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>神经网络拟合“玩具数据”</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -37,7 +36,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -54,13 +53,13 @@
 <header>
 <h1 class="title">神经网络拟合“玩具数据”</h1>
 </header>
-<div id="outline-container-org0db52b1" class="outline-2">
-<h2 id="org0db52b1">神经网络</h2>
-<div class="outline-text-2" id="text-org0db52b1">
+<div id="outline-container-orgceea8fc" class="outline-2">
+<h2 id="orgceea8fc">神经网络</h2>
+<div class="outline-text-2" id="text-orgceea8fc">
 </div>
-<div id="outline-container-org48293c6" class="outline-3">
-<h3 id="org48293c6">名称</h3>
-<div class="outline-text-3" id="text-org48293c6">
+<div id="outline-container-org5a3693a" class="outline-3">
+<h3 id="org5a3693a">名称</h3>
+<div class="outline-text-3" id="text-org5a3693a">
 <p>
 一般约定，N-layers不包括输入层。因此，一个一层神经网络代表的一个没有隐藏层的神经
 网络。在这种定义下，简单的逻辑回归或者支持向量机都是一个一层的神经网络。同时神经
@@ -69,9 +68,9 @@ Multi-Layer Perceptrons).
 </p>
 </div>
 </div>
-<div id="outline-container-org6416c14" class="outline-3">
-<h3 id="org6416c14">组件</h3>
-<div class="outline-text-3" id="text-org6416c14">
+<div id="outline-container-org162e82f" class="outline-3">
+<h3 id="org162e82f">组件</h3>
+<div class="outline-text-3" id="text-org162e82f">
 <ol class="org-ol">
 <li>节点，即神经元，位于层中</li>
 <li>权重，即链接线的粗细</li>
@@ -80,9 +79,9 @@ Multi-Layer Perceptrons).
 </ol>
 </div>
 </div>
-<div id="outline-container-orge8a53ee" class="outline-3">
-<h3 id="orge8a53ee">大小</h3>
-<div class="outline-text-3" id="text-orge8a53ee">
+<div id="outline-container-orgfd141d2" class="outline-3">
+<h3 id="orgfd141d2">大小</h3>
+<div class="outline-text-3" id="text-orgfd141d2">
 <ol class="org-ol">
 <li>如何计算神经网络中神经元的个数或者参数变量？神经元的个数有隐藏层所含的节点总
 数加上输出层节点个数，而参数变量为偏差+连接线。</li>
@@ -110,21 +109,21 @@ luck of random initialization.
 </ol>
 </div>
 </div>
-<div id="outline-container-org858ad8e" class="outline-3">
-<h3 id="org858ad8e">层的类型</h3>
-<div class="outline-text-3" id="text-org858ad8e">
+<div id="outline-container-orgc403bd9" class="outline-3">
+<h3 id="orgc403bd9">层的类型</h3>
+<div class="outline-text-3" id="text-orgc403bd9">
 </div>
-<div id="outline-container-orgcda553e" class="outline-4">
-<h4 id="orgcda553e">全链接层</h4>
-<div class="outline-text-4" id="text-orgcda553e">
+<div id="outline-container-orgfa19e5c" class="outline-4">
+<h4 id="orgfa19e5c">全链接层</h4>
+<div class="outline-text-4" id="text-orgfa19e5c">
 <p>
 故名思义，就是后一个层的每一个节点都与前一个层的所有节点相连。
 </p>
 </div>
 </div>
-<div id="outline-container-org9ec944e" class="outline-4">
-<h4 id="org9ec944e">输出层</h4>
-<div class="outline-text-4" id="text-org9ec944e">
+<div id="outline-container-org130b7da" class="outline-4">
+<h4 id="org130b7da">输出层</h4>
+<div class="outline-text-4" id="text-org130b7da">
 <p>
 输出层与其他的层不同，其没有激励函数，这是因为往往最后一层代表着类的得分或者一些
 其他类型的标签(分类)或者数值(回归)。
@@ -132,9 +131,9 @@ luck of random initialization.
 </div>
 </div>
 </div>
-<div id="outline-container-org474e7fc" class="outline-3">
-<h3 id="org474e7fc">函数</h3>
-<div class="outline-text-3" id="text-org474e7fc">
+<div id="outline-container-org73f9266" class="outline-3">
+<h3 id="org73f9266">函数</h3>
+<div class="outline-text-3" id="text-org73f9266">
 <blockquote>
 <p>
 Neural Networks with at least one hidden layer are universal approximators(通用
@@ -152,9 +151,9 @@ Neural Networks with at least one hidden layer are universal approximators(通�
 </p>
 </div>
 </div>
-<div id="outline-container-org5c73a18" class="outline-3">
-<h3 id="org5c73a18">结构</h3>
-<div class="outline-text-3" id="text-org5c73a18">
+<div id="outline-container-orga037690" class="outline-3">
+<h3 id="orga037690">结构</h3>
+<div class="outline-text-3" id="text-orga037690">
 <p>
 为一个网状结构，从输入数据，经过隐藏层的映射，输出对应的结果。
 </p>
@@ -162,85 +161,85 @@ Neural Networks with at least one hidden layer are universal approximators(通�
 </div>
 </div>
 
-<div id="outline-container-orgbc73dff" class="outline-2">
-<h2 id="orgbc73dff">预加载</h2>
-<div class="outline-text-2" id="text-orgbc73dff">
+<div id="outline-container-org9522a7c" class="outline-2">
+<h2 id="org9522a7c">预加载</h2>
+<div class="outline-text-2" id="text-org9522a7c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
-<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
+<pre class="src src-jupyter-python">import numpy as np
+import matplotlib.pyplot as plt
 
-<span style="color: #83a598;">COLOR</span> = [<span style="color: #b8bb26;">'tab:blue'</span>, <span style="color: #b8bb26;">'tab:orange'</span>, <span style="color: #b8bb26;">'tab:green'</span>, <span style="color: #b8bb26;">'tab:red'</span>, <span style="color: #b8bb26;">'tab:purple'</span>,
-           <span style="color: #b8bb26;">'tab:brown'</span>, <span style="color: #b8bb26;">'tab:pink'</span>, <span style="color: #b8bb26;">'tab:gray'</span>, <span style="color: #b8bb26;">'tab:olive'</span>, <span style="color: #b8bb26;">'tab:cyan'</span>]
+COLOR = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple',
+           'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc485088" class="outline-2">
-<h2 id="orgc485088">生成数据</h2>
-<div class="outline-text-2" id="text-orgc485088">
+<div id="outline-container-org596cacd" class="outline-2">
+<h2 id="org596cacd">生成数据</h2>
+<div class="outline-text-2" id="text-org596cacd">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">N</span> = 100
-<span style="color: #83a598;">D</span> = 2
-<span style="color: #83a598;">K</span> = 3
-<span style="color: #83a598;">X</span> = np.zeros((N*K, D))
-<span style="color: #83a598;">y</span> = np.zeros(N*K, dtype=<span style="color: #b8bb26;">'uint8'</span>)
-<span style="color: #83a598;">learning_rate</span> = 0.00001
-<span style="color: #83a598;">reg_lambda</span> = 0.0001
-<span style="color: #fb4934;">for</span> j <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(K):
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#30830;&#23450;&#27599;&#19968;&#20010;&#31867;&#30340;&#34892;&#33539;&#22260;</span>
-    <span style="color: #83a598;">ix</span> = <span style="color: #fe8019;">range</span>(N*j, N*(j+1))
-    <span style="color: #83a598;">r</span> = np.linspace(0.0, 1, N)
-    <span style="color: #83a598;">t</span> = np.linspace(j*4, (j+1)*4, N) + np.random.randn(N)*0.2
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">C_&#23558;&#20004;&#20010;&#25968;&#32452;&#25353;&#21015;&#36827;&#34892;&#36830;&#25509;(&#21512;&#24182;)</span>
-    <span style="color: #83a598;">X</span>[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
-    <span style="color: #83a598;">y</span>[ix] = j
+<pre class="src src-jupyter-python">N = 100
+D = 2
+K = 3
+X = np.zeros((N*K, D))
+y = np.zeros(N*K, dtype='uint8')
+learning_rate = 0.00001
+reg_lambda = 0.0001
+for j in range(K):
+    # 确定每一个类的行范围
+    ix = range(N*j, N*(j+1))
+    r = np.linspace(0.0, 1, N)
+    t = np.linspace(j*4, (j+1)*4, N) + np.random.randn(N)*0.2
+    # C_将两个数组按列进行连接(合并)
+    X[ix] = np.c_[r*np.sin(t), r*np.cos(t)]
+    y[ix] = j
 
 
-<span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+fig, ax = plt.subplots(figsize=(9.0, 6.0))
 ax.scatter(X[:, 0], X[:, 1],
-           c=<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">map</span>(<span style="color: #fb4934;">lambda</span> x: COLOR[x], y)),
+           c=list(map(lambda x: COLOR[x], y)),
            s=40, cmap=plt.cm.Spectral)
 plt.tight_layout(pad=0.0)
 </pre>
 </div>
 
 
-<figure>
+<figure id="org8ab39e2">
 <img src="./images/example-for-nerual-network-945052.png" alt="example-for-nerual-network-945052.png">
 
 </figure>
 </div>
 </div>
-<div id="outline-container-orgbe7ba6b" class="outline-2">
-<h2 id="orgbe7ba6b">初始化参数</h2>
-<div class="outline-text-2" id="text-orgbe7ba6b">
+<div id="outline-container-org8a64f5d" class="outline-2">
+<h2 id="org8a64f5d">初始化参数</h2>
+<div class="outline-text-2" id="text-org8a64f5d">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">W</span> = 0.01 * np.random.randn(D, K)
-<span style="color: #83a598;">B</span> = np.zeros((1, K))
+<pre class="src src-jupyter-python">W = 0.01 * np.random.randn(D, K)
+B = np.zeros((1, K))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgdc9b2d3" class="outline-2">
-<h2 id="orgdc9b2d3">线性分类器计算得分</h2>
-<div class="outline-text-2" id="text-orgdc9b2d3">
+<div id="outline-container-orgf7ea5bf" class="outline-2">
+<h2 id="orgf7ea5bf">线性分类器计算得分</h2>
+<div class="outline-text-2" id="text-orgf7ea5bf">
 <p>
 将所有输入乘以权重累加后，再加上偏差。计算出每一个样本，对应3个类的得分，直观上，
 渴望正确的类获得更高的得分，换句话说，就是正确的类在三个类的占比应该最大。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_scores</span>(X, W, B):
-    <span style="color: #fb4934;">return</span> np.dot(X, W) + B
+<pre class="src src-jupyter-python">def f_scores(X, W, B):
+    return np.dot(X, W) + B
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org96199e2" class="outline-2">
-<h2 id="org96199e2">计算损失</h2>
-<div class="outline-text-2" id="text-org96199e2">
+<div id="outline-container-orgecd59f2" class="outline-2">
+<h2 id="orgecd59f2">计算损失</h2>
+<div class="outline-text-2" id="text-orgecd59f2">
 <p>
 使用交叉熵(softmax classifier)。\( L_i = -log(\frac{e^{f_{yi}}}{\sum_j e^{f_j}})
 \)，假设以下情况，如果仅仅具有一个类时，那预测就是正确的类，那计算出来的损失应该
@@ -258,76 +257,76 @@ plt.tight_layout(pad=0.0)
 测正确的概率应该为1/3,因此损失值大约为 -log(1/3) = 1.09，跟计算出来的一样。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_exp_scores</span>(scores, y):
-    <span style="color: #83a598;">height</span> = scores.shape[0]
-    <span style="color: #83a598;">exp_scores</span> = np.exp(scores)
-    <span style="color: #83a598;">probs</span> = exp_scores / np.<span style="color: #fe8019;">sum</span>(exp_scores, axis=1, keepdims=<span style="color: #fabd2f;">True</span>)
-    <span style="color: #83a598;">correct_logprobs</span> = -np.log(probs[<span style="color: #fe8019;">range</span>(height), y])
-    <span style="color: #fb4934;">return</span> probs, correct_logprobs
+<pre class="src src-jupyter-python">def f_exp_scores(scores, y):
+    height = scores.shape[0]
+    exp_scores = np.exp(scores)
+    probs = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    correct_logprobs = -np.log(probs[range(height), y])
+    return probs, correct_logprobs
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_loss</span>(correct_logprobs, W, reg_lambda):
-    <span style="color: #83a598;">data_loss</span> = np.mean(correct_logprobs)
-    <span style="color: #83a598;">regularztion_loss</span> = 1/2 * reg_lambda * np.<span style="color: #fe8019;">sum</span>(W*W)
-    <span style="color: #83a598;">loss</span> = data_loss + regularztion_loss
-    <span style="color: #fb4934;">return</span> loss
+def f_loss(correct_logprobs, W, reg_lambda):
+    data_loss = np.mean(correct_logprobs)
+    regularztion_loss = 1/2 * reg_lambda * np.sum(W*W)
+    loss = data_loss + regularztion_loss
+    return loss
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org4b23a1b" class="outline-2">
-<h2 id="org4b23a1b">计算梯度</h2>
-<div class="outline-text-2" id="text-org4b23a1b">
+<div id="outline-container-orgda0b5c6" class="outline-2">
+<h2 id="orgda0b5c6">计算梯度</h2>
+<div class="outline-text-2" id="text-orgda0b5c6">
 <p>
 根据公式计算得到，可以直接得出损失函数的梯度。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_gradient</span>(X, W, probs, y, reg_lambda):
-    <span style="color: #83a598;">dscores</span> = probs.copy()
+<pre class="src src-jupyter-python">def f_gradient(X, W, probs, y, reg_lambda):
+    dscores = probs.copy()
 
-    <span style="color: #83a598;">height</span> = probs.shape[0]
-    <span style="color: #83a598;">dscores</span>[<span style="color: #fe8019;">range</span>(height), y] -= 1
-    <span style="color: #83a598;">dscores</span> /= height
+    height = probs.shape[0]
+    dscores[range(height), y] -= 1
+    dscores /= height
 
-    <span style="color: #83a598;">dW</span> = np.dot(X.T, dscores) + reg_lambda * W
-    <span style="color: #83a598;">dB</span> = np.<span style="color: #fe8019;">sum</span>(dscores, axis=0, keepdims=<span style="color: #fabd2f;">True</span>)
-    <span style="color: #fb4934;">return</span> dW, dB
+    dW = np.dot(X.T, dscores) + reg_lambda * W
+    dB = np.sum(dscores, axis=0, keepdims=True)
+    return dW, dB
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org9d677e5" class="outline-2">
-<h2 id="org9d677e5">更新权重</h2>
-<div class="outline-text-2" id="text-org9d677e5">
+<div id="outline-container-org6d2a304" class="outline-2">
+<h2 id="org6d2a304">更新权重</h2>
+<div class="outline-text-2" id="text-org6d2a304">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">f_update</span>(W, B, dW, dB, learning_rate):
-    <span style="color: #83a598;">weights</span> = W.copy()
-    <span style="color: #83a598;">bias</span> = B.copy()
-    <span style="color: #83a598;">weights</span> -= learning_rate * dW
-    <span style="color: #83a598;">bias</span> -= learning_rate * dB
-    <span style="color: #fb4934;">return</span> weights, bias
+<pre class="src src-jupyter-python">def f_update(W, B, dW, dB, learning_rate):
+    weights = W.copy()
+    bias = B.copy()
+    weights -= learning_rate * dW
+    bias -= learning_rate * dB
+    return weights, bias
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org96a3685" class="outline-2">
-<h2 id="org96a3685">迭代更新</h2>
-<div class="outline-text-2" id="text-org96a3685">
+<div id="outline-container-orga7debb0" class="outline-2">
+<h2 id="orga7debb0">迭代更新</h2>
+<div class="outline-text-2" id="text-orga7debb0">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">main</span>(X, W, B, y, reg_lambda, learning_rate, iter_num=100, verbose=<span style="color: #fabd2f;">False</span>):
-    <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(iter_num):
-        <span style="color: #83a598;">scores</span> = f_scores(X, W, B)
-        <span style="color: #83a598;">probs</span>, <span style="color: #83a598;">correct_logprobs</span> = f_exp_scores(scores, y)
-        <span style="color: #83a598;">loss</span> = f_loss(correct_logprobs, W, reg_lambda)
-        <span style="color: #83a598;">dW</span>, <span style="color: #83a598;">dB</span> = f_gradient(X, W, probs, y, reg_lambda)
-        <span style="color: #83a598;">W</span>, <span style="color: #83a598;">B</span> = f_update(W, B, dW, dB, learning_rate)
-        <span style="color: #fb4934;">if</span> verbose:
-            <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"iter_num: %d, loss: %f"</span> %(i, loss))
-    <span style="color: #fb4934;">return</span> W, B, loss
+<pre class="src src-jupyter-python">def main(X, W, B, y, reg_lambda, learning_rate, iter_num=100, verbose=False):
+    for i in range(iter_num):
+        scores = f_scores(X, W, B)
+        probs, correct_logprobs = f_exp_scores(scores, y)
+        loss = f_loss(correct_logprobs, W, reg_lambda)
+        dW, dB = f_gradient(X, W, probs, y, reg_lambda)
+        W, B = f_update(W, B, dW, dB, learning_rate)
+        if verbose:
+            print("iter_num: %d, loss: %f" %(i, loss))
+    return W, B, loss
 
-<span style="color: #83a598;">res_w</span>, <span style="color: #83a598;">res_b</span>, <span style="color: #83a598;">res_loss</span> = main(X, W, B, y, 1e-3, 1e-0, iter_num=200, verbose=<span style="color: #fabd2f;">True</span>)
+res_w, res_b, res_loss = main(X, W, B, y, 1e-3, 1e-0, iter_num=200, verbose=True)
 </pre>
 </div>
 <p>
@@ -336,135 +335,135 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org2ca314b" class="outline-2">
-<h2 id="org2ca314b">Neural network</h2>
-<div class="outline-text-2" id="text-org2ca314b">
+<div id="outline-container-orga098767" class="outline-2">
+<h2 id="orga098767">Neural network</h2>
+<div class="outline-text-2" id="text-orga098767">
 <p>
 从上面的线性分类器中，看到准确率仅仅51%。采用神经网络对数据进行拟合，设定一个两
 层的网络，其中第一层网络具有100个节点，而第二层即最后一层具有3个(节点)分类。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">h</span> = 100
-<span style="color: #83a598;">W</span> = 0.01 * np.random.randn(D, h)
-<span style="color: #83a598;">B</span> = np.zeros((1, h))
+<pre class="src src-jupyter-python">h = 100
+W = 0.01 * np.random.randn(D, h)
+B = np.zeros((1, h))
 
-<span style="color: #83a598;">W2</span> = 0.01 * np.random.randn(h, K)
-<span style="color: #83a598;">B2</span> = np.zeros((1, K))
+W2 = 0.01 * np.random.randn(h, K)
+B2 = np.zeros((1, K))
 
-<span style="color: #83a598;">learning_rate</span> = 1e-0
-<span style="color: #83a598;">reg_lambda</span> = 1e-3
+learning_rate = 1e-0
+reg_lambda = 1e-3
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org549d790" class="outline-3">
-<h3 id="org549d790">计算得分</h3>
-<div class="outline-text-3" id="text-org549d790">
+<div id="outline-container-org2e87fe0" class="outline-3">
+<h3 id="org2e87fe0">计算得分</h3>
+<div class="outline-text-3" id="text-org2e87fe0">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">n_scores</span>(X, W, W2, B, B1):
-    <span style="color: #83a598;">hidden_layer_scores</span> = np.dot(X, W) + B <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(300, 100)</span>
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#28608;&#21169;&#20989;&#25968; ReLU</span>
-    <span style="color: #83a598;">hidden_layer_scores</span> = np.maximum(0, hidden_layer_scores)
+<pre class="src src-jupyter-python">def n_scores(X, W, W2, B, B1):
+    hidden_layer_scores = np.dot(X, W) + B # (300, 100)
+    # 激励函数 ReLU
+    hidden_layer_scores = np.maximum(0, hidden_layer_scores)
 
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36755;&#20986;&#23618;</span>
-    <span style="color: #83a598;">output_scores</span> = np.dot(hidden_layer_scores, W2) + B2 <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(300, 3)</span>
-    <span style="color: #fb4934;">return</span> hidden_layer_scores, output_scores
+    # 输出层
+    output_scores = np.dot(hidden_layer_scores, W2) + B2 # (300, 3)
+    return hidden_layer_scores, output_scores
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgd6c663f" class="outline-3">
-<h3 id="orgd6c663f">计算损失</h3>
-<div class="outline-text-3" id="text-orgd6c663f">
+<div id="outline-container-orge25bad3" class="outline-3">
+<h3 id="orge25bad3">计算损失</h3>
+<div class="outline-text-3" id="text-orge25bad3">
 <p>
 损失函数同样是使用上面的softmax。根据反向传播算法。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">n_data_loss</span>(output_scores, y):
-    <span style="color: #83a598;">height</span> = y.shape[0]
-    <span style="color: #83a598;">exp_scores</span> = np.exp(output_scores)
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24471;&#20998;&#22312;&#21508;&#31867;&#20013;&#30340;&#21344;&#27604;</span>
-    <span style="color: #83a598;">exp_scores_percent</span> = exp_scores / np.<span style="color: #fe8019;">sum</span>(exp_scores, axis=1, keepdims=<span style="color: #fabd2f;">True</span>)
-    <span style="color: #83a598;">corr_scores</span> = exp_scores_percent[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(height)), y]
-    <span style="color: #83a598;">data_loss</span> = np.mean(-np.log(corr_scores))
-    <span style="color: #fb4934;">return</span> data_loss, exp_scores_percent
+<pre class="src src-jupyter-python">def n_data_loss(output_scores, y):
+    height = y.shape[0]
+    exp_scores = np.exp(output_scores)
+    # 得分在各类中的占比
+    exp_scores_percent = exp_scores / np.sum(exp_scores, axis=1, keepdims=True)
+    corr_scores = exp_scores_percent[list(range(height)), y]
+    data_loss = np.mean(-np.log(corr_scores))
+    return data_loss, exp_scores_percent
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">n_regularztion_loss</span>(W, W2, reg_lambda):
-    <span style="color: #fb4934;">return</span> 0.5 * reg_lambda * (np.<span style="color: #fe8019;">sum</span>(W * W) + np.<span style="color: #fe8019;">sum</span>(W2 * W2))
+def n_regularztion_loss(W, W2, reg_lambda):
+    return 0.5 * reg_lambda * (np.sum(W * W) + np.sum(W2 * W2))
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">n_loss = n_data_loss(output_scores, y) + n_regularztion_loss(W, W2, reg_lambda)</span>
+# n_loss = n_data_loss(output_scores, y) + n_regularztion_loss(W, W2, reg_lambda)
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgdf65cbf" class="outline-3">
-<h3 id="orgdf65cbf">计算梯度</h3>
-<div class="outline-text-3" id="text-orgdf65cbf">
+<div id="outline-container-orgd1f3d03" class="outline-3">
+<h3 id="orgd1f3d03">计算梯度</h3>
+<div class="outline-text-3" id="text-orgd1f3d03">
 <p>
 对损失函数求导。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">n_gradient</span>(X, W2, exp_scores_percent, y, hidden_layer_scores):
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23545;softmax&#20989;&#25968;&#27714;&#23548;&#37096;&#20998;&#65292;&#21069;&#38754;&#24050;&#32463;&#29992;&#20844;&#24335;&#35777;&#26126;&#65292;</span>
-    <span style="color: #83a598;">height</span> = y.shape[0]
-    <span style="color: #83a598;">doutput_scores</span> = exp_scores_percent.copy()
-    <span style="color: #83a598;">doutput_scores</span>[<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(height)), y] -= 1
-    <span style="color: #83a598;">doutput_scores</span> /= height
+<pre class="src src-jupyter-python">def n_gradient(X, W2, exp_scores_percent, y, hidden_layer_scores):
+    # 对softmax函数求导部分，前面已经用公式证明，
+    height = y.shape[0]
+    doutput_scores = exp_scores_percent.copy()
+    doutput_scores[list(range(height)), y] -= 1
+    doutput_scores /= height
 
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">output_scores = np.dot(hidden_layer_scores, W2) + B2</span>
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">dw2 = hidden_layer_scores.T * doutput_scores</span>
-    <span style="color: #83a598;">dW2</span> = np.dot(hidden_layer_scores.T, doutput_scores) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(100, 3)</span>
-    <span style="color: #83a598;">dB2</span> = np.<span style="color: #fe8019;">sum</span>(doutput_scores, axis=0, keepdims=<span style="color: #fabd2f;">True</span>) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(1, 3)</span>
+    # output_scores = np.dot(hidden_layer_scores, W2) + B2
+    # dw2 = hidden_layer_scores.T * doutput_scores
+    dW2 = np.dot(hidden_layer_scores.T, doutput_scores) # (100, 3)
+    dB2 = np.sum(doutput_scores, axis=0, keepdims=True) # (1, 3)
 
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">output_scores = np.dot(hidden_layer_scores, W2) + B2</span>
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20808;&#35745;&#31639;output_scores&#23545;hidden_layer_scores&#30340;&#23548;&#25968;</span>
-    <span style="color: #83a598;">dhidden_layer_scores</span> = np.dot(doutput_scores, W2.T) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(300, 100)</span>
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Relu&#27714;&#23548;&#24471;&#65292;&#20165;&#20165;&#24403;x&#22823;&#20110;0&#65292;&#27714;&#23548;&#24471;1</span>
-    <span style="color: #83a598;">dhidden_layer_scores</span>[hidden_layer_scores &lt;= 0] = 0
+    # output_scores = np.dot(hidden_layer_scores, W2) + B2
+    # 先计算output_scores对hidden_layer_scores的导数
+    dhidden_layer_scores = np.dot(doutput_scores, W2.T) # (300, 100)
+    # Relu求导得，仅仅当x大于0，求导得1
+    dhidden_layer_scores[hidden_layer_scores &lt;= 0] = 0
 
-    <span style="color: #83a598;">dW</span> = np.dot(X.T, dhidden_layer_scores)
-    <span style="color: #83a598;">dB</span> = np.<span style="color: #fe8019;">sum</span>(dhidden_layer_scores, axis=0, keepdims=<span style="color: #fabd2f;">True</span>)
-    <span style="color: #fb4934;">return</span> dW, dB, dW2, dB2
+    dW = np.dot(X.T, dhidden_layer_scores)
+    dB = np.sum(dhidden_layer_scores, axis=0, keepdims=True)
+    return dW, dB, dW2, dB2
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orge345d0e" class="outline-3">
-<h3 id="orge345d0e">更新函数</h3>
-<div class="outline-text-3" id="text-orge345d0e">
+<div id="outline-container-orgb1d7ae5" class="outline-3">
+<h3 id="orgb1d7ae5">更新函数</h3>
+<div class="outline-text-3" id="text-orgb1d7ae5">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">n_main</span>(X, y, h, W, B, W2, B2, learning_rate=1e-0, reg_lambda=1e-3, iter_num=500, verbose=<span style="color: #fabd2f;">False</span>):
-    <span style="color: #83a598;">W</span> = W.copy()
-    <span style="color: #83a598;">B</span> = B.copy()
-    <span style="color: #83a598;">W2</span> = W2.copy()
-    <span style="color: #83a598;">B2</span> = B2.copy()
-    <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(iter_num):
-        <span style="color: #83a598;">hidden_ls</span>, <span style="color: #83a598;">output_scores</span> = n_scores(X, W, W2, B, B2)
-        <span style="color: #83a598;">data_loss</span>, <span style="color: #83a598;">exp_scores_percent</span> = n_data_loss(output_scores, y)
-        <span style="color: #83a598;">reg_loss</span> = n_regularztion_loss(W, W2, reg_lambda)
-        <span style="color: #83a598;">loss</span> = data_loss + reg_loss
+<pre class="src src-jupyter-python">def n_main(X, y, h, W, B, W2, B2, learning_rate=1e-0, reg_lambda=1e-3, iter_num=500, verbose=False):
+    W = W.copy()
+    B = B.copy()
+    W2 = W2.copy()
+    B2 = B2.copy()
+    for i in range(iter_num):
+        hidden_ls, output_scores = n_scores(X, W, W2, B, B2)
+        data_loss, exp_scores_percent = n_data_loss(output_scores, y)
+        reg_loss = n_regularztion_loss(W, W2, reg_lambda)
+        loss = data_loss + reg_loss
 
-        <span style="color: #83a598;">d_w</span>, <span style="color: #83a598;">d_b</span>, <span style="color: #83a598;">d_w2</span>, <span style="color: #83a598;">d_b2</span> = n_gradient(X, W2, exp_scores_percent, y, hidden_ls)
-        <span style="color: #83a598;">d_w</span> += reg_lambda * W
-        <span style="color: #83a598;">d_w2</span> += reg_lambda * W2
+        d_w, d_b, d_w2, d_b2 = n_gradient(X, W2, exp_scores_percent, y, hidden_ls)
+        d_w += reg_lambda * W
+        d_w2 += reg_lambda * W2
 
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">update</span>
-        <span style="color: #83a598;">W</span>    -= learning_rate * d_w
-        <span style="color: #83a598;">B</span>    -= learning_rate * d_b
-        <span style="color: #83a598;">W2</span>   -= learning_rate * d_w2
-        <span style="color: #83a598;">B2</span>   -= learning_rate * d_b2
+        # update
+        W    -= learning_rate * d_w
+        B    -= learning_rate * d_b
+        W2   -= learning_rate * d_w2
+        B2   -= learning_rate * d_b2
 
-        <span style="color: #fb4934;">if</span> verbose <span style="color: #fb4934;">and</span> i % 100 == 0:
-            <span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"iter: %d, loss: %f"</span> %(i, loss))
-    <span style="color: #fb4934;">return</span> W, B, W2, B2, loss
+        if verbose and i % 100 == 0:
+            print("iter: %d, loss: %f" %(i, loss))
+    return W, B, W2, B2, loss
 
-<span style="color: #83a598;">nres_W</span>, <span style="color: #83a598;">nres_B</span>, <span style="color: #83a598;">nres_W2</span>, <span style="color: #83a598;">nres_B2</span>, <span style="color: #83a598;">nres_loss</span> = n_main(X, y, h, W, B, W2, B2, iter_num=10000, verbose=<span style="color: #fabd2f;">True</span>)
+nres_W, nres_B, nres_W2, nres_B2, nres_loss = n_main(X, y, h, W, B, W2, B2, iter_num=10000, verbose=True)
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#20934;&#30830;&#29575;</span>
-<span style="color: #83a598;">_</span>, <span style="color: #83a598;">n_s</span> = n_scores(X, nres_W, nres_W2, nres_B, nres_B2)
-<span style="color: #83a598;">n_pred</span> = np.argmax(n_s, axis=1)
+# 计算准确率
+_, n_s = n_scores(X, nres_W, nres_W2, nres_B, nres_B2)
+n_pred = np.argmax(n_s, axis=1)
 np.mean(n_pred == y)
 </pre>
 </div>
@@ -476,71 +475,71 @@ np.mean(n_pred == y)
 </div>
 </div>
 
-<div id="outline-container-org47b2eb9" class="outline-2">
-<h2 id="org47b2eb9">决策边界</h2>
-<div class="outline-text-2" id="text-org47b2eb9">
+<div id="outline-container-orgf91bb65" class="outline-2">
+<h2 id="orgf91bb65">决策边界</h2>
+<div class="outline-text-2" id="text-orgf91bb65">
 </div>
-<div id="outline-container-org6cb0e77" class="outline-3">
-<h3 id="org6cb0e77">线性函数决策边界</h3>
-<div class="outline-text-3" id="text-org6cb0e77">
+<div id="outline-container-org7b1b07c" class="outline-3">
+<h3 id="org7b1b07c">线性函数决策边界</h3>
+<div class="outline-text-3" id="text-org7b1b07c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">step</span> = 0.02
-<span style="color: #83a598;">xmin</span>, <span style="color: #83a598;">xmax</span> = X[:, 0].<span style="color: #fe8019;">min</span>() - 1, X[:, 0].<span style="color: #fe8019;">max</span>() + 1
-<span style="color: #83a598;">ymin</span>, <span style="color: #83a598;">ymax</span> = X[:, 1].<span style="color: #fe8019;">min</span>() - 1, X[:, 1].<span style="color: #fe8019;">max</span>() + 1
+<pre class="src src-jupyter-python">step = 0.02
+xmin, xmax = X[:, 0].min() - 1, X[:, 0].max() + 1
+ymin, ymax = X[:, 1].min() - 1, X[:, 1].max() + 1
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20551;&#35774;  xx&#65292;yy&#37117;&#20026; (196, 191)</span>
-<span style="color: #83a598;">xx</span>, <span style="color: #83a598;">yy</span> = np.meshgrid(np.arange(xmin, xmax, step),
+# 假设  xx，yy都为 (196, 191)
+xx, yy = np.meshgrid(np.arange(xmin, xmax, step),
                      np.arange(ymin, ymax, step))
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#30697;&#38453;&#25289;&#24179;&#21518;&#65292;&#22312;&#21512;&#24182;&#25104;(196x191, 2)</span>
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(196x191, 2) &#20877;&#19982;W&#26435;&#37325;&#30697;&#38453;&#30456;&#20056;W(2, 3)&#65292;&#24471;&#21040;&#19968;&#20010;</span>
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(196x191, 3)&#20854;&#20013;&#27599;&#19968;&#34892;&#20195;&#34920;&#19968;&#20010;&#26679;&#26412;3&#20010;&#31867;&#21508;&#33258;&#30340;&#24471;&#20998;&#12290;</span>
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Z&#30456;&#31561;&#19982;&#21518;&#38754;&#30340;&#24471;&#20998;&#65292;&#21482;&#19981;&#36807;&#36825;&#37324;&#19981;&#26159;&#29992;X&#65292;&#32780;&#26159;&#29992;xx&#65292;yy</span>
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22240;&#27492;&#21487;&#20197;&#20351;&#29992;&#19978;&#38754;&#30340;&#35745;&#31639;&#24471;&#20998;&#30340;&#20989;&#25968;&#36827;&#34892;&#35745;&#31639;</span>
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">Z = f_scores(np.c_[xx.ravel(), yy.ravel()], res_w, res_b)</span>
-<span style="color: #83a598;">Z</span> = np.dot(np.c_[xx.ravel(), yy.ravel()], res_w) + res_b
+# 将矩阵拉平后，在合并成(196x191, 2)
+# (196x191, 2) 再与W权重矩阵相乘W(2, 3)，得到一个
+# (196x191, 3)其中每一行代表一个样本3个类各自的得分。
+# Z相等与后面的得分，只不过这里不是用X，而是用xx，yy
+# 因此可以使用上面的计算得分的函数进行计算
+# Z = f_scores(np.c_[xx.ravel(), yy.ravel()], res_w, res_b)
+Z = np.dot(np.c_[xx.ravel(), yy.ravel()], res_w) + res_b
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20174;&#20013;&#36873;&#25321;&#26368;&#22823;&#30340;&#27010;&#29575;&#30340;&#31867;&#12290;</span>
-<span style="color: #83a598;">Z</span> = np.argmax(Z, axis=1)        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">(196x191, 1)</span>
-<span style="color: #83a598;">Z</span> = Z.reshape(xx.shape)
+# 从中选择最大的概率的类。
+Z = np.argmax(Z, axis=1)        # (196x191, 1)
+Z = Z.reshape(xx.shape)
 
-<span style="color: #83a598;">fig</span> = plt.figure(figsize=(9.0, 6.0))
+fig = plt.figure(figsize=(9.0, 6.0))
 plt.contourf(xx, yy, Z, cmap=plt.cm.RdPu, alpha=0.5)
-plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors=<span style="color: #b8bb26;">'black'</span>)
-plt.xlim(xx.<span style="color: #fe8019;">min</span>(), xx.<span style="color: #fe8019;">max</span>())
-plt.ylim(yy.<span style="color: #fe8019;">min</span>(), yy.<span style="color: #fe8019;">max</span>())
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors='black')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
 plt.tight_layout(pad=0.0)
 </pre>
 </div>
 
 
-<figure>
+<figure id="orgc48abaa">
 <img src="./images/example-for-nerual-network-480812.png" alt="example-for-nerual-network-480812.png">
 
 </figure>
 </div>
 </div>
-<div id="outline-container-orgd4ff3e2" class="outline-3">
-<h3 id="orgd4ff3e2">神经网络决策边界</h3>
-<div class="outline-text-3" id="text-orgd4ff3e2">
+<div id="outline-container-orgfdda0b1" class="outline-3">
+<h3 id="orgfdda0b1">神经网络决策边界</h3>
+<div class="outline-text-3" id="text-orgfdda0b1">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#22312;xx&#65292;yy&#19979;&#30340;&#24471;&#20998;</span>
-<span style="color: #83a598;">_</span>, <span style="color: #83a598;">Z</span> = n_scores(np.c_[xx.ravel(), yy.ravel()], nres_W, nres_W2, nres_B, nres_B2)
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20174;&#20013;&#36873;&#25321;&#26368;&#22823;&#30340;&#27010;&#29575;&#30340;&#31867;&#12290;</span>
-<span style="color: #83a598;">Z</span> = np.argmax(Z, axis=1)
-<span style="color: #83a598;">Z</span> = Z.reshape(xx.shape)
+<pre class="src src-jupyter-python"># 计算在xx，yy下的得分
+_, Z = n_scores(np.c_[xx.ravel(), yy.ravel()], nres_W, nres_W2, nres_B, nres_B2)
+# 从中选择最大的概率的类。
+Z = np.argmax(Z, axis=1)
+Z = Z.reshape(xx.shape)
 
-<span style="color: #83a598;">fig</span> = plt.figure(figsize=(9.0, 6.0))
+fig = plt.figure(figsize=(9.0, 6.0))
 plt.contourf(xx, yy, Z, cmap=plt.cm.RdPu, alpha=0.5)
-plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors=<span style="color: #b8bb26;">'black'</span>)
-plt.xlim(xx.<span style="color: #fe8019;">min</span>(), xx.<span style="color: #fe8019;">max</span>())
-plt.ylim(yy.<span style="color: #fe8019;">min</span>(), yy.<span style="color: #fe8019;">max</span>())
+plt.scatter(X[:, 0], X[:, 1], c=y, s=40, cmap=plt.cm.RdPu, edgecolors='black')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
 plt.tight_layout(pad=0.0)
 </pre>
 </div>
 
 
-<figure>
+<figure id="orga0bfdc8">
 <img src="./images/example-for-nerual-network-959414.png" alt="example-for-nerual-network-959414.png">
 
 </figure>
@@ -548,9 +547,9 @@ plt.tight_layout(pad=0.0)
 </div>
 </div>
 
-<div id="outline-container-org17ed18a" class="outline-2">
-<h2 id="org17ed18a">参考</h2>
-<div class="outline-text-2" id="text-org17ed18a">
+<div id="outline-container-org161e31f" class="outline-2">
+<h2 id="org161e31f">参考</h2>
+<div class="outline-text-2" id="text-org161e31f">
 <p>
 <a href="https://cs231n.github.io/neural-networks-case-study/">CS231n</a>
 </p>
@@ -562,7 +561,7 @@ plt.tight_layout(pad=0.0)
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>

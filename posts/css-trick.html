@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-04-21 Tue 22:54 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CSS 不常见的用法</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -35,18 +34,18 @@
 收集一些平时在CSS中遇到的问题，分析其出现的原因。
 </p>
 
-<div id="outline-container-orge4da3ba" class="outline-2">
-<h2 id="orge4da3ba">如何在父级元素动态变化的情况下，让子集元素具有滚动条？</h2>
-<div class="outline-text-2" id="text-orge4da3ba">
+<div id="outline-container-org08ba358" class="outline-2">
+<h2 id="org08ba358">如何在父级元素动态变化的情况下，让子集元素具有滚动条？</h2>
+<div class="outline-text-2" id="text-org08ba358">
 <ol class="org-ol">
 <li>应用场景: 比如一个直播室，左边是视频，右边是聊天需要将两个元素的高度对齐，
 视频元素的高度是动态的变化的，依赖于解码的大小，然后自动充满整个容器。</li>
 </ol>
 </div>
 
-<div id="outline-container-org7eceb47" class="outline-3">
-<h3 id="org7eceb47">尝试方法：</h3>
-<div class="outline-text-3" id="text-org7eceb47">
+<div id="outline-container-org07188ed" class="outline-3">
+<h3 id="org07188ed">尝试方法：</h3>
+<div class="outline-text-3" id="text-org07188ed">
 <ol class="org-ol">
 <li>固定高度，但不会自适应收缩。</li>
 <li>使用 100% 指定高度，但出项的情况是，视频div高度不会一定等于 100%，造成上下空
@@ -55,9 +54,9 @@
 </div>
 </div>
 
-<div id="outline-container-org2dc3041" class="outline-3">
-<h3 id="org2dc3041">再次分析问题：</h3>
-<div class="outline-text-3" id="text-org2dc3041">
+<div id="outline-container-org62583bb" class="outline-3">
+<h3 id="org62583bb">再次分析问题：</h3>
+<div class="outline-text-3" id="text-org62583bb">
 <ol class="org-ol">
 <li>需要具有滚动条，就要给定元素一个绝对的高度，当元素溢出的时候才会出现滚动条</li>
 <li>需要两个元素对齐，且其中一个元素的高度是动态变化的。即一个元素的高度依赖于另
@@ -66,9 +65,9 @@
 </div>
 </div>
 
-<div id="outline-container-org4e8a4f9" class="outline-3">
-<h3 id="org4e8a4f9">尝试方法:</h3>
-<div class="outline-text-3" id="text-org4e8a4f9">
+<div id="outline-container-org6520de3" class="outline-3">
+<h3 id="org6520de3">尝试方法:</h3>
+<div class="outline-text-3" id="text-org6520de3">
 <ol class="org-ol">
 <li>用JS获取视频元素的高度，动态设定另一个元素的高度，但不能确保成功，如果视频元
 素的渲染速度较慢，那就会出现第二个元素的高度为0</li>
@@ -76,9 +75,9 @@
 </div>
 </div>
 
-<div id="outline-container-org26666fa" class="outline-3">
-<h3 id="org26666fa">再次分析问题：</h3>
-<div class="outline-text-3" id="text-org26666fa">
+<div id="outline-container-org2c07aac" class="outline-3">
+<h3 id="org2c07aac">再次分析问题：</h3>
+<div class="outline-text-3" id="text-org2c07aac">
 <ol class="org-ol">
 <li>如果需要两个元素的高度同样，将其一起放在同一个容器中，两个元素都使用容器的高度，
 这时两个元素的高度是一样。</li>
@@ -90,9 +89,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgbbd2192" class="outline-3">
-<h3 id="orgbbd2192">尝试方法:</h3>
-<div class="outline-text-3" id="text-orgbbd2192">
+<div id="outline-container-org93b96ab" class="outline-3">
+<h3 id="org93b96ab">尝试方法:</h3>
+<div class="outline-text-3" id="text-org93b96ab">
 <ol class="org-ol">
 <li>在父容器上使用 flex 将 flex 的方向设为 row，其子元素将具有同一高度</li>
 <li>聊天容器设定高度 100% 将具有于视频元素同一高度</li>
@@ -102,9 +101,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgb0ea97d" class="outline-3">
-<h3 id="orgb0ea97d">总结:</h3>
-<div class="outline-text-3" id="text-orgb0ea97d">
+<div id="outline-container-orgcfdba01" class="outline-3">
+<h3 id="orgcfdba01">总结:</h3>
+<div class="outline-text-3" id="text-orgcfdba01">
 <p>
 关键点在于理解position: absolute 将一个元素移除正常的文本流,且并不为元素预留空间,即
 对于使用了 position: absolute 的元素中,用 height: 100% 还是 height: inherit 都可

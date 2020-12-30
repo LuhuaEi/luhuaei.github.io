@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>关于数据预处理</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -37,7 +36,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -58,25 +57,25 @@
 割后的训练集计算得出，并应用其他数据集的预处理上。比如：通过计算得出训练集的平均
 数为M，那验证集、测试集也是利用M进行中心化。
 </p>
-<div id="outline-container-org3ab0d88" class="outline-2">
-<h2 id="org3ab0d88">中心化</h2>
-<div class="outline-text-2" id="text-org3ab0d88">
+<div id="outline-container-orgdf0b977" class="outline-2">
+<h2 id="orgdf0b977">中心化</h2>
+<div class="outline-text-2" id="text-orgdf0b977">
 <p>
 普通的中心化是直接减去平均值。
 </p>
 </div>
 </div>
-<div id="outline-container-orgab53a4e" class="outline-2">
-<h2 id="orgab53a4e">标准化</h2>
-<div class="outline-text-2" id="text-orgab53a4e">
+<div id="outline-container-orgd7aa679" class="outline-2">
+<h2 id="orgd7aa679">标准化</h2>
+<div class="outline-text-2" id="text-orgd7aa679">
 <p>
 标准化是将均值变成0,方差为1。\(x = \frac{x - EX}{X_{var}}\)
 </p>
 </div>
 </div>
-<div id="outline-container-org26ccae8" class="outline-2">
-<h2 id="org26ccae8">PCA(主成分分析)</h2>
-<div class="outline-text-2" id="text-org26ccae8">
+<div id="outline-container-org421c048" class="outline-2">
+<h2 id="org421c048">PCA(主成分分析)</h2>
+<div class="outline-text-2" id="text-org421c048">
 <p>
 PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的协方差阵或者相关阵通过正交
 矩阵转换成对角矩阵。
@@ -99,9 +98,9 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd239628" class="outline-2">
-<h2 id="orgd239628">白化变换(whitening transformation、球化)</h2>
-<div class="outline-text-2" id="text-orgd239628">
+<div id="outline-container-org98d3f17" class="outline-2">
+<h2 id="org98d3f17">白化变换(whitening transformation、球化)</h2>
+<div class="outline-text-2" id="text-org98d3f17">
 <p>
 球化的步骤差不多与主成分步骤相同，前面通过奇异分解获得特征值、特征向量。然后通过
 点积将数据旋转到新的坐标系上，而白化就是将新坐标系上的数据除以特征值的平方跟、
@@ -111,13 +110,13 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-orgfe25488" class="outline-2">
-<h2 id="orgfe25488">权重初始化</h2>
-<div class="outline-text-2" id="text-orgfe25488">
+<div id="outline-container-org1a84105" class="outline-2">
+<h2 id="org1a84105">权重初始化</h2>
+<div class="outline-text-2" id="text-org1a84105">
 </div>
-<div id="outline-container-org96a61e9" class="outline-4">
-<h4 id="org96a61e9">全0初始化</h4>
-<div class="outline-text-4" id="text-org96a61e9">
+<div id="outline-container-org226d1f1" class="outline-4">
+<h4 id="org226d1f1">全0初始化</h4>
+<div class="outline-text-4" id="text-org226d1f1">
 <p>
 在经过合理的标准化后，我们认为数据一半是小于0,一半是大于0,那这是假设权重为0将是
 一个合理的选择，但是如果将所有的权重都初始化为0,而如果网络中每一个神经元都是相同
@@ -125,9 +124,9 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-org9de9d3a" class="outline-4">
-<h4 id="org9de9d3a">小的随机值</h4>
-<div class="outline-text-4" id="text-org9de9d3a">
+<div id="outline-container-org7947406" class="outline-4">
+<h4 id="org7947406">小的随机值</h4>
+<div class="outline-text-4" id="text-org7947406">
 <p>
 所以我们需要寻找一个接近于0,而又不等于0的数作为权重值，并且这些数是不对称的(各自
 不相同)。小的随机值是一个很好的选择。但并不是初始权重值越小越好，一个神经网络层
@@ -135,9 +134,9 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-org49f83e0" class="outline-4">
-<h4 id="org49f83e0">校准方差</h4>
-<div class="outline-text-4" id="text-org49f83e0">
+<div id="outline-container-org9d78202" class="outline-4">
+<h4 id="org9d78202">校准方差</h4>
+<div class="outline-text-4" id="text-org9d78202">
 <p>
 采用随机值，将有一个问题就是方差将会随着神经元的输入的增大而增大(每一次生成的值
 都是不同的)。通过校准方差可以将方差标准化为1。这将确保所有的神经元都具有相同的输
@@ -146,30 +145,30 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-org5555dcf" class="outline-4">
-<h4 id="org5555dcf">初始化偏差</h4>
-<div class="outline-text-4" id="text-org5555dcf">
+<div id="outline-container-orgcd05e07" class="outline-4">
+<h4 id="orgcd05e07">初始化偏差</h4>
+<div class="outline-text-4" id="text-orgcd05e07">
 <p>
 一般使用0作为初始化偏差，但也有使用一个很接近0,但非0的数作为初始偏差。
 </p>
 </div>
 </div>
-<div id="outline-container-org7c63bf5" class="outline-4">
-<h4 id="org7c63bf5">批量数目</h4>
+<div id="outline-container-org980f745" class="outline-4">
+<h4 id="org980f745">批量数目</h4>
 </div>
 </div>
-<div id="outline-container-orgd727901" class="outline-2">
-<h2 id="orgd727901">正则化(Regularzation)</h2>
-<div class="outline-text-2" id="text-orgd727901">
+<div id="outline-container-orgb155d4b" class="outline-2">
+<h2 id="orgb155d4b">正则化(Regularzation)</h2>
+<div class="outline-text-2" id="text-orgb155d4b">
 <p>
 主要用于防止神经网络过拟合(overfiting)，而根据奥卡姆剃刀原理，可以通过降低模型的
 复杂度来防止过拟合。也就是说我们不仅仅是要以最小损失为目标，而是要以最小损失和复
 杂度为目标。
 </p>
 </div>
-<div id="outline-container-org33eb264" class="outline-4">
-<h4 id="org33eb264">L2正则化</h4>
-<div class="outline-text-4" id="text-org33eb264">
+<div id="outline-container-org169067f" class="outline-4">
+<h4 id="org169067f">L2正则化</h4>
+<div class="outline-text-4" id="text-org169067f">
 <p>
 \(\frac{1}{\lambda}W^2\)其中\(\lambda\)为正则化率，前面乘以\(\frac{1}{2}\)是用于
 消除求梯度带来的2。L2方法对离群值的惩罚很重，而对于接近于0的几乎没有什么惩罚。这
@@ -177,9 +176,9 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-org57c2a33" class="outline-4">
-<h4 id="org57c2a33">L1正则化</h4>
-<div class="outline-text-4" id="text-org57c2a33">
+<div id="outline-container-orge97c35d" class="outline-4">
+<h4 id="orge97c35d">L1正则化</h4>
+<div class="outline-text-4" id="text-orge97c35d">
 <p>
 利用L2正则化，并不能令权重为0,而L1表示为\(\lambda|W|\)，其可以导致权重为0,而当权
 重为0时，会使相对应的特征从模型中移除，即无论输入什么值，输出都为0。对于一个稀疏
@@ -188,9 +187,9 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-org07f670f" class="outline-4">
-<h4 id="org07f670f">最大约束(Max norm constraints)</h4>
-<div class="outline-text-4" id="text-org07f670f">
+<div id="outline-container-org4358535" class="outline-4">
+<h4 id="org4358535">最大约束(Max norm constraints)</h4>
+<div class="outline-text-4" id="text-org4358535">
 <p>
 指定一个绝对的上界，使用设计好的梯度下降对其约束。在实践过程中，一般的流程是，通
 过正常的方式更新参数，然后判断权重是否处于给定的范围内。对于某些问题可以获得很好
@@ -199,28 +198,28 @@ PCA 的应用前提是变量之间是相关的。通过正交矩阵将对称的�
 </p>
 </div>
 </div>
-<div id="outline-container-orga178f7e" class="outline-4">
-<h4 id="orga178f7e">Dropout</h4>
-<div class="outline-text-4" id="text-orga178f7e">
+<div id="outline-container-org668023d" class="outline-4">
+<h4 id="org668023d">Dropout</h4>
+<div class="outline-text-4" id="text-org668023d">
 <p>
 Dropout定义为：一种简单的方式防止过拟合。Dropout中，一个神经元仅仅有p的概率是激
 活的，Dropout可以理解成一个简化版的全链接层。
 </p>
 </div>
 </div>
-<div id="outline-container-orgcb4c2bf" class="outline-4">
-<h4 id="orgcb4c2bf">前向传播中的噪点</h4>
+<div id="outline-container-orge77b812" class="outline-4">
+<h4 id="orge77b812">前向传播中的噪点</h4>
 </div>
-<div id="outline-container-org6469231" class="outline-4">
-<h4 id="org6469231">偏差正规化</h4>
+<div id="outline-container-org06a5e15" class="outline-4">
+<h4 id="org06a5e15">偏差正规化</h4>
 </div>
-<div id="outline-container-orgdc8121e" class="outline-4">
-<h4 id="orgdc8121e">每层正规化</h4>
+<div id="outline-container-org335c0e1" class="outline-4">
+<h4 id="org335c0e1">每层正规化</h4>
 </div>
 </div>
-<div id="outline-container-org39891f2" class="outline-2">
-<h2 id="org39891f2">损失函数</h2>
-<div class="outline-text-2" id="text-org39891f2">
+<div id="outline-container-org9874b3b" class="outline-2">
+<h2 id="org9874b3b">损失函数</h2>
+<div class="outline-text-2" id="text-org9874b3b">
 <p>
 训练目标：最小化(数据损失+复杂度)，通过正则化可以降低模型的复杂度，防止过拟合的
 情况发生。对于一个监督学习来说，一个样本的损失值就是渴望值(真实值)与预测值之间的
@@ -238,7 +237,7 @@ Dropout定义为：一种简单的方式防止过拟合。Dropout中，一个神
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>

@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>用AI画出手写风格的图</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -15,7 +14,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -31,9 +30,9 @@
 <div id="content">
 <header>
 <h1 class="title">用AI画出手写风格的图</h1>
-</header><div id="outline-container-org76bd29c" class="outline-2">
-<h2 id="org76bd29c">整体概要</h2>
-<div class="outline-text-2" id="text-org76bd29c">
+</header><div id="outline-container-orged710a2" class="outline-2">
+<h2 id="orged710a2">整体概要</h2>
+<div class="outline-text-2" id="text-orged710a2">
 <ul class="org-ul">
 <li>目标：
 <ul class="org-ul">
@@ -48,80 +47,80 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgae0b89a" class="outline-2">
-<h2 id="orgae0b89a">依赖加载</h2>
-<div class="outline-text-2" id="text-orgae0b89a">
+<div id="outline-container-org364b2ae" class="outline-2">
+<h2 id="org364b2ae">依赖加载</h2>
+<div class="outline-text-2" id="text-org364b2ae">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
-<span style="color: #fb4934;">import</span> pandas <span style="color: #fb4934;">as</span> pd
-<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
-<span style="color: #fb4934;">from</span> matplotlib.animation <span style="color: #fb4934;">import</span> FuncAnimation
+<pre class="src src-jupyter-python">import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
-<span style="color: #fb4934;">import</span> ndjson                   <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35299;&#26512;ndjson&#25991;&#20214;</span>
-<span style="color: #fb4934;">import</span> json
+import ndjson                   # 解析ndjson文件
+import json
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org205697a" class="outline-2">
-<h2 id="org205697a">加载数据</h2>
-<div class="outline-text-2" id="text-org205697a">
+<div id="outline-container-org6c463eb" class="outline-2">
+<h2 id="org6c463eb">加载数据</h2>
+<div class="outline-text-2" id="text-org6c463eb">
 <p>
 先尝试使用baseball<sub>bat数据集</sub>，后面可以只需改变数据集就可以了。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">with</span> <span style="color: #fe8019;">open</span>(<span style="color: #b8bb26;">"/home/luhuaei/Data/google-quickdarw/baseball_bat.ndjson"</span>, <span style="color: #b8bb26;">'r'</span>) <span style="color: #fb4934;">as</span> f:
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">pandas provice many utils function</span>
-    <span style="color: #83a598;">DATA_BASEBALL</span> = pd.DataFrame(ndjson.load(f))
-    <span style="color: #83a598;">DATA_BASEBALL.drawing</span> = DATA_BASEBALL.drawing.<span style="color: #fe8019;">apply</span>(<span style="color: #fb4934;">lambda</span> x: np.array(x))
+<pre class="src src-jupyter-python">with open("/home/luhuaei/Data/google-quickdarw/baseball_bat.ndjson", 'r') as f:
+    # pandas provice many utils function
+    DATA_BASEBALL = pd.DataFrame(ndjson.load(f))
+    DATA_BASEBALL.drawing = DATA_BASEBALL.drawing.apply(lambda x: np.array(x))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org820a85b" class="outline-2">
-<h2 id="org820a85b">实用函数</h2>
-<div class="outline-text-2" id="text-org820a85b">
+<div id="outline-container-org4e16538" class="outline-2">
+<h2 id="org4e16538">实用函数</h2>
+<div class="outline-text-2" id="text-org4e16538">
 <p>
 这里定义一些经常调用的函数。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">bar_annotate</span>(draw_rect):
-    <span style="color: #fb4934;">for</span> rect <span style="color: #fb4934;">in</span> draw_rect:
-        <span style="color: #83a598;">height</span> = rect.get_height()
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">textcoords is determine the annotate text coords, here `offset points' is represented</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">offset points from xy values.</span>
-        ax.annotate(<span style="color: #b8bb26;">'%.2f'</span> %(height, ), xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3), textcoords=<span style="color: #b8bb26;">'offset points'</span>, ha=<span style="color: #b8bb26;">'center'</span>, va=<span style="color: #b8bb26;">'bottom'</span>)
+<pre class="src src-jupyter-python">def bar_annotate(draw_rect):
+    for rect in draw_rect:
+        height = rect.get_height()
+        # textcoords is determine the annotate text coords, here `offset points' is represented
+        # offset points from xy values.
+        ax.annotate('%.2f' %(height, ), xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3), textcoords='offset points', ha='center', va='bottom')
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orge05785f" class="outline-2">
-<h2 id="orge05785f">描述信息</h2>
-<div class="outline-text-2" id="text-orge05785f">
+<div id="outline-container-org2ec03b1" class="outline-2">
+<h2 id="org2ec03b1">描述信息</h2>
+<div class="outline-text-2" id="text-org2ec03b1">
 <p>
 描述分析，好像我也经习惯了，每拿到一个数据，首先进行描述分析，当我看别人做的分析
 报告时，才发现简单的描述分析对于了解整个数据集还是不够的。
 </p>
 </div>
-<div id="outline-container-orgfd6f38e" class="outline-3">
-<h3 id="orgfd6f38e">baseball<sub>bat</sub></h3>
-<div class="outline-text-3" id="text-orgfd6f38e">
+<div id="outline-container-orga41a2f7" class="outline-3">
+<h3 id="orga41a2f7">baseball<sub>bat</sub></h3>
+<div class="outline-text-3" id="text-orga41a2f7">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">count_country</span> = DATA_BASEBALL.countrycode.value_counts()
+<pre class="src src-jupyter-python">count_country = DATA_BASEBALL.countrycode.value_counts()
 
-plt.style.use(<span style="color: #b8bb26;">'ggplot'</span>)
-<span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
-<span style="color: #83a598;">rect</span> = ax.bar(count_country[:10].index, count_country[:10].values)
+plt.style.use('ggplot')
+fig, ax = plt.subplots(figsize=(9.0, 6.0))
+rect = ax.bar(count_country[:10].index, count_country[:10].values)
 bar_annotate(rect)
 </pre>
 </div>
 
 
-<figure>
+<figure id="org24e3b84">
 <img src="./images/have-fun-on-quick-draw-01-923979.png" alt="have-fun-on-quick-draw-01-923979.png">
 
 </figure>
@@ -133,18 +132,18 @@ bar_annotate(rect)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">DATA_BASEBALL</span>[<span style="color: #b8bb26;">'count_strokes'</span>] = DATA_BASEBALL.drawing.<span style="color: #fe8019;">apply</span>(<span style="color: #fb4934;">lambda</span> x: np.array(x).shape[0])
+<pre class="src src-jupyter-python">DATA_BASEBALL['count_strokes'] = DATA_BASEBALL.drawing.apply(lambda x: np.array(x).shape[0])
 
-<span style="color: #83a598;">mean_strokes</span> = DATA_BASEBALL.count_strokes.groupby(DATA_BASEBALL.countrycode).mean()
-<span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
-<span style="color: #83a598;">bar</span> = ax.bar(count_country[:10].index, mean_strokes[count_country[:10].index])
+mean_strokes = DATA_BASEBALL.count_strokes.groupby(DATA_BASEBALL.countrycode).mean()
+fig, ax = plt.subplots(figsize=(9.0, 6.0))
+bar = ax.bar(count_country[:10].index, mean_strokes[count_country[:10].index])
 bar_annotate(bar)
 ax.set_ylim(0, 5)
 </pre>
 </div>
 
 
-<figure>
+<figure id="orgcaeb47d">
 <img src="./images/have-fun-on-quick-draw-01-104983.png" alt="have-fun-on-quick-draw-01-104983.png">
 
 </figure>
@@ -156,18 +155,18 @@ ax.set_ylim(0, 5)
 </p>
 
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(3, 3, figsize=(9.0, 6.0))
-<span style="color: #83a598;">index</span> = np.random.choice(DATA_BASEBALL.index, 9)
-<span style="color: #fb4934;">for</span> i, a <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">zip</span>(index, ax.flatten()):
-    <span style="color: #83a598;">drawing</span> = DATA_BASEBALL.drawing[i]
-    <span style="color: #fb4934;">for</span> draw_line <span style="color: #fb4934;">in</span> drawing:
-        a.plot(draw_line[0], draw_line[1], <span style="color: #b8bb26;">'-'</span>)
+<pre class="src src-jupyter-python">fig, ax = plt.subplots(3, 3, figsize=(9.0, 6.0))
+index = np.random.choice(DATA_BASEBALL.index, 9)
+for i, a in zip(index, ax.flatten()):
+    drawing = DATA_BASEBALL.drawing[i]
+    for draw_line in drawing:
+        a.plot(draw_line[0], draw_line[1], '-')
         a.set_axis_off()
 </pre>
 </div>
 
 
-<figure>
+<figure id="org06ff83d">
 <img src="./images/have-fun-on-quick-draw-01-115375.png" alt="have-fun-on-quick-draw-01-115375.png">
 
 </figure>
@@ -176,21 +175,21 @@ ax.set_ylim(0, 5)
 生成一个动态的gif图，快速浏览100张图片的形状。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
-<span style="color: #83a598;">index</span> = np.random.choice(DATA_BASEBALL.index, 100)
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">gif_update</span>(iter_count):
-    <span style="color: #83a598;">drawing</span> = DATA_BASEBALL.drawing[iter_count]
+<pre class="src src-jupyter-python">fig, ax = plt.subplots(figsize=(9.0, 6.0))
+index = np.random.choice(DATA_BASEBALL.index, 100)
+def gif_update(iter_count):
+    drawing = DATA_BASEBALL.drawing[iter_count]
     ax.clear()
-    <span style="color: #fb4934;">for</span> draw_line <span style="color: #fb4934;">in</span> drawing:
+    for draw_line in drawing:
         ax.plot(draw_line[0], draw_line[1])
         ax.set_axis_off()
-<span style="color: #83a598;">anim</span> = FuncAnimation(fig, gif_update, frames=index, interval=5000)
-anim.save(path, fps=60, writer=<span style="color: #b8bb26;">'imagemagick'</span>)
+anim = FuncAnimation(fig, gif_update, frames=index, interval=5000)
+anim.save(path, fps=60, writer='imagemagick')
 </pre>
 </div>
 
 
-<figure>
+<figure id="orgdbda682">
 <img src="./images/have-fun-on-quick-draw-01-221760.gif" alt="have-fun-on-quick-draw-01-221760.gif">
 
 </figure>
@@ -198,9 +197,9 @@ anim.save(path, fps=60, writer=<span style="color: #b8bb26;">'imagemagick'</span
 </div>
 </div>
 
-<div id="outline-container-org2c798b5" class="outline-2">
-<h2 id="org2c798b5">切割数据</h2>
-<div class="outline-text-2" id="text-org2c798b5">
+<div id="outline-container-org65e18b3" class="outline-2">
+<h2 id="org65e18b3">切割数据</h2>
+<div class="outline-text-2" id="text-org65e18b3">
 <div class="org-src-container">
 <pre class="src src-jupyter-python">
 </pre>
@@ -213,7 +212,7 @@ anim.save(path, fps=60, writer=<span style="color: #b8bb26;">'imagemagick'</span
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>

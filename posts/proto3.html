@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-08-02 Sun 12:45 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How: proto3</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -35,9 +34,9 @@
 <a href="https://developers.google.com/protocol-buffers/docs/proto3">proto3</a>
 </p>
 
-<div id="outline-container-org5e5b1ee" class="outline-2">
-<h2 id="org5e5b1ee">style guide</h2>
-<div class="outline-text-2" id="text-org5e5b1ee">
+<div id="outline-container-org4596eb4" class="outline-2">
+<h2 id="org4596eb4">style guide</h2>
+<div class="outline-text-2" id="text-org4596eb4">
 <ol class="org-ol">
 <li>license</li>
 <li>overview</li>
@@ -49,18 +48,18 @@
 </div>
 </div>
 
-<div id="outline-container-orga87301f" class="outline-2">
-<h2 id="orga87301f">声明语法</h2>
-<div class="outline-text-2" id="text-orga87301f">
+<div id="outline-container-orgc1276e2" class="outline-2">
+<h2 id="orgc1276e2">声明语法</h2>
+<div class="outline-text-2" id="text-orgc1276e2">
 <pre class="example">
 syntax = "proto3";
 </pre>
 </div>
 </div>
 
-<div id="outline-container-orgc5647b4" class="outline-2">
-<h2 id="orgc5647b4">注意点:</h2>
-<div class="outline-text-2" id="text-orgc5647b4">
+<div id="outline-container-orgd4eed40" class="outline-2">
+<h2 id="orgd4eed40">注意点:</h2>
+<div class="outline-text-2" id="text-orgd4eed40">
 <ol class="org-ol">
 <li>信息队列编码, 1-15为单字节，16-2047为双字节，编码范围为1-2<sup>29</sup>. 在这期间
 19000:19999为预留的区间，不推荐使用。</li>
@@ -68,9 +67,9 @@ syntax = "proto3";
 </div>
 </div>
 
-<div id="outline-container-orgd2eba8a" class="outline-2">
-<h2 id="orgd2eba8a">导入其他proto文件</h2>
-<div class="outline-text-2" id="text-orgd2eba8a">
+<div id="outline-container-org14879fe" class="outline-2">
+<h2 id="org14879fe">导入其他proto文件</h2>
+<div class="outline-text-2" id="text-org14879fe">
 <ol class="org-ol">
 <li>如果具有多个文件，比如A, B, C</li>
 <li>加载proto路径，通过 -I/&#x2013;proto<sub>path</sub> 指定目录</li>
@@ -91,9 +90,9 @@ import "B.proto";
 </div>
 </div>
 
-<div id="outline-container-org6b53b09" class="outline-2">
-<h2 id="org6b53b09">信息(message)</h2>
-<div class="outline-text-2" id="text-org6b53b09">
+<div id="outline-container-org47c7dd5" class="outline-2">
+<h2 id="org47c7dd5">信息(message)</h2>
+<div class="outline-text-2" id="text-org47c7dd5">
 <ol class="org-ol">
 <li>单数(singular), 接收信息范围: 0, 1， 在proto3中为默认的选择。</li>
 <li>重复(repeated), 接收任何数量的信息</li>
@@ -121,9 +120,9 @@ message Bar {
 <li>对重复的字段使用复数名称(repeated)</li>
 </ol>
 </div>
-<div id="outline-container-org75e96b7" class="outline-3">
-<h3 id="org75e96b7">信息更新</h3>
-<div class="outline-text-3" id="text-org75e96b7">
+<div id="outline-container-orgf6194e9" class="outline-3">
+<h3 id="orgf6194e9">信息更新</h3>
+<div class="outline-text-3" id="text-orgf6194e9">
 <ol class="org-ol">
 <li>当需要更新一个领域的结构体时，不需要重新设计，而可以在已有的领域上加入新的代
 码。</li>
@@ -143,9 +142,9 @@ reserved进行预留，以便后用。</li>
 </div>
 </div>
 
-<div id="outline-container-org62a0b44" class="outline-2">
-<h2 id="org62a0b44">默认值</h2>
-<div class="outline-text-2" id="text-org62a0b44">
+<div id="outline-container-org76425fa" class="outline-2">
+<h2 id="org76425fa">默认值</h2>
+<div class="outline-text-2" id="text-org76425fa">
 <p>
 字符串 空字符串
 字节 空字节
@@ -156,9 +155,9 @@ reserved进行预留，以便后用。</li>
 </div>
 </div>
 
-<div id="outline-container-orgc50758f" class="outline-2">
-<h2 id="orgc50758f">枚举型</h2>
-<div class="outline-text-2" id="text-orgc50758f">
+<div id="outline-container-org33133a2" class="outline-2">
+<h2 id="org33133a2">枚举型</h2>
+<div class="outline-text-2" id="text-org33133a2">
 <ol class="org-ol">
 <li>枚举第一个元素必须对应为0</li>
 <li>在将allow<sub>alias打开后</sub>，可以给不同的key赋予相同的value</li>
@@ -179,9 +178,9 @@ enum corpus {
 </div>
 </div>
 
-<div id="outline-container-org969e529" class="outline-2">
-<h2 id="org969e529">预留值</h2>
-<div class="outline-text-2" id="text-org969e529">
+<div id="outline-container-orgd2c0839" class="outline-2">
+<h2 id="orgd2c0839">预留值</h2>
+<div class="outline-text-2" id="text-orgd2c0839">
 <p>
 保留特定的值，以便后面用到(不能将数值型跟字符串型混合在同一条语句上)
 </p>
@@ -194,9 +193,9 @@ enum corpus {
 </div>
 </div>
 
-<div id="outline-container-org8185559" class="outline-2">
-<h2 id="org8185559">无知领域(unknown fields)</h2>
-<div class="outline-text-2" id="text-org8185559">
+<div id="outline-container-org52bf97e" class="outline-2">
+<h2 id="org52bf97e">无知领域(unknown fields)</h2>
+<div class="outline-text-2" id="text-org52bf97e">
 <p>
 proto3在刚开始的时候，是将不能识别的语法（区域）都抛弃，但是在3.5后，对不知的区
 域信息将保留下来作为序列化输出的一部分。
@@ -204,9 +203,9 @@ proto3在刚开始的时候，是将不能识别的语法（区域）都抛弃�
 </div>
 </div>
 
-<div id="outline-container-org290558c" class="outline-2">
-<h2 id="org290558c">Any类型</h2>
-<div class="outline-text-2" id="text-org290558c">
+<div id="outline-container-orge729cca" class="outline-2">
+<h2 id="orge729cca">Any类型</h2>
+<div class="outline-text-2" id="text-orge729cca">
 <p>
 使用Any类型需要从google/protobuf/any.proto中导入。Any类型可以让你加入一个没有定
 义的类型。(不同的语言对Any类型的解码的函数也不同)
@@ -221,9 +220,9 @@ message Foo {
 </div>
 </div>
 
-<div id="outline-container-org568d8ec" class="outline-2">
-<h2 id="org568d8ec">oneof(之一类型)</h2>
-<div class="outline-text-2" id="text-org568d8ec">
+<div id="outline-container-orgcd3b151" class="outline-2">
+<h2 id="orgcd3b151">oneof(之一类型)</h2>
+<div class="outline-text-2" id="text-orgcd3b151">
 <ol class="org-ol">
 <li>主要是可以在多个message结构中使用同一个类型。跟正规的结构类型类似，只是oneof
 在多个结构之间通过分享内存共用。</li>
@@ -251,9 +250,9 @@ message foo {
 </div>
 </div>
 
-<div id="outline-container-org9e1a055" class="outline-2">
-<h2 id="org9e1a055">Map(关联表)</h2>
-<div class="outline-text-2" id="text-org9e1a055">
+<div id="outline-container-orgd87c5b7" class="outline-2">
+<h2 id="orgd87c5b7">Map(关联表)</h2>
+<div class="outline-text-2" id="text-orgd87c5b7">
 <ol class="org-ol">
 <li>key类型不能是枚举类型或浮点数，可以是整数和字符串</li>
 <li>value类型可以是任何类型，除了map类型</li>
@@ -282,9 +281,9 @@ repeated Entry foo = 1;
 </div>
 </div>
 
-<div id="outline-container-org627850a" class="outline-2">
-<h2 id="org627850a">Package (namespace)</h2>
-<div class="outline-text-2" id="text-org627850a">
+<div id="outline-container-org850f81b" class="outline-2">
+<h2 id="org850f81b">Package (namespace)</h2>
+<div class="outline-text-2" id="text-org850f81b">
 <ol class="org-ol">
 <li>可以使用package来避免两个文件之间的名字冲突, 不同的语音使用的实现方法也不一样。</li>
 </ol>
@@ -297,9 +296,9 @@ repeated Entry foo = 1;
 </div>
 </div>
 
-<div id="outline-container-org3304e85" class="outline-2">
-<h2 id="org3304e85">Service 接口</h2>
-<div class="outline-text-2" id="text-org3304e85">
+<div id="outline-container-org9bacf84" class="outline-2">
+<h2 id="org9bacf84">Service 接口</h2>
+<div class="outline-text-2" id="text-org9bacf84">
 <ol class="org-ol">
 <li>使用在RPC服务</li>
 </ol>
@@ -314,9 +313,9 @@ service SearchRequest () {
 </div>
 </div>
 
-<div id="outline-container-org5d0802c" class="outline-2">
-<h2 id="org5d0802c">JSON Map</h2>
-<div class="outline-text-2" id="text-org5d0802c">
+<div id="outline-container-org8f72074" class="outline-2">
+<h2 id="org8f72074">JSON Map</h2>
+<div class="outline-text-2" id="text-org8f72074">
 <ol class="org-ol">
 <li>如果值为null，在编码成proto buffer时，就会替换成合适的默认值。</li>
 <li>如果在proto buffer 中已经具有默认值时，将会忽略编码。</li>
@@ -465,9 +464,9 @@ service SearchRequest () {
 </div>
 </div>
 
-<div id="outline-container-org0c32b9c" class="outline-2">
-<h2 id="org0c32b9c">Options</h2>
-<div class="outline-text-2" id="text-org0c32b9c">
+<div id="outline-container-org4de13d7" class="outline-2">
+<h2 id="org4de13d7">Options</h2>
+<div class="outline-text-2" id="text-org4de13d7">
 <ol class="org-ol">
 <li>一些选项是应用于文件的，应该写在文件的头部</li>
 <li>一些选项是应用于结构体中，应该写在类型定义的前面。</li>
@@ -478,9 +477,9 @@ option go_package = "../foo/bar";
 </pre>
 </div>
 </div>
-<div id="outline-container-orgb012b74" class="outline-2">
-<h2 id="orgb012b74">类型表</h2>
-<div class="outline-text-2" id="text-orgb012b74">
+<div id="outline-container-org49b76be" class="outline-2">
+<h2 id="org49b76be">类型表</h2>
+<div class="outline-text-2" id="text-org49b76be">
 <table>
 
 

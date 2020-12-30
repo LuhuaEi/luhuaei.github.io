@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>使用梯度下降求解线性回归问题</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -37,7 +36,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -71,9 +70,9 @@
 0的地方，而对于一个凸面来说，极小值就是处于所有曲线的极小值交点处。
 </p>
 
-<div id="outline-container-org7706c2b" class="outline-2">
-<h2 id="org7706c2b">优化器</h2>
-<div class="outline-text-2" id="text-org7706c2b">
+<div id="outline-container-org4236c84" class="outline-2">
+<h2 id="org4236c84">优化器</h2>
+<div class="outline-text-2" id="text-org4236c84">
 <p>
 梯度下降在寻找最小值的过程中，就是一个优化过程。而关于 <b>优化器</b>: 优化器用于根据
 损失函数寻找最优的权重值，使得损失函数值最小。我们不可以寻找到最好的权重值在一开
@@ -89,18 +88,18 @@ over time to get lower loss
 </blockquote>
 </div>
 
-<div id="outline-container-org751681b" class="outline-3">
-<h3 id="org751681b">随机搜索</h3>
-<div class="outline-text-3" id="text-org751681b">
+<div id="outline-container-orgdb69d34" class="outline-3">
+<h3 id="orgdb69d34">随机搜索</h3>
+<div class="outline-text-3" id="text-orgdb69d34">
 <p>
 先随机生成一个权重，对给予的权重值求值损失函数，那当前的损失函数与目前最优的损失
 函数相比，如果更优，则保留该权重，否则重复生成一个随机新的权重值，重复比较。
 </p>
 </div>
 </div>
-<div id="outline-container-org174f54a" class="outline-3">
-<h3 id="org174f54a">随机局部搜索</h3>
-<div class="outline-text-3" id="text-org174f54a">
+<div id="outline-container-org4df2edf" class="outline-3">
+<h3 id="org4df2edf">随机局部搜索</h3>
+<div class="outline-text-3" id="text-org4df2edf">
 <p>
 先随机生成一个权重，每一次都是通过微调权重，如果损失函数更小，则选择为当前最优的
 权重，否则，继续对当前的权重进行微调。微调可以为那当前的权重值W，加上一个aw，其
@@ -113,9 +112,9 @@ over time to get lower loss
 </p>
 </div>
 </div>
-<div id="outline-container-org408e985" class="outline-3">
-<h3 id="org408e985">跟随梯度搜索</h3>
-<div class="outline-text-3" id="text-org408e985">
+<div id="outline-container-org45ea8ca" class="outline-3">
+<h3 id="org45ea8ca">跟随梯度搜索</h3>
+<div class="outline-text-3" id="text-org45ea8ca">
 <p>
 而跟随梯度搜索为通过梯度可以知道最小损失所在的方向，因此，不需要寻找方向，只需要
 更新权重值，令损失达到最小。
@@ -141,85 +140,85 @@ over time to get lower loss
 就是沿着负梯度下降。
 </p>
 </div>
-<div id="outline-container-org6b1acdf" class="outline-4">
-<h4 id="org6b1acdf">数值法梯度(numerical gradient)</h4>
-<div class="outline-text-4" id="text-org6b1acdf">
+<div id="outline-container-orgb76deb2" class="outline-4">
+<h4 id="orgb76deb2">数值法梯度(numerical gradient)</h4>
+<div class="outline-text-4" id="text-orgb76deb2">
 <p>
 特点为：速度慢，但是容易操作。用泰勒表达式可以验证用一个h的误差项比2h的误差项大。
 所以推荐使用2h求导。\(g = \frac{f(x + h) - f(x - h)}{2h}\)
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">eval_gradient_numerical</span>(f, x, verbose=<span style="color: #fabd2f;">True</span>, h=0.00001):
-      <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">      Inputs:</span>
-<span style="color: #ada296;">      ------------------------------------------------------------</span>
-<span style="color: #ada296;">      - f: (accept one paramter) loss function.</span>
-<span style="color: #ada296;">      - x: (data set) The point to evaluate the gardient at</span>
-<span style="color: #ada296;">      Outputs:</span>
-<span style="color: #ada296;">      ------------------------------------------------------------</span>
-<span style="color: #ada296;">      - grad: (shape same with x) The gradient on each point of x.</span>
-<span style="color: #ada296;">      '''</span>
-      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#29983;&#25104;&#19968;&#20010;&#19982;&#36755;&#20837;x&#30456;&#21516;&#32500;&#24230;&#30340;0&#25968;&#32452;</span>
-      <span style="color: #83a598;">grad</span> = np.zeros_like(x)
-      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22810;&#32500;&#36845;&#20195;&#65292;&#36825;&#37324;&#23545;x&#30340;&#27599;&#19968;&#20010;&#32500;&#24230;&#37117;&#36827;&#34892;&#36845;&#20195;</span>
-      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20808;&#23545;&#26368;&#21518;&#30340;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;&#65292;&#24403;&#23436;&#25104;&#21518;&#65292;&#20877;&#23545;&#21069;&#19968;&#20010;&#32500;&#24230;&#36827;&#34892;&#36845;&#20195;</span>
-      <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36845;&#20195;&#23436;&#25104;&#21518;&#65292;&#20351;&#29992;finished&#21028;&#26029;</span>
-      <span style="color: #83a598;">it</span> = np.nditer(x, flags=[<span style="color: #b8bb26;">'multi_index'</span>], op_flags=[<span style="color: #b8bb26;">'readwrite'</span>])
-      <span style="color: #fb4934;">while</span> <span style="color: #fb4934;">not</span> it.finished:
-          <span style="color: #83a598;">ix</span> = it.multi_index
-          <span style="color: #83a598;">old_val</span> = x[ix]
+<pre class="src src-jupyter-python">def eval_gradient_numerical(f, x, verbose=True, h=0.00001):
+      '''
+      Inputs:
+      ------------------------------------------------------------
+      - f: (accept one paramter) loss function.
+      - x: (data set) The point to evaluate the gardient at
+      Outputs:
+      ------------------------------------------------------------
+      - grad: (shape same with x) The gradient on each point of x.
+      '''
+      # 生成一个与输入x相同维度的0数组
+      grad = np.zeros_like(x)
+      # 多维迭代，这里对x的每一个维度都进行迭代
+      # 先对最后的维度进行迭代，当完成后，再对前一个维度进行迭代
+      # 迭代完成后，使用finished判断
+      it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
+      while not it.finished:
+          ix = it.multi_index
+          old_val = x[ix]
 
-          <span style="color: #83a598;">x</span>[ix] = old_val + h
-          <span style="color: #83a598;">fxph</span> = f(x)
+          x[ix] = old_val + h
+          fxph = f(x)
 
-          <span style="color: #83a598;">x</span>[ix] = old_val - h
-          <span style="color: #83a598;">fxmh</span> = f(x)
+          x[ix] = old_val - h
+          fxmh = f(x)
 
-          <span style="color: #83a598;">x</span>[ix] = old_val
+          x[ix] = old_val
 
-          <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#26012;&#29575;&#65292;&#36825;&#37324;&#20351;&#29992;&#26012;&#29575;&#30340;&#21407;&#22987;&#23450;&#20041;&#35745;&#31639;&#65292;&#36890;&#36807;&#24494;&#23567;&#30340;&#38754;&#31215;&#19982;h&#23485;&#24230;&#12290;</span>
-          <span style="color: #83a598;">grad</span>[ix] = (fxph - fxmh) / (2 * h)
+          # 计算斜率，这里使用斜率的原始定义计算，通过微小的面积与h宽度。
+          grad[ix] = (fxph - fxmh) / (2 * h)
 
-          <span style="color: #fb4934;">if</span> verbose:
-              <span style="color: #fb4934;">print</span>(ix, grad[ix])
+          if verbose:
+              print(ix, grad[ix])
           it.iternext()
-      <span style="color: #fb4934;">return</span> grad
+      return grad
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">eval_gradient_array</span>(f, x, df, h=1e-5):
-    <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">    Inputs:</span>
-<span style="color: #ada296;">    ------------------------------------------------------------</span>
-<span style="color: #ada296;">    - f: loss function</span>
-<span style="color: #ada296;">    - x: input data set</span>
-<span style="color: #ada296;">    - df: the loss function output gradient array</span>
+def eval_gradient_array(f, x, df, h=1e-5):
+    '''
+    Inputs:
+    ------------------------------------------------------------
+    - f: loss function
+    - x: input data set
+    - df: the loss function output gradient array
 
-<span style="color: #ada296;">    Outputs:</span>
-<span style="color: #ada296;">    ------------------------------------------------------------</span>
-<span style="color: #ada296;">    - grad: the grad is the gradient array.</span>
-<span style="color: #ada296;">    '''</span>
-    <span style="color: #83a598;">grad</span> = np.zeros_like(x)
-    <span style="color: #83a598;">it</span> = np.nditer(x, flags=[<span style="color: #b8bb26;">'multi_index'</span>], op_flags=[<span style="color: #b8bb26;">'readwrite'</span>])
-    <span style="color: #fb4934;">while</span> <span style="color: #fb4934;">not</span> it.finished:
-        <span style="color: #83a598;">ix</span> = it.multi_index
-        <span style="color: #83a598;">old_val</span> = x[ix]
+    Outputs:
+    ------------------------------------------------------------
+    - grad: the grad is the gradient array.
+    '''
+    grad = np.zeros_like(x)
+    it = np.nditer(x, flags=['multi_index'], op_flags=['readwrite'])
+    while not it.finished:
+        ix = it.multi_index
+        old_val = x[ix]
 
-        <span style="color: #83a598;">x</span>[ix] = old_val + h
-        <span style="color: #83a598;">pos</span> = f(x).copy()
+        x[ix] = old_val + h
+        pos = f(x).copy()
 
-        <span style="color: #83a598;">x</span>[ix] = old_val - h
-        <span style="color: #83a598;">neg</span> = f(x).copy()
+        x[ix] = old_val - h
+        neg = f(x).copy()
 
-        <span style="color: #83a598;">x</span>[ix] = old_val
-        <span style="color: #83a598;">grad</span>[ix] = np.<span style="color: #fe8019;">sum</span>((pos - neg) * df) / (2 * h)
+        x[ix] = old_val
+        grad[ix] = np.sum((pos - neg) * df) / (2 * h)
         it.iternext()
-    <span style="color: #fb4934;">return</span> grad
+    return grad
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org0d4692e" class="outline-4">
-<h4 id="org0d4692e">解析法梯度(analytic gradient)</h4>
-<div class="outline-text-4" id="text-org0d4692e">
+<div id="outline-container-orgb98d8bb" class="outline-4">
+<h4 id="orgb98d8bb">解析法梯度(analytic gradient)</h4>
+<div class="outline-text-4" id="text-orgb98d8bb">
 <p>
 特点为：数据快，但需要操作精准(易于出错)。利用微积分的原理求解梯度，先把表达式用
 积分计算出来，再在代码中实现(求导数)。在现实中，一般采用分析梯度，然后对结果进行检验，即
@@ -227,9 +226,9 @@ over time to get lower loss
 </p>
 </div>
 </div>
-<div id="outline-container-org80c6f02" class="outline-4">
-<h4 id="org80c6f02">反向传播梯度(backward pass)</h4>
-<div class="outline-text-4" id="text-org80c6f02">
+<div id="outline-container-orgbab0e22" class="outline-4">
+<h4 id="orgbab0e22">反向传播梯度(backward pass)</h4>
+<div class="outline-text-4" id="text-orgbab0e22">
 <p>
 由于梯度其实就是斜率，也就是函数的导数，通过解析法可以直接求出最后的值，而反向传
 播是一步一步向后求导数，只要不是到最后一步，即只要不是到达输入数据层，都被视为一
@@ -245,9 +244,9 @@ over time to get lower loss
 </p>
 </div>
 </div>
-<div id="outline-container-org9adb951" class="outline-4">
-<h4 id="org9adb951">梯度审核</h4>
-<div class="outline-text-4" id="text-org9adb951">
+<div id="outline-container-org086bd10" class="outline-4">
+<h4 id="org086bd10">梯度审核</h4>
+<div class="outline-text-4" id="text-org086bd10">
 <p>
 梯度检验：使用相对误差来比较两个梯度的差异，这是因为如果使用绝对误差，0.00001在目
 标值0.00001和1中是大小程度不相同的。几条检验规则：
@@ -295,9 +294,9 @@ over time to get lower loss
 </p>
 </div>
 </div>
-<div id="outline-container-org1ac6bec" class="outline-4">
-<h4 id="org1ac6bec">权重更新</h4>
-<div class="outline-text-4" id="text-org1ac6bec">
+<div id="outline-container-orga0f3fc1" class="outline-4">
+<h4 id="orga0f3fc1">权重更新</h4>
+<div class="outline-text-4" id="text-orga0f3fc1">
 <p>
 当利用梯度下降的方法求的每一个位置的梯度后，利用这些梯度对已有的权重进行更新，这
 是一个学习的过程，不同的学习速率具有不同大小的前进步伐。 <code>W_new = W -
@@ -317,143 +316,143 @@ learning_rate * grad</code> 注意到这里对权重更新是那当前的权重�
 </div>
 </div>
 
-<div id="outline-container-org0132df4" class="outline-2">
-<h2 id="org0132df4">反向传播</h2>
-<div class="outline-text-2" id="text-org0132df4">
+<div id="outline-container-org5e1d06a" class="outline-2">
+<h2 id="org5e1d06a">反向传播</h2>
+<div class="outline-text-2" id="text-org5e1d06a">
 <p>
 方向传播的主要原理在于使用链式法则。通过前向传播的步骤，一步一步反推。
 </p>
 </div>
-<div id="outline-container-org9cf20c9" class="outline-3">
-<h3 id="org9cf20c9">加载数据</h3>
-<div class="outline-text-3" id="text-org9cf20c9">
+<div id="outline-container-org5ee825f" class="outline-3">
+<h3 id="org5ee825f">加载数据</h3>
+<div class="outline-text-3" id="text-org5ee825f">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
-<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
-<span style="color: #fb4934;">from</span> matplotlib.animation <span style="color: #fb4934;">import</span> FuncAnimation
+<pre class="src src-jupyter-python">import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
-plt.style.use(<span style="color: #b8bb26;">'ggplot'</span>)
-<span style="color: #83a598;">DATA</span> = np.array(np.genfromtxt(<span style="color: #b8bb26;">"data/gd-line-regression.csv"</span>, delimiter=<span style="color: #b8bb26;">','</span>))
+plt.style.use('ggplot')
+DATA = np.array(np.genfromtxt("data/gd-line-regression.csv", delimiter=','))
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf7a2530" class="outline-3">
-<h3 id="orgf7a2530">数据预览</h3>
-<div class="outline-text-3" id="text-orgf7a2530">
+<div id="outline-container-org32e32dc" class="outline-3">
+<h3 id="org32e32dc">数据预览</h3>
+<div class="outline-text-3" id="text-org32e32dc">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">x</span> = DATA[:, 0]
-<span style="color: #83a598;">y</span> = DATA[:, 1]
+<pre class="src src-jupyter-python">x = DATA[:, 0]
+y = DATA[:, 1]
 plt.figure(figsize=(9.0, 6.0))
-plt.plot(x, y, <span style="color: #b8bb26;">'o'</span>)
-plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
-plt.ylabel(<span style="color: #b8bb26;">'y'</span>)
+plt.plot(x, y, 'o')
+plt.xlabel('x')
+plt.ylabel('y')
 plt.tight_layout(pad=0.0)
 </pre>
 </div>
 
 
-<figure>
+<figure id="org6c98c43">
 <img src="./images/use-gradient-descent-for-line-regression-945387.png" alt="use-gradient-descent-for-line-regression-945387.png">
 
 </figure>
 </div>
 </div>
-<div id="outline-container-orgefe8be6" class="outline-3">
-<h3 id="orgefe8be6">梯度下降函数</h3>
-<div class="outline-text-3" id="text-orgefe8be6">
+<div id="outline-container-org90bb2f6" class="outline-3">
+<h3 id="org90bb2f6">梯度下降函数</h3>
+<div class="outline-text-3" id="text-org90bb2f6">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">LinearRegression</span>():
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>):
-        <span style="color: #fb4934;">self</span>.weights_list = []
+<pre class="src src-jupyter-python">class LinearRegression():
+    def __init__(self):
+        self.weights_list = []
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">model</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
-        <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">        Inputs:</span>
-<span style="color: #ada296;">        ------------------------------------------------------------</span>
-<span style="color: #ada296;">        - x_train: (N, D)</span>
-<span style="color: #ada296;">        - y_train: (N, 1)</span>
-<span style="color: #ada296;">        '''</span>
-        <span style="color: #fb4934;">self</span>.x_train = x_train
-        <span style="color: #fb4934;">self</span>.y_train = y_train
+    def model(self, x_train, y_train):
+        '''
+        Inputs:
+        ------------------------------------------------------------
+        - x_train: (N, D)
+        - y_train: (N, 1)
+        '''
+        self.x_train = x_train
+        self.y_train = y_train
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, weights, learning_rate=0.0001, iter_count=1000):
-        <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">        Inputs:</span>
-<span style="color: #ada296;">        ------------------------------------------------------------</span>
-<span style="color: #ada296;">        - weights: (D, 1)</span>
-<span style="color: #ada296;">        - learning_rate: (float)</span>
-<span style="color: #ada296;">        - iter_count: (integer)</span>
-<span style="color: #ada296;">        Outputs:</span>
-<span style="color: #ada296;">        ------------------------------------------------------------</span>
-<span style="color: #ada296;">        update the weights on self weights.</span>
-<span style="color: #ada296;">        '''</span>
-        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(0, iter_count):
-            <span style="color: #83a598;">gw</span> = <span style="color: #fb4934;">self</span>.gradient_descent(weights)
-            <span style="color: #83a598;">weights</span> -= learning_rate * gw
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">if don't copy will lead all values will the last update value.</span>
-            <span style="color: #fb4934;">self</span>.weights_list.append(weights.copy())
-        <span style="color: #fb4934;">self</span>.weights = weights
+    def train(self, weights, learning_rate=0.0001, iter_count=1000):
+        '''
+        Inputs:
+        ------------------------------------------------------------
+        - weights: (D, 1)
+        - learning_rate: (float)
+        - iter_count: (integer)
+        Outputs:
+        ------------------------------------------------------------
+        update the weights on self weights.
+        '''
+        for i in range(0, iter_count):
+            gw = self.gradient_descent(weights)
+            weights -= learning_rate * gw
+            # if don't copy will lead all values will the last update value.
+            self.weights_list.append(weights.copy())
+        self.weights = weights
 
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">gradient_descent</span>(<span style="color: #fb4934;">self</span>, w):
-        <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">        use forward and backward pass computer the gradient</span>
+    def gradient_descent(self, w):
+        '''
+        use forward and backward pass computer the gradient
 
-<span style="color: #ada296;">        Inputs:</span>
-<span style="color: #ada296;">        ------------------------------------------------------------</span>
-<span style="color: #ada296;">        - w: (D, 1) weights</span>
-<span style="color: #ada296;">        Outputs:</span>
-<span style="color: #ada296;">        ------------------------------------------------------------</span>
-<span style="color: #ada296;">        - dw: (D, 1) gradient weights</span>
-<span style="color: #ada296;">        '''</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">forward pass</span>
-        <span style="color: #83a598;">w_mul_x</span> = <span style="color: #fb4934;">self</span>.x_train.dot(w)                           <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">1 (N, 1)</span>
-        <span style="color: #83a598;">w_mul_x_sub_y</span> = w_mul_x - <span style="color: #fb4934;">self</span>.y_train                  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">2 (N, 1)</span>
-        <span style="color: #83a598;">w_mul_x_sub_y_square</span> = np.square(w_mul_x_sub_y)         <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">3 (N, 1)</span>
-        <span style="color: #83a598;">sum_w_mul_x_sub_y_square</span> = np.<span style="color: #fe8019;">sum</span>(w_mul_x_sub_y_square) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">4 (1, 1)</span>
-        <span style="color: #83a598;">mse</span> = sum_w_mul_x_sub_y_square / <span style="color: #fb4934;">self</span>.x_train.shape[0]  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">5 (1, 1)</span>
+        Inputs:
+        ------------------------------------------------------------
+        - w: (D, 1) weights
+        Outputs:
+        ------------------------------------------------------------
+        - dw: (D, 1) gradient weights
+        '''
+        # forward pass
+        w_mul_x = self.x_train.dot(w)                           # 1 (N, 1)
+        w_mul_x_sub_y = w_mul_x - self.y_train                  # 2 (N, 1)
+        w_mul_x_sub_y_square = np.square(w_mul_x_sub_y)         # 3 (N, 1)
+        sum_w_mul_x_sub_y_square = np.sum(w_mul_x_sub_y_square) # 4 (1, 1)
+        mse = sum_w_mul_x_sub_y_square / self.x_train.shape[0]  # 5 (1, 1)
 
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">backward pass</span>
-        <span style="color: #83a598;">dsum_w_mul_x_sub_y_square</span> = 1 / <span style="color: #fb4934;">self</span>.x_train.shape[0] <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">5</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]</span>
-        <span style="color: #83a598;">dw_mul_x_sub_y_square</span> = 1
-        <span style="color: #83a598;">dw_mul_x_sub_y</span> = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">3 (N, 1)</span>
-        <span style="color: #83a598;">dw_mul_x</span> = dw_mul_x_sub_y                                  <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">2 (N, 1)</span>
-        <span style="color: #83a598;">dw</span> = <span style="color: #fb4934;">self</span>.x_train.T.dot(dw_mul_x)                          <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">1 (D, 1)</span>
-        <span style="color: #fb4934;">return</span> dw
+        # backward pass
+        dsum_w_mul_x_sub_y_square = 1 / self.x_train.shape[0] # 5
+        # 4 equal 1 * dsum_w_mul_x_sub_y_square * self.x_train.shape[0]
+        dw_mul_x_sub_y_square = 1
+        dw_mul_x_sub_y = 2 * w_mul_x_sub_y * dw_mul_x_sub_y_square # 3 (N, 1)
+        dw_mul_x = dw_mul_x_sub_y                                  # 2 (N, 1)
+        dw = self.x_train.T.dot(dw_mul_x)                          # 1 (D, 1)
+        return dw
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">MSE</span>(<span style="color: #fb4934;">self</span>):
-        <span style="color: #ada296;">'''computer the mean square error'''</span>
-        <span style="color: #83a598;">y_pred</span> = np.dot(<span style="color: #fb4934;">self</span>.x_train, <span style="color: #fb4934;">self</span>.weights)
-        <span style="color: #fb4934;">return</span> np.mean(np.square(<span style="color: #fb4934;">self</span>.y_train - y_pred))
+    def MSE(self):
+        '''computer the mean square error'''
+        y_pred = np.dot(self.x_train, self.weights)
+        return np.mean(np.square(self.y_train - y_pred))
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">plot</span>(<span style="color: #fb4934;">self</span>, w):
+    def plot(self, w):
         plt.figure(figsize=(9.0, 6.0))
-        plt.plot(<span style="color: #fb4934;">self</span>.x_train[:, 1], <span style="color: #fb4934;">self</span>.y_train, <span style="color: #b8bb26;">'bo'</span>)
-        plt.plot(<span style="color: #fb4934;">self</span>.x_train[:, 1], np.dot(<span style="color: #fb4934;">self</span>.x_train, w), <span style="color: #b8bb26;">'r-'</span>)
-        plt.xlabel(<span style="color: #b8bb26;">'x'</span>)
-        plt.ylabel(<span style="color: #b8bb26;">'y'</span>)
+        plt.plot(self.x_train[:, 1], self.y_train, 'bo')
+        plt.plot(self.x_train[:, 1], np.dot(self.x_train, w), 'r-')
+        plt.xlabel('x')
+        plt.ylabel('y')
         plt.tight_layout(pad=0.0)
         plt.show()
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgc8505fb" class="outline-3">
-<h3 id="orgc8505fb">求解</h3>
-<div class="outline-text-3" id="text-orgc8505fb">
+<div id="outline-container-orgd136563" class="outline-3">
+<h3 id="orgd136563">求解</h3>
+<div class="outline-text-3" id="text-orgd136563">
 <p>
 这里已经将截距项合并到x中以及weights中。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22312;&#25968;&#25454;&#21069;&#38754;&#28155;&#21152;&#19968;&#21015;&#65292;&#29992;&#26469;&#35745;&#31639;&#25130;&#36317;&#39033;</span>
-<span style="color: #83a598;">xt</span> = np.c_[np.ones((x.shape[0])), x]
-<span style="color: #83a598;">yt</span> = y.reshape(y.shape[0], -1)
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20004;&#20010;&#31995;&#25968;&#65292;&#19968;&#20010;&#25130;&#36317;&#39033;&#65292;&#19968;&#20010;&#31995;&#25968;</span>
-<span style="color: #83a598;">weights</span> = np.zeros((2, 1))
+<pre class="src src-jupyter-python"># 在数据前面添加一列，用来计算截距项
+xt = np.c_[np.ones((x.shape[0])), x]
+yt = y.reshape(y.shape[0], -1)
+# 两个系数，一个截距项，一个系数
+weights = np.zeros((2, 1))
 
-<span style="color: #83a598;">linear</span> = LinearRegression()
+linear = LinearRegression()
 linear.model(xt, yt)
 linear.train(weights.copy(), learning_rate=0.000001, iter_count=10)
 linear.plot(linear.weights)
@@ -461,32 +460,32 @@ linear.plot(linear.weights)
 </div>
 
 
-<figure>
+<figure id="orgd3b4601">
 <img src="./images/use-gradient-descent-for-line-regression-134697.png" alt="use-gradient-descent-for-line-regression-134697.png">
 
 </figure>
 </div>
 </div>
-<div id="outline-container-org2f7ad39" class="outline-3">
-<h3 id="org2f7ad39">优化过程</h3>
-<div class="outline-text-3" id="text-org2f7ad39">
+<div id="outline-container-org41f2088" class="outline-3">
+<h3 id="org41f2088">优化过程</h3>
+<div class="outline-text-3" id="text-org41f2088">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">fig</span>, <span style="color: #83a598;">ax</span> = plt.subplots(figsize=(9.0, 6.0))
+<pre class="src src-jupyter-python">fig, ax = plt.subplots(figsize=(9.0, 6.0))
 ax.scatter(x, y)
-line, = ax.plot(x, np.dot(xt, weights), <span style="color: #b8bb26;">'r-'</span>, lw=3)
+line, = ax.plot(x, np.dot(xt, weights), 'r-', lw=3)
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">update</span>(i):
-    <span style="color: #83a598;">y_pred</span> = np.dot(xt, linear.weights_list[i])
+def update(i):
+    y_pred = np.dot(xt, linear.weights_list[i])
     line.set_ydata(y_pred)
-    <span style="color: #fb4934;">return</span> line,
+    return line,
 
-<span style="color: #83a598;">anim</span> = FuncAnimation(fig, update, frames=<span style="color: #fe8019;">list</span>(<span style="color: #fe8019;">range</span>(10)), interval=500)
-anim.save(<span style="color: #b8bb26;">'./images/update-line-for-gradient-descent.gif'</span>, fps=60, writer=<span style="color: #b8bb26;">'imagemagick'</span>)
+anim = FuncAnimation(fig, update, frames=list(range(10)), interval=500)
+anim.save('./images/update-line-for-gradient-descent.gif', fps=60, writer='imagemagick')
 </pre>
 </div>
 
 
-<figure>
+<figure id="org9499032">
 <img src="./images/update-line-for-gradient-descent.gif" alt="update-line-for-gradient-descent.gif">
 
 </figure>
@@ -499,7 +498,7 @@ anim.save(<span style="color: #b8bb26;">'./images/update-line-for-gradient-desce
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>

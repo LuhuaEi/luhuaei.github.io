@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<!-- 2020-01-05 Sun 22:27 -->
+<!-- 2020-12-30 Wed 21:31 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>KNN算法预测CIFAR(01)</title>
 <meta name="generator" content="Org mode">
-<meta name="author" content="luhuaei">
 
 <meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
 <link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
@@ -15,7 +14,7 @@
 </head>
 <body>
 <div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8"> 
+   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
 <div id="preamble" class="status">
 
 <div class="">
@@ -34,226 +33,226 @@
 </header><p>
 根据KNN的原理，实现KNN模型，加深对KNN的理解。
 </p>
-<div id="outline-container-orgc09f51c" class="outline-2">
-<h2 id="orgc09f51c">依赖加载</h2>
-<div class="outline-text-2" id="text-orgc09f51c">
+<div id="outline-container-orga572d2c" class="outline-2">
+<h2 id="orga572d2c">依赖加载</h2>
+<div class="outline-text-2" id="text-orga572d2c">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">import</span> numpy <span style="color: #fb4934;">as</span> np
-<span style="color: #fb4934;">import</span> matplotlib.pyplot <span style="color: #fb4934;">as</span> plt
-<span style="color: #fb4934;">from</span> collections <span style="color: #fb4934;">import</span> Counter
-<span style="color: #fb4934;">import</span> pickle
-<span style="color: #fb4934;">import</span> os
+<pre class="src src-jupyter-python">import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+import pickle
+import os
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35774;&#32622;&#40664;&#35748;&#30340;&#22270;&#29255;&#22823;&#23567;</span>
-<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'figure.figsize'</span>] = (10.0, 8.0)
-<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'image.cmap'</span>] = <span style="color: #b8bb26;">'gray'</span>
-<span style="color: #83a598;">plt.rcParams</span>[<span style="color: #b8bb26;">'image.interpolation'</span>] = <span style="color: #b8bb26;">'nearest'</span>
+# 设置默认的图片大小
+plt.rcParams['figure.figsize'] = (10.0, 8.0)
+plt.rcParams['image.cmap'] = 'gray'
+plt.rcParams['image.interpolation'] = 'nearest'
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">relative_error</span>(x, y):
-    <span style="color: #ada296;">'''&#35745;&#31639;x&#19982;y&#20043;&#38388;&#30340;&#30456;&#23545;&#35823;&#24046;&#65292;x&#19982;y&#21487;&#20197;&#26159;&#25968;&#20540;&#65292;&#20063;&#21487;&#20197;&#26159;&#25968;&#32452;'''</span>
-    <span style="color: #fb4934;">return</span> np.<span style="color: #fe8019;">max</span>(np.<span style="color: #fe8019;">abs</span>(x - y) / (np.maximum(1e-8, np.<span style="color: #fe8019;">abs</span>(x) + np.<span style="color: #fe8019;">abs</span>(y))))
+def relative_error(x, y):
+    '''计算x与y之间的相对误差，x与y可以是数值，也可以是数组'''
+    return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgdd062da" class="outline-2">
-<h2 id="orgdd062da">数据加载</h2>
-<div class="outline-text-2" id="text-orgdd062da">
+<div id="outline-container-orgafc8652" class="outline-2">
+<h2 id="orgafc8652">数据加载</h2>
+<div class="outline-text-2" id="text-orgafc8652">
 <p>
 由于CIFAR默认的格式为二进制格式，不能使用常规的文件读取进行解码。
 <code>np.concatenate()</code> 类似于 <code>np.c_ or np.r_</code> 用来合并数据。
 </p>
 </div>
-<div id="outline-container-org1b6bed5" class="outline-3">
-<h3 id="org1b6bed5">数据加载函数</h3>
-<div class="outline-text-3" id="text-org1b6bed5">
+<div id="outline-container-org95d7ab9" class="outline-3">
+<h3 id="org95d7ab9">数据加载函数</h3>
+<div class="outline-text-3" id="text-org95d7ab9">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">unpickle</span>(file_name):
-    <span style="color: #ada296;">'''&#35299;&#30721;&#25968;&#25454;'''</span>
-    <span style="color: #fb4934;">with</span> <span style="color: #fe8019;">open</span>(file_name, <span style="color: #b8bb26;">'rb'</span>) <span style="color: #fb4934;">as</span> f:
-        <span style="color: #83a598;">d</span> = pickle.load(f, encoding=<span style="color: #b8bb26;">'bytes'</span>)
-    <span style="color: #fb4934;">return</span> d
+<pre class="src src-jupyter-python">def unpickle(file_name):
+    '''解码数据'''
+    with open(file_name, 'rb') as f:
+        d = pickle.load(f, encoding='bytes')
+    return d
 
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">load_data_batch</span>(file_name):
-    <span style="color: #ada296;">'''The CIFAR DATA is a 10000x3072 numpy array of uint8s. Each row of the array</span>
-<span style="color: #ada296;">    stores a 32x32 colour image. The first 1024 entries contain the red channel</span>
-<span style="color: #ada296;">    values, the next 1024 the green, and the final 1024 the blue. The image is</span>
-<span style="color: #ada296;">    stored in row-major order, so that the first 32 entries of the array are the</span>
-<span style="color: #ada296;">    red channel values of the first row of the image. &#27599;&#19968;&#20010;&#22270;&#29255;&#37117;&#20855;&#26377;3&#23618;&#65292;&#20998;&#21035;</span>
-<span style="color: #ada296;">    &#20195;&#34920;RGB&#12290;&#32780;&#25968;&#32452;&#20013;&#30340;&#27599;&#19968;&#34892;&#20648;&#23384;&#19968;&#20010;&#22270;&#29255;&#65292;&#20854;&#20013;&#21069;1024&#21508;&#20540;&#20195;&#34920;&#22270;&#29255;&#30340;&#32418;&#33394;&#23618;&#65292;&#32780;&#25509;</span>
-<span style="color: #ada296;">    &#30528;&#20026;&#32511;&#33394;&#20540;&#65292;&#26368;&#21518;1024&#20010;&#20540;&#20026;&#34013;&#33394;&#12290;&#22240;&#27492;&#21487;&#20197;&#23558;&#22270;&#29255;&#37325;&#35774;&#25104;(3, 32, 32)&#65292;&#20877;&#32463;&#36807;&#35013;&#32622;</span>
-<span style="color: #ada296;">    &#25104;(32, 32, 3)&#23601;&#26159;&#25105;&#20204;&#24120;&#35265;&#30340;&#23485; X &#39640; X &#28145;&#24230;&#12290;</span>
+def load_data_batch(file_name):
+    '''The CIFAR DATA is a 10000x3072 numpy array of uint8s. Each row of the array
+    stores a 32x32 colour image. The first 1024 entries contain the red channel
+    values, the next 1024 the green, and the final 1024 the blue. The image is
+    stored in row-major order, so that the first 32 entries of the array are the
+    red channel values of the first row of the image. 每一个图片都具有3层，分别
+    代表RGB。而数组中的每一行储存一个图片，其中前1024各值代表图片的红色层，而接
+    着为绿色值，最后1024个值为蓝色。因此可以将图片重设成(3, 32, 32)，再经过装置
+    成(32, 32, 3)就是我们常见的宽 X 高 X 深度。
 
-<span style="color: #ada296;">    labels is a list of 10000 numbers in the range 0-9. The number at index i</span>
-<span style="color: #ada296;">    indicates the label of the ith image in the array data.</span>
-<span style="color: #ada296;">    '''</span>
-    <span style="color: #83a598;">d</span> = unpickle(file_name)
-    <span style="color: #fb4934;">print</span>(d.keys())
-    <span style="color: #83a598;">X</span> = d[b<span style="color: #b8bb26;">'data'</span>]
-    <span style="color: #83a598;">Y</span> = d[b<span style="color: #b8bb26;">'labels'</span>]
-    <span style="color: #83a598;">X</span> = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype(<span style="color: #b8bb26;">'float'</span>)
-    <span style="color: #83a598;">Y</span> = np.array(Y)
-    <span style="color: #fb4934;">return</span> X, Y
+    labels is a list of 10000 numbers in the range 0-9. The number at index i
+    indicates the label of the ith image in the array data.
+    '''
+    d = unpickle(file_name)
+    print(d.keys())
+    X = d[b'data']
+    Y = d[b'labels']
+    X = X.reshape(10000, 3, 32, 32).transpose(0, 2, 3, 1).astype('float')
+    Y = np.array(Y)
+    return X, Y
 
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">load_CIFAR_data</span>(CIFAR_path):
-    <span style="color: #ada296;">'''&#21152;&#36733;CIFAR&#25968;&#25454;&#65292;&#24182;&#23558;&#23567;&#25209;&#37327;&#30340;&#25968;&#25454;&#21512;&#24182;&#22312;&#19968;&#36215;&#12290;'''</span>
-    <span style="color: #83a598;">xs</span> = []
-    <span style="color: #83a598;">ys</span> = []
-    <span style="color: #fb4934;">for</span> b <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(1, 6):
-        <span style="color: #83a598;">f</span> = os.path.join(CIFAR_path, <span style="color: #b8bb26;">'data_batch_%d'</span> % b)
-        <span style="color: #83a598;">X</span>, <span style="color: #83a598;">Y</span> = load_data_batch(f)
+def load_CIFAR_data(CIFAR_path):
+    '''加载CIFAR数据，并将小批量的数据合并在一起。'''
+    xs = []
+    ys = []
+    for b in range(1, 6):
+        f = os.path.join(CIFAR_path, 'data_batch_%d' % b)
+        X, Y = load_data_batch(f)
         xs.append(X)
         ys.append(Y)
-    <span style="color: #83a598;">Xtr</span> = np.concatenate(xs)
-    <span style="color: #83a598;">Ytr</span> = np.concatenate(ys)
-    <span style="color: #fb4934;">del</span> X, Y
-    <span style="color: #83a598;">f</span> = os.path.join(CIFAR_path, <span style="color: #b8bb26;">'test_batch'</span>)
-    <span style="color: #83a598;">Xte</span>, <span style="color: #83a598;">Yte</span> = load_data_batch(f)
-    <span style="color: #fb4934;">return</span> Xtr, Ytr, Xte, Yte
+    Xtr = np.concatenate(xs)
+    Ytr = np.concatenate(ys)
+    del X, Y
+    f = os.path.join(CIFAR_path, 'test_batch')
+    Xte, Yte = load_data_batch(f)
+    return Xtr, Ytr, Xte, Yte
 
 
-<span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">get_CIFAR_data</span>(num_training=49000, num_validation=1000, num_test=1000,
-                   subtract_mean=<span style="color: #fabd2f;">True</span>):
-    <span style="color: #ada296;">'''</span>
-<span style="color: #ada296;">    &#25972;&#20010;CIFAR&#20849;&#26377;60000&#24352;&#22270;&#29255;&#65292;&#20854;&#20013;50000&#20316;&#20026;&#35757;&#32451;&#38598;&#65292;1000&#20316;&#20026;&#27979;&#35797;&#38598;&#12290;&#23545;&#21152;&#36733;&#30340;&#25968;&#25454;</span>
-<span style="color: #ada296;">    &#36827;&#34892;&#39044;&#22788;&#29702;&#25805;&#20316;&#65292;&#24182;&#36820;&#22238;&#23383;&#20856;&#24418;&#24335;&#12290;</span>
-<span style="color: #ada296;">    '''</span>
-    <span style="color: #83a598;">cifar_dir</span> = <span style="color: #b8bb26;">"/home/luhuaei/Data/cifar-10-batches-py/"</span>
-    <span style="color: #83a598;">X_train</span>, <span style="color: #83a598;">Y_train</span>, <span style="color: #83a598;">X_test</span>, <span style="color: #83a598;">Y_test</span> = load_CIFAR_data(cifar_dir)
+def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=1000,
+                   subtract_mean=True):
+    '''
+    整个CIFAR共有60000张图片，其中50000作为训练集，1000作为测试集。对加载的数据
+    进行预处理操作，并返回字典形式。
+    '''
+    cifar_dir = "/home/luhuaei/Data/cifar-10-batches-py/"
+    X_train, Y_train, X_test, Y_test = load_CIFAR_data(cifar_dir)
 
-    <span style="color: #83a598;">xtrain</span> = X_train[:num_training]
-    <span style="color: #83a598;">ytrain</span> = Y_train[:num_training]
-    <span style="color: #83a598;">xtest</span> = X_test[:num_test]
-    <span style="color: #83a598;">ytest</span> = Y_test[:num_test]
-    <span style="color: #83a598;">xvalidation</span> = X_train[num_training:num_training + num_validation]
-    <span style="color: #83a598;">yvalidation</span> = Y_train[num_training:num_training + num_validation]
+    xtrain = X_train[:num_training]
+    ytrain = Y_train[:num_training]
+    xtest = X_test[:num_test]
+    ytest = Y_test[:num_test]
+    xvalidation = X_train[num_training:num_training + num_validation]
+    yvalidation = Y_train[num_training:num_training + num_validation]
 
-    <span style="color: #fb4934;">if</span> subtract_mean:
-        <span style="color: #83a598;">mean_image</span> = np.mean(xtrain, axis=0)
-        <span style="color: #83a598;">xtrain</span> -= mean_image
-        <span style="color: #83a598;">xvalidation</span> -= mean_image
-        <span style="color: #83a598;">xtest</span> -= mean_image
+    if subtract_mean:
+        mean_image = np.mean(xtrain, axis=0)
+        xtrain -= mean_image
+        xvalidation -= mean_image
+        xtest -= mean_image
 
-        <span style="color: #83a598;">xtrain</span> = xtrain.transpose(0, 3, 1, 2).copy()
-        <span style="color: #83a598;">xtest</span> = xtest.transpose(0, 3, 1, 2).copy()
-        <span style="color: #83a598;">xvalidation</span> = xvalidation.transpose(0, 3, 1, 2).copy()
+        xtrain = xtrain.transpose(0, 3, 1, 2).copy()
+        xtest = xtest.transpose(0, 3, 1, 2).copy()
+        xvalidation = xvalidation.transpose(0, 3, 1, 2).copy()
 
-    <span style="color: #fb4934;">return</span> {
-        <span style="color: #b8bb26;">'x_train'</span>: xtrain, <span style="color: #b8bb26;">'y_train'</span>: ytrain,
-        <span style="color: #b8bb26;">'x_validation'</span>: xvalidation, <span style="color: #b8bb26;">'y_validation'</span>: yvalidation,
-        <span style="color: #b8bb26;">'x_test'</span>: xtest, <span style="color: #b8bb26;">'y_test'</span>: ytest
+    return {
+        'x_train': xtrain, 'y_train': ytrain,
+        'x_validation': xvalidation, 'y_validation': yvalidation,
+        'x_test': xtest, 'y_test': ytest
     }
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orge56965f" class="outline-3">
-<h3 id="orge56965f">加载数据</h3>
-<div class="outline-text-3" id="text-orge56965f">
+<div id="outline-container-org0f571e1" class="outline-3">
+<h3 id="org0f571e1">加载数据</h3>
+<div class="outline-text-3" id="text-org0f571e1">
 <p>
 将数据集变成一个2维的矩阵。选取前面的5000作为训练集，1000作为验证集，1000作为测
 试集。一些模型需要用到2维的数据形式。 <code>np.prod()</code> 为将元素累积。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">DATA</span> = get_CIFAR_data()
-<span style="color: #83a598;">X_train</span> = DATA[<span style="color: #b8bb26;">'x_train'</span>]
-<span style="color: #83a598;">Y_train</span> = DATA[<span style="color: #b8bb26;">'y_train'</span>]
-<span style="color: #83a598;">X_test</span> = DATA[<span style="color: #b8bb26;">'x_test'</span>]
-<span style="color: #83a598;">Y_test</span> = DATA[<span style="color: #b8bb26;">'y_test'</span>]
-<span style="color: #83a598;">X_vali</span> = DATA[<span style="color: #b8bb26;">'x_validation'</span>]
-<span style="color: #83a598;">Y_vali</span> = DATA[<span style="color: #b8bb26;">'y_validation'</span>]
-<span style="color: #83a598;">X_train2d</span> = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
-<span style="color: #83a598;">X_test2d</span> = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
-<span style="color: #83a598;">X_vali2d</span> = X_vali.reshape(X_vali.shape[0], -1)
+<pre class="src src-jupyter-python">DATA = get_CIFAR_data()
+X_train = DATA['x_train']
+Y_train = DATA['y_train']
+X_test = DATA['x_test']
+Y_test = DATA['y_test']
+X_vali = DATA['x_validation']
+Y_vali = DATA['y_validation']
+X_train2d = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
+X_test2d = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
+X_vali2d = X_vali.reshape(X_vali.shape[0], -1)
 </pre>
 </div>
 </div>
 </div>
 </div>
-<div id="outline-container-orgf66311b" class="outline-2">
-<h2 id="orgf66311b">可视化数据</h2>
-<div class="outline-text-2" id="text-orgf66311b">
+<div id="outline-container-orgfa73c30" class="outline-2">
+<h2 id="orgfa73c30">可视化数据</h2>
+<div class="outline-text-2" id="text-orgfa73c30">
 <p>
 <code>np.flatnonzero()</code> 将函数变平，并返回非零元素的索引。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">classes</span> = [<span style="color: #b8bb26;">'plane'</span>, <span style="color: #b8bb26;">'car'</span>, <span style="color: #b8bb26;">'bird'</span>, <span style="color: #b8bb26;">'cat'</span>, <span style="color: #b8bb26;">'deer'</span>, <span style="color: #b8bb26;">'dog'</span>, <span style="color: #b8bb26;">'frog'</span>, <span style="color: #b8bb26;">'horse'</span>, <span style="color: #b8bb26;">'ship'</span>, <span style="color: #b8bb26;">'truck'</span>]
-<span style="color: #83a598;">num_classes</span> = <span style="color: #fe8019;">len</span>(classes)
-<span style="color: #83a598;">sample_per_class</span> = 7
-<span style="color: #fb4934;">for</span> y_index, cls <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(classes):
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36820;&#22238;index&#23545;&#24212;&#30340;&#31867;&#30340;&#25968;&#25454;&#65292;&#24182;&#21033;&#29992;np.flatnonzero()&#21464;&#24179;&#12290;</span>
-    <span style="color: #83a598;">idxs</span> = np.flatnonzero(Y_train == y_index)
-    <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#19981;&#25918;&#22238;&#25277;&#21462;&#25351;&#23450;&#20010;&#25968;&#26679;&#26412;&#65292;</span>
-    <span style="color: #83a598;">idxs</span> = np.random.choice(idxs, sample_per_class, replace=<span style="color: #fabd2f;">False</span>)
-    <span style="color: #fb4934;">for</span> i, idx <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(idxs):
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#22270;&#29255;&#23637;&#31034;&#25104;7x10&#65292;&#35745;&#31639;&#22270;&#29255;&#20986;&#29616;&#30340;&#20301;&#32622;</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">i * num_classes&#35745;&#31639;&#34892;&#25968;&#65292;y_index + 1&#35745;&#31639;&#21015;&#25968;</span>
-        <span style="color: #83a598;">img_index</span> = i * num_classes + y_index + 1
+<pre class="src src-jupyter-python">classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+num_classes = len(classes)
+sample_per_class = 7
+for y_index, cls in enumerate(classes):
+    # 返回index对应的类的数据，并利用np.flatnonzero()变平。
+    idxs = np.flatnonzero(Y_train == y_index)
+    # 不放回抽取指定个数样本，
+    idxs = np.random.choice(idxs, sample_per_class, replace=False)
+    for i, idx in enumerate(idxs):
+        # 这里图片展示成7x10，计算图片出现的位置
+        # i * num_classes计算行数，y_index + 1计算列数
+        img_index = i * num_classes + y_index + 1
         plt.subplot(sample_per_class, num_classes, img_index)
-        plt.imshow(X_train[idx].astype(<span style="color: #b8bb26;">'uint8'</span>))
-        plt.axis(<span style="color: #b8bb26;">'off'</span>)
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35774;&#32622;&#22270;&#29255;&#30340;&#31867;&#21517;</span>
-        <span style="color: #fb4934;">if</span> i == 0:
-            plt.title(cls, color=<span style="color: #b8bb26;">'green'</span>)
+        plt.imshow(X_train[idx].astype('uint8'))
+        plt.axis('off')
+        # 设置图片的类名
+        if i == 0:
+            plt.title(cls, color='green')
 plt.show()
 </pre>
 </div>
 
 
-<figure>
+<figure id="org66c3f6f">
 <img src="./images/cifar-data-on-knn-630170.png" alt="cifar-data-on-knn-630170.png">
 
 </figure>
 </div>
 </div>
 
-<div id="outline-container-orged412a8" class="outline-2">
-<h2 id="orged412a8">K最近邻</h2>
-<div class="outline-text-2" id="text-orged412a8">
+<div id="outline-container-org5b77d02" class="outline-2">
+<h2 id="org5b77d02">K最近邻</h2>
+<div class="outline-text-2" id="text-org5b77d02">
 </div>
-<div id="outline-container-org92634ff" class="outline-3">
-<h3 id="org92634ff">近邻算法</h3>
-<div class="outline-text-3" id="text-org92634ff">
+<div id="outline-container-org46617d8" class="outline-3">
+<h3 id="org46617d8">近邻算法</h3>
+<div class="outline-text-3" id="text-org46617d8">
 <p>
 利用近邻算法对图片进行分类，由于图片一般具有三个channael，这里是利用两个图片进行
 相减后取绝对值(L1)或者是相减后取平方在开方，对结果矩阵元素进行相加，得到两者之间
 的距离。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">NearesNeighbor</span>():
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>, method=<span style="color: #b8bb26;">"L1"</span>):
-        <span style="color: #fb4934;">self</span>.method = method
+<pre class="src src-jupyter-python">class NearesNeighbor():
+    def __init__(self, method="L1"):
+        self.method = method
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
-        <span style="color: #fb4934;">self</span>.x_train = x_train
-        <span style="color: #fb4934;">self</span>.y_train = y_train
+    def train(self, x_train, y_train):
+        self.x_train = x_train
+        self.y_train = y_train
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, x_pred):
-        <span style="color: #83a598;">out_num</span> = x_pred.shape[0]
-        <span style="color: #83a598;">out</span> = np.zeros(out_num, dtype=<span style="color: #fb4934;">self</span>.y_train.dtype)
-        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(out_num):
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(x_train_num, 1)</span>
-            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L1"</span>:
-                <span style="color: #83a598;">distance</span> = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train - x_pred[i, :]), axis=1)
-            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L2"</span>:
-                <span style="color: #83a598;">distance</span> = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train - x_pred[i, :]), axis=1))
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23547;&#25214;&#26368;&#23567;&#36317;&#31163;&#30340;&#20301;&#32622;</span>
-            <span style="color: #83a598;">min_index</span> = np.argmin(distance)
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#24403;&#21069;&#30340;&#27979;&#35797;&#26679;&#26412;&#26631;&#35760;&#20026;&#26368;&#23567;&#36317;&#31163;&#23545;&#24212;&#30340;&#35757;&#32451;&#26679;&#26412;&#26631;&#31614;</span>
-            <span style="color: #83a598;">out</span>[i] = <span style="color: #fb4934;">self</span>.y_train[min_index]
-            <span style="color: #fb4934;">print</span>(i)
-        <span style="color: #fb4934;">return</span> out
+    def predict(self, x_pred):
+        out_num = x_pred.shape[0]
+        out = np.zeros(out_num, dtype=self.y_train.dtype)
+        for i in range(out_num):
+            # 所有训练样本都对当前的样本矩阵相减，并对结果每一列(axis=1)累加
+            # 得到一个二维的矩阵(x_train_num, 1)
+            if self.method == "L1":
+                distance = np.sum(np.abs(self.x_train - x_pred[i, :]), axis=1)
+            if self.method == "L2":
+                distance = np.sqrt(np.sum(np.square(self.x_train - x_pred[i, :]), axis=1))
+            # 寻找最小距离的位置
+            min_index = np.argmin(distance)
+            # 将当前的测试样本标记为最小距离对应的训练样本标签
+            out[i] = self.y_train[min_index]
+            print(i)
+        return out
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org3194088" class="outline-3">
-<h3 id="org3194088">k近邻算法</h3>
-<div class="outline-text-3" id="text-org3194088">
+<div id="outline-container-orge013e49" class="outline-3">
+<h3 id="orge013e49">k近邻算法</h3>
+<div class="outline-text-3" id="text-orge013e49">
 <blockquote>
 <p>
 The idea is very simple: instead of finding the single closest image in the
@@ -266,9 +265,9 @@ label of the test image.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfbdf741" class="outline-3">
-<h3 id="orgfbdf741">如何选择k？</h3>
-<div class="outline-text-3" id="text-orgfbdf741">
+<div id="outline-container-orgbab606f" class="outline-3">
+<h3 id="orgbab606f">如何选择k？</h3>
+<div class="outline-text-3" id="text-orgbab606f">
 <p>
 在机器学习上，对于一些无法确定的参数，称为超参数(hyperparameters)。不能使用测试
 集数据来改进超参数的，这会产生过拟合(overfit)，测试集应该只用于最后最后一步。
@@ -294,162 +293,162 @@ Evaluate on the test set only a single time, at the very end.
 </div>
 </div>
 
-<div id="outline-container-orgba823c8" class="outline-3">
-<h3 id="orgba823c8">Cross Validation</h3>
-<div class="outline-text-3" id="text-orgba823c8">
+<div id="outline-container-org6dd6bb7" class="outline-3">
+<h3 id="org6dd6bb7">Cross Validation</h3>
+<div class="outline-text-3" id="text-org6dd6bb7">
 <p>
 将数据进行切割，返回一个列表，在python中，两个列表进行相加求值为将两个列表进行合
 并。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">cross_validation</span>(Xtr, Ytr, ks, folds, classifier):
-    <span style="color: #83a598;">xtrf</span> = np.split(Xtr, folds)
-    <span style="color: #83a598;">ytrf</span> = np.split(Ytr, folds)
-    <span style="color: #83a598;">num_split</span> = Xtr.shape[0] / folds
+<pre class="src src-jupyter-python">def cross_validation(Xtr, Ytr, ks, folds, classifier):
+    xtrf = np.split(Xtr, folds)
+    ytrf = np.split(Ytr, folds)
+    num_split = Xtr.shape[0] / folds
 
-    <span style="color: #83a598;">k_acc</span> = {}
+    k_acc = {}
 
-    <span style="color: #fb4934;">for</span> ik, k <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">enumerate</span>(ks):
-        <span style="color: #83a598;">acc</span> = np.zeros(folds, dtype=np.<span style="color: #fe8019;">float</span>)
-        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(folds):
-            <span style="color: #83a598;">train</span> = np.concatenate((xtrf[:i] + xtrf[i+1:]))
-            <span style="color: #83a598;">label</span> = np.concatenate((ytrf[:i] + ytrf[i+1:]))
+    for ik, k in enumerate(ks):
+        acc = np.zeros(folds, dtype=np.float)
+        for i in range(folds):
+            train = np.concatenate((xtrf[:i] + xtrf[i+1:]))
+            label = np.concatenate((ytrf[:i] + ytrf[i+1:]))
             classifier.train(train, label)
-            <span style="color: #83a598;">pred</span> = classifier.predict(xtrf[i], k)
-            <span style="color: #83a598;">acc</span>[i] = np.mean(pred == ytrf[i])
-        <span style="color: #83a598;">k_acc</span>[k] = acc
-    <span style="color: #fb4934;">return</span> k_acc
+            pred = classifier.predict(xtrf[i], k)
+            acc[i] = np.mean(pred == ytrf[i])
+        k_acc[k] = acc
+    return k_acc
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org003297c" class="outline-3">
-<h3 id="org003297c">算法实现</h3>
-<div class="outline-text-3" id="text-org003297c">
+<div id="outline-container-org0c29f70" class="outline-3">
+<h3 id="org0c29f70">算法实现</h3>
+<div class="outline-text-3" id="text-org0c29f70">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">class</span> <span style="color: #8ec07c;">KNearesNeighbor</span>():
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">__init__</span>(<span style="color: #fb4934;">self</span>, method=<span style="color: #b8bb26;">'L2'</span>, loop_way=0):
-        <span style="color: #fb4934;">self</span>.method = method
-        <span style="color: #fb4934;">self</span>.loop_way = loop_way
+<pre class="src src-jupyter-python">class KNearesNeighbor():
+    def __init__(self, method='L2', loop_way=0):
+        self.method = method
+        self.loop_way = loop_way
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">train</span>(<span style="color: #fb4934;">self</span>, x_train, y_train):
-        <span style="color: #fb4934;">self</span>.x_train = x_train
-        <span style="color: #fb4934;">self</span>.y_train = y_train
+    def train(self, x_train, y_train):
+        self.x_train = x_train
+        self.y_train = y_train
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict</span>(<span style="color: #fb4934;">self</span>, x_pred, k):
-        <span style="color: #fb4934;">self</span>.k = k
-        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 0:
-            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_no_loop(x_pred)
-        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 1:
-            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_one_loop(x_pred)
-        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.loop_way == 2:
-            <span style="color: #83a598;">distance</span> = <span style="color: #fb4934;">self</span>.predict_two_loop(x_pred)
-        <span style="color: #fb4934;">return</span> <span style="color: #fb4934;">self</span>.predict_label(distance)
+    def predict(self, x_pred, k):
+        self.k = k
+        if self.loop_way == 0:
+            distance = self.predict_no_loop(x_pred)
+        if self.loop_way == 1:
+            distance = self.predict_one_loop(x_pred)
+        if self.loop_way == 2:
+            distance = self.predict_two_loop(x_pred)
+        return self.predict_label(distance)
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_no_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
-        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #83a598;">xth</span>, <span style="color: #83a598;">xtw</span> = <span style="color: #fb4934;">self</span>.x_train.shape
-        <span style="color: #83a598;">xph</span>, <span style="color: #83a598;">xpw</span> = x_pred.shape
-        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#21033;&#29992;numpy&#20013;&#24403;&#19968;&#20010;&#30697;&#38453;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#25110;&#32773;&#19968;&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;&#25968;&#32452;&#26102;&#65292;&#25968;&#32452;</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20013;&#27599;&#19968;&#20010;&#20540;&#37117;&#20250;&#34987;&#24212;&#29992;&#65292;&#22914;(5, 1) - (2, 1)&#34920;&#31034;&#25104;5&#20010;&#25968;&#20540;&#20943;&#21435;&#19968;&#20010;2&#32500;&#30340;&#25968;&#20540;&#65292;</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#23558;&#20250;&#24471;&#21040;(5, 2)&#65292;&#22312;numpy&#20013;&#20250;&#23558;(2, 1)&#35013;&#32622;&#25104;(1, 2)&#65292;&#20174;&#32780;(5, 1) - (1, 2)&#24471;&#21040;&#19968;&#20010;5x2&#30340;&#30697;&#38453;&#65292;</span>
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22914;&#26524;&#19968;&#20010;&#30697;&#38453;&#26159;&#26174;&#24335;&#25351;&#23450;&#20026;(5,1)&#21478;&#19968;&#20010;&#26174;&#24335;&#25351;&#23450;&#20026;(2, 1)&#30456;&#21152;&#23558;&#20250;&#20986;&#38169;</span>
-        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L1'</span>:
-            <span style="color: #83a598;">distance</span> = np.<span style="color: #fe8019;">abs</span>(np.<span style="color: #fe8019;">sum</span>(x_pred, axis=1).reshape(xph, 1)
-                              - np.<span style="color: #fe8019;">sum</span>(<span style="color: #fb4934;">self</span>.x_train, axis=1).reshape(1, xth))
-        <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L2'</span>:
-            <span style="color: #83a598;">distance</span> = np.sqrt(np.<span style="color: #fe8019;">sum</span>(x_pred**2, axis=1).reshape(xph, 1)
-                               + np.<span style="color: #fe8019;">sum</span>(<span style="color: #fb4934;">self</span>.x_train**2, axis=1).reshape(1, xth) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36825;&#37324;&#35201;&#20040;&#19981;&#35201;reshape(xth, -1)&#65292;&#35201;&#20040;&#25351;&#23450;&#20026;(1, xth)&#21542;&#21017;&#20986;&#38169;</span>
-                               - 2 * x_pred.dot(<span style="color: #fb4934;">self</span>.x_train.T))
-        <span style="color: #fb4934;">return</span> distance
+    def predict_no_loop(self, x_pred):
+        '''x_pred 为需要预测的X，返回距离矩阵'''
+        xth, xtw = self.x_train.shape
+        xph, xpw = x_pred.shape
+        distance = np.zeros((xph, xth))
+        # 这里利用numpy中当一个矩阵减去一个数组或者一个数值减去一个数组时，数组
+        # 中每一个值都会被应用，如(5, 1) - (2, 1)表示成5个数值减去一个2维的数值，
+        # 将会得到(5, 2)，在numpy中会将(2, 1)装置成(1, 2)，从而(5, 1) - (1, 2)得到一个5x2的矩阵，
+        # 如果一个矩阵是显式指定为(5,1)另一个显式指定为(2, 1)相加将会出错
+        if self.method == 'L1':
+            distance = np.abs(np.sum(x_pred, axis=1).reshape(xph, 1)
+                              - np.sum(self.x_train, axis=1).reshape(1, xth))
+        if self.method == 'L2':
+            distance = np.sqrt(np.sum(x_pred**2, axis=1).reshape(xph, 1)
+                               + np.sum(self.x_train**2, axis=1).reshape(1, xth) # 这里要么不要reshape(xth, -1)，要么指定为(1, xth)否则出错
+                               - 2 * x_pred.dot(self.x_train.T))
+        return distance
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_one_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
-        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #83a598;">xph</span> = x_pred.shape[0]
-        <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35757;&#32451;&#38598;&#30340;&#26679;&#26412;&#20010;&#25968;&#65292;&#36825;&#37324;&#22240;&#20026;&#25972;&#20010;&#35757;&#32451;&#38598;&#26679;&#26412;&#37117;&#23545;&#27979;&#35797;&#38598;&#20013;&#30340;&#27599;&#19968;&#20010;&#22270;&#29255;&#36941;&#21382;</span>
-        <span style="color: #83a598;">xth</span> = <span style="color: #fb4934;">self</span>.x_train.shape[0]
-        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xph):
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#25152;&#26377;&#35757;&#32451;&#26679;&#26412;&#37117;&#23545;&#24403;&#21069;&#30340;&#26679;&#26412;&#30697;&#38453;&#30456;&#20943;&#65292;&#24182;&#23545;&#32467;&#26524;&#27599;&#19968;&#21015;(axis=1)&#32047;&#21152;</span>
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#24471;&#21040;&#19968;&#20010;&#20108;&#32500;&#30340;&#30697;&#38453;(num, 1)</span>
-            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L1"</span>:
-                <span style="color: #83a598;">distance</span>[i] = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train - x_pred[i]), axis=1)
-            <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">"L2"</span>:
-                <span style="color: #83a598;">distance</span>[i] = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train - x_pred[i]), axis=1))
-        <span style="color: #fb4934;">return</span> distance
+    def predict_one_loop(self, x_pred):
+        '''x_pred 为需要预测的X，返回距离矩阵'''
+        xph = x_pred.shape[0]
+        # 训练集的样本个数，这里因为整个训练集样本都对测试集中的每一个图片遍历
+        xth = self.x_train.shape[0]
+        distance = np.zeros((xph, xth))
+        for i in range(xph):
+            # 所有训练样本都对当前的样本矩阵相减，并对结果每一列(axis=1)累加
+            # 得到一个二维的矩阵(num, 1)
+            if self.method == "L1":
+                distance[i] = np.sum(np.abs(self.x_train - x_pred[i]), axis=1)
+            if self.method == "L2":
+                distance[i] = np.sqrt(np.sum(np.square(self.x_train - x_pred[i]), axis=1))
+        return distance
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_two_loop</span>(<span style="color: #fb4934;">self</span>, x_pred):
-        <span style="color: #ada296;">'''x_pred &#20026;&#38656;&#35201;&#39044;&#27979;&#30340;X&#65292;&#36820;&#22238;&#36317;&#31163;&#30697;&#38453;'''</span>
-        <span style="color: #83a598;">xth</span>, <span style="color: #83a598;">xtw</span> = <span style="color: #fb4934;">self</span>.x_train.shape
-        <span style="color: #83a598;">xph</span>, <span style="color: #83a598;">xpw</span> = x_pred.shape
-        <span style="color: #83a598;">distance</span> = np.zeros((xph, xth))
-        <span style="color: #fb4934;">for</span> y <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xph):
-            <span style="color: #fb4934;">for</span> x <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(xth):
-                <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L1'</span>:
-                    <span style="color: #83a598;">distance</span>[y, x] = np.<span style="color: #fe8019;">sum</span>(np.<span style="color: #fe8019;">abs</span>(<span style="color: #fb4934;">self</span>.x_train[x] - x_pred[y]))
-                <span style="color: #fb4934;">if</span> <span style="color: #fb4934;">self</span>.method == <span style="color: #b8bb26;">'L2'</span>:
-                    <span style="color: #83a598;">distance</span>[y, x] = np.sqrt(np.<span style="color: #fe8019;">sum</span>(np.square(<span style="color: #fb4934;">self</span>.x_train[x] - x_pred[y])))
-        <span style="color: #fb4934;">return</span> distance
+    def predict_two_loop(self, x_pred):
+        '''x_pred 为需要预测的X，返回距离矩阵'''
+        xth, xtw = self.x_train.shape
+        xph, xpw = x_pred.shape
+        distance = np.zeros((xph, xth))
+        for y in range(xph):
+            for x in range(xth):
+                if self.method == 'L1':
+                    distance[y, x] = np.sum(np.abs(self.x_train[x] - x_pred[y]))
+                if self.method == 'L2':
+                    distance[y, x] = np.sqrt(np.sum(np.square(self.x_train[x] - x_pred[y])))
+        return distance
 
-    <span style="color: #fb4934;">def</span> <span style="color: #8ec07c;">predict_label</span>(<span style="color: #fb4934;">self</span>, distance):
-        <span style="color: #83a598;">out_num</span> = distance.shape[0]
-        <span style="color: #83a598;">out</span> = np.zeros(out_num)
-        <span style="color: #fb4934;">for</span> i <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">range</span>(out_num):
-            <span style="color: #83a598;">top_k_index</span> = np.argsort(distance[i])[:<span style="color: #fb4934;">self</span>.k]
-            <span style="color: #83a598;">top_k_label</span> = <span style="color: #fb4934;">self</span>.y_train[top_k_index]
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#20174;&#20960;&#20010;&#26631;&#31614;&#20013;&#36873;&#25321;&#26368;&#22810;&#25237;&#31080;(&#20986;&#29616;&#26368;&#22810;)&#30340;&#26631;&#31614;</span>
-            <span style="color: #83a598;">vote</span> = Counter(top_k_label)
-            <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#36820;&#22238;&#19968;&#20010;&#21015;&#34920;&#65292;&#21015;&#34920;&#20013;&#20026;&#20803;&#32452;&#65292;&#20803;&#32452;&#31532;&#19968;&#20010;&#20803;&#32032;&#20026;&#26631;&#31614;&#65292;&#31532;&#20108;&#20010;&#20026;&#20986;&#29616;&#30340;&#27425;&#25968;</span>
-            <span style="color: #83a598;">count</span> = vote.most_common()
-            <span style="color: #83a598;">out</span>[i] = count[0][0]
-        <span style="color: #fb4934;">return</span> out
+    def predict_label(self, distance):
+        out_num = distance.shape[0]
+        out = np.zeros(out_num)
+        for i in range(out_num):
+            top_k_index = np.argsort(distance[i])[:self.k]
+            top_k_label = self.y_train[top_k_index]
+            # 从几个标签中选择最多投票(出现最多)的标签
+            vote = Counter(top_k_label)
+            # 返回一个列表，列表中为元组，元组第一个元素为标签，第二个为出现的次数
+            count = vote.most_common()
+            out[i] = count[0][0]
+        return out
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orge3c7b6b" class="outline-3">
-<h3 id="orge3c7b6b">优缺点</h3>
-<div class="outline-text-3" id="text-orge3c7b6b">
+<div id="outline-container-org5b73e0f" class="outline-3">
+<h3 id="org5b73e0f">优缺点</h3>
+<div class="outline-text-3" id="text-org5b73e0f">
 </div>
-<div id="outline-container-org89d5396" class="outline-4">
-<h4 id="org89d5396">优点</h4>
-<div class="outline-text-4" id="text-org89d5396">
+<div id="outline-container-orgd05510c" class="outline-4">
+<h4 id="orgd05510c">优点</h4>
+<div class="outline-text-4" id="text-orgd05510c">
 <p>
 容易实现，简单理解。更适用于二维的数据。
 </p>
 </div>
 </div>
-<div id="outline-container-org20db0b5" class="outline-4">
-<h4 id="org20db0b5">缺点</h4>
-<div class="outline-text-4" id="text-org20db0b5">
+<div id="outline-container-org201b9a4" class="outline-4">
+<h4 id="org201b9a4">缺点</h4>
+<div class="outline-text-4" id="text-org201b9a4">
 <p>
 计算量大，耗时长，每测试一个样本，都需要遍历整个训练集。
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org99c1d38" class="outline-3">
-<h3 id="org99c1d38">测试数据</h3>
-<div class="outline-text-3" id="text-org99c1d38">
+<div id="outline-container-org61be01c" class="outline-3">
+<h3 id="org61be01c">测试数据</h3>
+<div class="outline-text-3" id="text-org61be01c">
 </div>
-<div id="outline-container-org3933f64" class="outline-4">
-<h4 id="org3933f64">NN与KNN</h4>
-<div class="outline-text-4" id="text-org3933f64">
+<div id="outline-container-orge9bda9a" class="outline-4">
+<h4 id="orge9bda9a">NN与KNN</h4>
+<div class="outline-text-4" id="text-orge9bda9a">
 <p>
 不使用循环速度真的提升很多。
 </p>
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">nn</span> = NearesNeighbor(<span style="color: #b8bb26;">"L2"</span>)
+<pre class="src src-jupyter-python">nn = NearesNeighbor("L2")
 nn.train(X_train2d, Y_train)
-<span style="color: #83a598;">nn_pred</span> = nn.predict(X_test2d)
-<span style="color: #83a598;">nn_accurary</span> = np.mean(nn_pred == Y_test)
+nn_pred = nn.predict(X_test2d)
+nn_accurary = np.mean(nn_pred == Y_test)
 
-<span style="color: #83a598;">knn</span> = KNearesNeighbor(method=<span style="color: #b8bb26;">'L2'</span>, loop_way=0)
+knn = KNearesNeighbor(method='L2', loop_way=0)
 knn.train(X_train2d, Y_train)
-<span style="color: #83a598;">knn_pred</span> = knn.predict(X_test2d, k=10)
-<span style="color: #83a598;">knn_accurary</span> = np.mean(knn_pred == Y_test)
-<span style="color: #fb4934;">print</span>(<span style="color: #b8bb26;">"NN: %.2f, KNN: %.2f"</span> %(nn_accurary, knn_accurary))
+knn_pred = knn.predict(X_test2d, k=10)
+knn_accurary = np.mean(knn_pred == Y_test)
+print("NN: %.2f, KNN: %.2f" %(nn_accurary, knn_accurary))
 </pre>
 </div>
 
@@ -460,34 +459,34 @@ NN: 0.27, KNN: 0.29
 </div>
 </div>
 
-<div id="outline-container-orgb9c270e" class="outline-3">
-<h3 id="orgb9c270e">使用交叉验证选择最优的k</h3>
-<div class="outline-text-3" id="text-orgb9c270e">
+<div id="outline-container-orgd022100" class="outline-3">
+<h3 id="orgd022100">使用交叉验证选择最优的k</h3>
+<div class="outline-text-3" id="text-orgd022100">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #83a598;">num_folds</span> = 5
-<span style="color: #83a598;">k_choices</span> = [1, 3, 5, 7, 10, 25, 50, 100]
+<pre class="src src-jupyter-python">num_folds = 5
+k_choices = [1, 3, 5, 7, 10, 25, 50, 100]
 
-<span style="color: #83a598;">knn</span> = KNearesNeighbor()
-<span style="color: #83a598;">kacc</span> = cross_validation(X_train2d, Y_train, k_choices, num_folds, knn)
+knn = KNearesNeighbor()
+kacc = cross_validation(X_train2d, Y_train, k_choices, num_folds, knn)
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org75a142c" class="outline-3">
-<h3 id="org75a142c">准确率可视化</h3>
-<div class="outline-text-3" id="text-org75a142c">
+<div id="outline-container-org0355cc3" class="outline-3">
+<h3 id="org0355cc3">准确率可视化</h3>
+<div class="outline-text-3" id="text-org0355cc3">
 <div class="org-src-container">
-<pre class="src src-jupyter-python"><span style="color: #fb4934;">for</span> k <span style="color: #fb4934;">in</span> k_choices:
-    <span style="color: #83a598;">acc</span> = kacc[k]
-    plt.scatter([k] * <span style="color: #fe8019;">len</span>(acc), acc) <span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#22266;&#23450;x&#65292;&#25551;&#32472;acc</span>
+<pre class="src src-jupyter-python">for k in k_choices:
+    acc = kacc[k]
+    plt.scatter([k] * len(acc), acc) # 固定x，描绘acc
 
-<span style="color: #7c6f64;"># </span><span style="color: #7c6f64;">&#35745;&#31639;&#27599;&#19968;&#20010;k&#23545;&#24212;&#30340;folds&#30340;&#24179;&#22343;&#20540;&#19982;&#26631;&#20934;&#24046;</span>
-<span style="color: #83a598;">acc_mean</span> = [np.mean(v) <span style="color: #fb4934;">for</span> k, v <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">sorted</span>(kacc.items())]
-<span style="color: #83a598;">acc_std</span> = [np.std(v) <span style="color: #fb4934;">for</span> k, v <span style="color: #fb4934;">in</span> <span style="color: #fe8019;">sorted</span>(kacc.items())]
+# 计算每一个k对应的folds的平均值与标准差
+acc_mean = [np.mean(v) for k, v in sorted(kacc.items())]
+acc_std = [np.std(v) for k, v in sorted(kacc.items())]
 plt.errorbar(k_choices, acc_mean, yerr=acc_std)
-plt.title(<span style="color: #b8bb26;">'Cross Validation of k'</span>)
-plt.xlabel(<span style="color: #b8bb26;">'k'</span>)
-plt.ylabel(<span style="color: #b8bb26;">'accurary'</span>)
+plt.title('Cross Validation of k')
+plt.xlabel('k')
+plt.ylabel('accurary')
 plt.show()
 </pre>
 </div>
@@ -505,7 +504,7 @@ plt.show()
       <!-- Footer Definition -->
    </footer>
 
-  <!-- Google Analytics Js --><!-- Disqua JS --> 
+  <!-- Google Analytics Js --><!-- Disqua JS -->
 </div>
 
 </div>
