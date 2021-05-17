@@ -1,0 +1,100 @@
+最近在学习 `Vue.js`{.verbatim} ,在这里记录其中的一些坑.
+
+关于 `Vue.js`{.verbatim}
+基本情况可以参考大佬的[Vue.js实践小技巧](https://manateelazycat.github.io/web/2019/07/14/vue-tooltips.html)
+
+1.  数据或者对象中值改变,界面的数据不进行渲染.这个vue中不能响应结构中变化，但是在
+    官方文档中也给出了，对于一些操作是可以感知的，如push, pop这种。
+
+2.  怎样创建一个递归的组件,应用场景: 比如一个树状结构的展示列表.
+    也有一些评论场景 使用树状结构进行展示回复.
+
+        <template>
+            <div>
+                <tree :user="next_user" :value="next_value"></tree>
+            </div>
+        </template>
+
+        <script>
+         export default {
+             name: "tree",
+             props: {
+                 user: String,
+                 value: Number,
+             },
+             data() {
+                 return {
+                     next_user: "",
+                     next_value: "",
+                 }
+             }
+         }
+        </script>
+
+    递归的关键点在于为一个组件使用 `name`{.verbatim} 标记,
+    并在自身模板中引用本身.注意设定 结束判断条件,否则会出现递归溢出错误.
+
+3.  在模板中引用全局函数并不需要加上 `this`{.verbatim} 指针,
+    同样在模板中使用全局变量可以直 接写成
+    `$store.state.global_value`{.verbatim} 的形式. 不同经过使用
+    `methods`{.verbatim} 包装一层.
+
+4.  过滤器用起来很方便, 可以在组件中定义局部过滤器,也可以使用
+    `Vue`{.verbatim} 定义全局过滤 器.
+
+        <!-- 局部过滤器 -->
+        <script>
+         export default {
+             name: "test",
+             filters: {
+                 odd: function(arr) {
+                     let result = [];
+                     arr.map((e) => {
+                         if (e % 2 != 0) result.push(e);
+                     });
+                     return result;
+                 }
+             }
+         }
+
+        <!-- 全局过滤器 -->
+        Vue.filter("even", (arr) => {
+             let result = [];
+             arr.map((e) => {
+                 if (e % 2 == 0) result.push(e);
+             });
+             return result;
+         });
+        </script>
+
+5.  不该使用箭头函数
+
+    1.  不应该使用箭头函数来定义 method 函数
+    2.  不应该对 data 属性使用箭头函数
+    3.  不应该使用箭头函数来定义 watcher 函数
+    4.  不应该使用箭头函数来定义计算属性函数
+
+6.  keep-alive
+    组件的使用，这个组件可以让你页面进行缓存，当切换路由的时候，可以保
+    留原来页面的渲染数据不变。比如，当一个用户在等待一个加载的时候，这是他可能感
+    到不耐烦，切换到其他的页面，当他再次切换回来，可以保持进度条，或者已经渲染的
+    数据不被刷新，或者重新计算渲染。原理是通过将原来的页面进行缓存，当再次切换回
+    来的时候，优先从以缓存的队列中选取。
+
+7.  store 管理， `mutation`{.verbatim}
+    接收参数必须只能两个，超出的都无法获取；第二个参数推荐传
+    递的是一个对象，来接收更多的信息。
+
+8.  slot 插槽, 用于组件层次的复用, 可以通过 `slot`{.verbatim}
+    来自定义布局. 关于插槽, 通常将
+    使用具有插槽的组件(子组件)的组件(父组件). 子组件可以通过
+    `插槽prop`{.verbatim} 来实现与 父组件之间的数据传递.
+
+9.  动态组件, 适用于多标签页面, 加上 `<keep-alive>`{.verbatim}
+    可以保存原有的状态,而不会自 动更新,从而导致重新加载.
+
+10. 在多层次组件中，我比较喜欢将各个子组件的业务逻辑都集中到一个组件上(原始节点
+    组件)，而通过prop或者自定义事件来传递数据，这样就可以仅仅需要维护一个业务逻
+    辑的组件，而后面的子组件都可以将页面与数据脱离。对于多层次组件来说，使用
+    prop和自定义事件就需要层层传递，使用 v-on=\"\$licenster\"
+    可以跨中间组件传递事 件。

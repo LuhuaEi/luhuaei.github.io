@@ -1,43 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- 2020-12-30 Wed 21:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>KNN算法预测CIFAR(01)</title>
-<meta name="generator" content="Org mode">
-
-<meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
-<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-</head>
-<body>
-<div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
-<div id="preamble" class="status">
-
-<div class="">
-    <a href="/"> Luhua.ei </a>
-</div>
-<ul class="">
-  <li><a href="/about.html"> About Me </a> </li>
-  <li><a href="https://github.com/luhuaei"> Github </a> </li>
-  <li><a href="/archive.html"> Posts </a> </li>
-</ul>
-  <hr>
-</div>
-<div id="content">
-<header>
-<h1 class="title">KNN算法预测CIFAR(01)</h1>
-</header><p>
 根据KNN的原理，实现KNN模型，加深对KNN的理解。
-</p>
-<div id="outline-container-orga572d2c" class="outline-2">
-<h2 id="orga572d2c">依赖加载</h2>
-<div class="outline-text-2" id="text-orga572d2c">
-<div class="org-src-container">
-<pre class="src src-jupyter-python">import numpy as np
+
+# 依赖加载
+
+``` {.python session="py" results="output silent" exports="both"}
+import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
 import pickle
@@ -51,24 +17,18 @@ plt.rcParams['image.interpolation'] = 'nearest'
 def relative_error(x, y):
     '''计算x与y之间的相对误差，x与y可以是数值，也可以是数组'''
     return np.max(np.abs(x - y) / (np.maximum(1e-8, np.abs(x) + np.abs(y))))
-</pre>
-</div>
-</div>
-</div>
+```
 
-<div id="outline-container-orgafc8652" class="outline-2">
-<h2 id="orgafc8652">数据加载</h2>
-<div class="outline-text-2" id="text-orgafc8652">
-<p>
+# 数据加载
+
 由于CIFAR默认的格式为二进制格式，不能使用常规的文件读取进行解码。
-<code>np.concatenate()</code> 类似于 <code>np.c_ or np.r_</code> 用来合并数据。
-</p>
-</div>
-<div id="outline-container-org95d7ab9" class="outline-3">
-<h3 id="org95d7ab9">数据加载函数</h3>
-<div class="outline-text-3" id="text-org95d7ab9">
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def unpickle(file_name):
+`np.concatenate()`{.verbatim} 类似于 `np.c_ or np.r_`{.verbatim}
+用来合并数据。
+
+## 数据加载函数
+
+``` {.python session="py" results="output silent" exports="both"}
+def unpickle(file_name):
     '''解码数据'''
     with open(file_name, 'rb') as f:
         d = pickle.load(f, encoding='bytes')
@@ -145,19 +105,16 @@ def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=1000,
         'x_validation': xvalidation, 'y_validation': yvalidation,
         'x_test': xtest, 'y_test': ytest
     }
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org0f571e1" class="outline-3">
-<h3 id="org0f571e1">加载数据</h3>
-<div class="outline-text-3" id="text-org0f571e1">
-<p>
+```
+
+## 加载数据
+
 将数据集变成一个2维的矩阵。选取前面的5000作为训练集，1000作为验证集，1000作为测
-试集。一些模型需要用到2维的数据形式。 <code>np.prod()</code> 为将元素累积。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">DATA = get_CIFAR_data()
+试集。一些模型需要用到2维的数据形式。 `np.prod()`{.verbatim}
+为将元素累积。
+
+``` {.python session="py" results="output silent" exports="both"}
+DATA = get_CIFAR_data()
 X_train = DATA['x_train']
 Y_train = DATA['y_train']
 X_test = DATA['x_test']
@@ -167,19 +124,14 @@ Y_vali = DATA['y_validation']
 X_train2d = X_train.reshape(X_train.shape[0], np.prod(X_train.shape[1:]))
 X_test2d = X_test.reshape(X_test.shape[0], np.prod(X_test.shape[1:]))
 X_vali2d = X_vali.reshape(X_vali.shape[0], -1)
-</pre>
-</div>
-</div>
-</div>
-</div>
-<div id="outline-container-orgfa73c30" class="outline-2">
-<h2 id="orgfa73c30">可视化数据</h2>
-<div class="outline-text-2" id="text-orgfa73c30">
-<p>
-<code>np.flatnonzero()</code> 将函数变平，并返回非零元素的索引。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+```
+
+# 可视化数据
+
+`np.flatnonzero()`{.verbatim} 将函数变平，并返回非零元素的索引。
+
+``` {.python session="py" results="output graphic" file="./images/cifar-data-on-knn-630170.png" exports="both"}
+classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 num_classes = len(classes)
 sample_per_class = 7
 for y_index, cls in enumerate(classes):
@@ -198,31 +150,20 @@ for y_index, cls in enumerate(classes):
         if i == 0:
             plt.title(cls, color='green')
 plt.show()
-</pre>
-</div>
+```
 
+![](./images/cifar-data-on-knn-630170.png)
 
-<figure id="org66c3f6f">
-<img src="./images/cifar-data-on-knn-630170.png" alt="cifar-data-on-knn-630170.png">
+# K最近邻
 
-</figure>
-</div>
-</div>
+## 近邻算法
 
-<div id="outline-container-org5b77d02" class="outline-2">
-<h2 id="org5b77d02">K最近邻</h2>
-<div class="outline-text-2" id="text-org5b77d02">
-</div>
-<div id="outline-container-org46617d8" class="outline-3">
-<h3 id="org46617d8">近邻算法</h3>
-<div class="outline-text-3" id="text-org46617d8">
-<p>
 利用近邻算法对图片进行分类，由于图片一般具有三个channael，这里是利用两个图片进行
 相减后取绝对值(L1)或者是相减后取平方在开方，对结果矩阵元素进行相加，得到两者之间
 的距离。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">class NearesNeighbor():
+
+``` {.python session="py" results="output silent"}
+class NearesNeighbor():
     def __init__(self, method="L1"):
         self.method = method
 
@@ -246,62 +187,38 @@ plt.show()
             out[i] = self.y_train[min_index]
             print(i)
         return out
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-orge013e49" class="outline-3">
-<h3 id="orge013e49">k近邻算法</h3>
-<div class="outline-text-3" id="text-orge013e49">
-<blockquote>
-<p>
-The idea is very simple: instead of finding the single closest image in the
-training set, we will find the top <b>k</b> closest images, and have them vote on the
-label of the test image.
-</p>
-</blockquote>
-<p>
+```
+
+## k近邻算法
+
+> The idea is very simple: instead of finding the single closest image
+> in the training set, we will find the top **k** closest images, and
+> have them vote on the label of the test image.
+
 从直觉上，选择的类越多，分类器受异常值的影响就越少。
-</p>
-</div>
-</div>
-<div id="outline-container-orgbab606f" class="outline-3">
-<h3 id="orgbab606f">如何选择k？</h3>
-<div class="outline-text-3" id="text-orgbab606f">
-<p>
+
+## 如何选择k？
+
 在机器学习上，对于一些无法确定的参数，称为超参数(hyperparameters)。不能使用测试
 集数据来改进超参数的，这会产生过拟合(overfit)，测试集应该只用于最后最后一步。
-</p>
 
-<blockquote>
-<p>
-Evaluate on the test set only a single time, at the very end.
-</p>
-</blockquote>
+> Evaluate on the test set only a single time, at the very end.
 
-<p>
-正确的调节参数的做法，应该为将数据分为测试集(test set)，以及训练集(train set)，
-其中训练集又可以分出一部分数据为验证集(validation set)。使用验证集进行调参，得到
-最终模型后，再用于测试集。
-</p>
+正确的调节参数的做法，应该为将数据分为测试集(test set)，以及训练集(train
+set)， 其中训练集又可以分出一部分数据为验证集(validation
+set)。使用验证集进行调参，得到 最终模型后，再用于测试集。
 
-<p>
 对于小数据集来说，分割出来的验证集与训练集数据量都很小，可以使用交叉验证方法
 (cross-validation)。对于一个5折叠(fold)的交叉验证来说，将整个训练集等分为5份，使
 用其中4份作为训练，1份作为验证集。
-</p>
-</div>
-</div>
 
-<div id="outline-container-org6dd6bb7" class="outline-3">
-<h3 id="org6dd6bb7">Cross Validation</h3>
-<div class="outline-text-3" id="text-org6dd6bb7">
-<p>
+## Cross Validation
+
 将数据进行切割，返回一个列表，在python中，两个列表进行相加求值为将两个列表进行合
 并。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def cross_validation(Xtr, Ytr, ks, folds, classifier):
+
+``` {.python session="py" results="output silent"}
+def cross_validation(Xtr, Ytr, ks, folds, classifier):
     xtrf = np.split(Xtr, folds)
     ytrf = np.split(Ytr, folds)
     num_split = Xtr.shape[0] / folds
@@ -318,15 +235,12 @@ Evaluate on the test set only a single time, at the very end.
             acc[i] = np.mean(pred == ytrf[i])
         k_acc[k] = acc
     return k_acc
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org0c29f70" class="outline-3">
-<h3 id="org0c29f70">算法实现</h3>
-<div class="outline-text-3" id="text-org0c29f70">
-<div class="org-src-container">
-<pre class="src src-jupyter-python">class KNearesNeighbor():
+```
+
+## 算法实现
+
+``` {.python session="py" results="output silent"}
+class KNearesNeighbor():
     def __init__(self, method='L2', loop_way=0):
         self.method = method
         self.loop_way = loop_way
@@ -403,43 +317,26 @@ Evaluate on the test set only a single time, at the very end.
             count = vote.most_common()
             out[i] = count[0][0]
         return out
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org5b73e0f" class="outline-3">
-<h3 id="org5b73e0f">优缺点</h3>
-<div class="outline-text-3" id="text-org5b73e0f">
-</div>
-<div id="outline-container-orgd05510c" class="outline-4">
-<h4 id="orgd05510c">优点</h4>
-<div class="outline-text-4" id="text-orgd05510c">
-<p>
+```
+
+## 优缺点
+
+### 优点
+
 容易实现，简单理解。更适用于二维的数据。
-</p>
-</div>
-</div>
-<div id="outline-container-org201b9a4" class="outline-4">
-<h4 id="org201b9a4">缺点</h4>
-<div class="outline-text-4" id="text-org201b9a4">
-<p>
+
+### 缺点
+
 计算量大，耗时长，每测试一个样本，都需要遍历整个训练集。
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org61be01c" class="outline-3">
-<h3 id="org61be01c">测试数据</h3>
-<div class="outline-text-3" id="text-org61be01c">
-</div>
-<div id="outline-container-orge9bda9a" class="outline-4">
-<h4 id="orge9bda9a">NN与KNN</h4>
-<div class="outline-text-4" id="text-orge9bda9a">
-<p>
+
+## 测试数据
+
+### NN与KNN
+
 不使用循环速度真的提升很多。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">nn = NearesNeighbor("L2")
+
+``` {.python session="py" results="output" exports="both"}
+nn = NearesNeighbor("L2")
 nn.train(X_train2d, Y_train)
 nn_pred = nn.predict(X_test2d)
 nn_accurary = np.mean(nn_pred == Y_test)
@@ -449,34 +346,24 @@ knn.train(X_train2d, Y_train)
 knn_pred = knn.predict(X_test2d, k=10)
 knn_accurary = np.mean(knn_pred == Y_test)
 print("NN: %.2f, KNN: %.2f" %(nn_accurary, knn_accurary))
-</pre>
-</div>
+```
 
-<p>
 NN: 0.27, KNN: 0.29
-</p>
-</div>
-</div>
-</div>
 
-<div id="outline-container-orgd022100" class="outline-3">
-<h3 id="orgd022100">使用交叉验证选择最优的k</h3>
-<div class="outline-text-3" id="text-orgd022100">
-<div class="org-src-container">
-<pre class="src src-jupyter-python">num_folds = 5
+## 使用交叉验证选择最优的k
+
+``` {.python session="py" results="output silent"}
+num_folds = 5
 k_choices = [1, 3, 5, 7, 10, 25, 50, 100]
 
 knn = KNearesNeighbor()
 kacc = cross_validation(X_train2d, Y_train, k_choices, num_folds, knn)
-</pre>
-</div>
-</div>
-</div>
-<div id="outline-container-org0355cc3" class="outline-3">
-<h3 id="org0355cc3">准确率可视化</h3>
-<div class="outline-text-3" id="text-org0355cc3">
-<div class="org-src-container">
-<pre class="src src-jupyter-python">for k in k_choices:
+```
+
+## 准确率可视化
+
+``` {.python session="py" results="output graphic" file="./images/cifar-data-on-knn-397684.png" exports="both"}
+for k in k_choices:
     acc = kacc[k]
     plt.scatter([k] * len(acc), acc) # 固定x，描绘acc
 
@@ -488,27 +375,7 @@ plt.title('Cross Validation of k')
 plt.xlabel('k')
 plt.ylabel('accurary')
 plt.show()
-</pre>
-</div>
+```
 
-<p>
-<img src="./images/cifar-data-on-knn-397684.png" alt="cifar-data-on-knn-397684.png">
+![](./images/cifar-data-on-knn-397684.png)
 从上面的交叉验证中，可以寻找最高准确率对应的k值，即为最优的k=10。
-</p>
-</div>
-</div>
-</div>
-</div>
-<div id="postamble" class="status">
-<footer class="footer">
-      <!-- Footer Definition -->
-   </footer>
-
-  <!-- Google Analytics Js --><!-- Disqua JS -->
-</div>
-
-</div>
-<div class="col"></div></div>
-</div>
-</body>
-</html>

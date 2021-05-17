@@ -1,168 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<!-- 2020-12-30 Wed 21:31 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>从图片中提出特征(CIFAR)(04)</title>
-<meta name="generator" content="Org mode">
+> Q: How do you eat an elephant? A: One bite at a time.
 
-<meta name="google-site-verification" content="dVWCUwH8eYXavYgAUJtgmzwlXVIcYZeyvlUolZQVb2E" />
-<link rel="stylesheet" type="text/css" href="/assets/css/style.css"/>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async></script>
-<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        displayAlign: "center",
-        displayIndent: "0em",
-
-        "HTML-CSS": { scale: 100,
-                        linebreaks: { automatic: "false" },
-                        webFont: "TeX"
-                       },
-        SVG: {scale: 100,
-              linebreaks: { automatic: "false" },
-              font: "TeX"},
-        NativeMML: {scale: 100},
-        TeX: { equationNumbers: {autoNumber: "AMS"},
-               MultLineWidth: "85%",
-               TagSide: "right",
-               TagIndent: ".8em"
-             }
-});
-</script>
-<script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
-</head>
-<body>
-<div class="content-wrapper container">
-   <div class="row"> <div class="col"> </div>   <div class="col-sm-6 col-md-8">
-<div id="preamble" class="status">
-
-<div class="">
-    <a href="/"> Luhua.ei </a>
-</div>
-<ul class="">
-  <li><a href="/about.html"> About Me </a> </li>
-  <li><a href="https://github.com/luhuaei"> Github </a> </li>
-  <li><a href="/archive.html"> Posts </a> </li>
-</ul>
-  <hr>
-</div>
-<div id="content">
-<header>
-<h1 class="title">从图片中提出特征(CIFAR)(04)</h1>
-</header><blockquote>
-<p>
-Q: How do you eat an elephant?
-A: One bite at a time.
-</p>
-</blockquote>
-
-<p>
 先从图片中提取特征，再根据这些特征用线性分类器进行分类。从前面的文章中，我们可以
-知道使用 <code>SVM</code> 对图片进行分类，准确率仅仅35%。
-</p>
+知道使用 `SVM`{.verbatim} 对图片进行分类，准确率仅仅35%。
 
-<p>
 在深度学习还没有发展起来的时候，人们使用图像识别的主要途径(pipeline):
-</p>
-<ul class="org-ul">
-<li>input images</li>
-<li>preprocess. e.g(resize, normalize)</li>
-<li>extract features. e.g(HOG(histogram of oriented gradient), HAAR(haar-like
-features, 哈尔特征), SIFT(scale
-invariant features transforms descriptor，尺度不变特征变换), SURF(Speed Up
-Robust Feature、加速稳健特征)</li>
-<li>algorithm learning. e.g(Supports Vectors Machine, Random Forests, ANN)</li>
-<li>prediction labels.</li>
-</ul>
-<p>
-可见、对于图片识别的传统建模流程与对一些数据进行分析的流程是类似的。
-</p>
 
-<div id="outline-container-orge4684af" class="outline-2">
-<h2 id="orge4684af">HOG(histogram of oriented gradient, 方向梯度直方图)</h2>
-<div class="outline-text-2" id="text-orge4684af">
-<blockquote>
-<p>
-HOG should capture the texture of the images while ignoring color information.
-</p>
-</blockquote>
-<p>
+-   input images
+-   preprocess. e.g(resize, normalize)
+-   extract features. e.g(HOG(histogram of oriented gradient),
+    HAAR(haar-like features, 哈尔特征), SIFT(scale invariant features
+    transforms descriptor，尺度不变特征变换), SURF(Speed Up Robust
+    Feature、加速稳健特征)
+-   algorithm learning. e.g(Supports Vectors Machine, Random Forests,
+    ANN)
+-   prediction labels.
+
+可见、对于图片识别的传统建模流程与对一些数据进行分析的流程是类似的。
+
+# HOG(histogram of oriented gradient, 方向梯度直方图)
+
+> HOG should capture the texture of the images while ignoring color
+> information.
+
 从上面这个通俗的解释上看，HOG是在忽略图片的颜色，而仅仅提取图片的纹理。可以纹理
 在图片中就是依靠不同颜色而表现出来的？忽略颜色还怎么提取纹理？一些模型的提取纹理
 就是从区域中比较两元素单元的颜色差。
-</p>
 
-<p>
 因为对于一张灰色度的图片来说，其也是没有颜色的，但我们可以分辨出灰色度的图片，原
 因在于，虽然没有颜色，但是每一个元素的亮度不一样。所以如果两个元素之间的亮度差比
 较大，将被视为一个纹理。
-</p>
 
-<p>
-根据<a href="https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE">维基百科</a>上，描述HOG的具体实现方法是：将图像分割成小的连通区域(细胞单元)、采
+根据[维基百科](https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE)上，描述HOG的具体实现方法是：将图像分割成小的连通区域(细胞单元)、采
 集细胞单元中各个像素点的梯度或者边缘的方向直方图。最后将这些直方图组合起来就可以
 构成特征采集器(descriptor)。
-</p>
 
-<p>
-一个采集器，就是从一个 <code>width x height x channel</code> 的图片中，输出一个长度为 <code>n</code>
-的向量或者数据， <code>HOG</code> 采集的结果维度并不是固定不变的。
-</p>
+一个采集器，就是从一个 `width x height x channel`{.verbatim}
+的图片中，输出一个长度为 `n`{.verbatim} 的向量或者数据，
+`HOG`{.verbatim} 采集的结果维度并不是固定不变的。
 
-<p>
-至于那一种特征(feature)的“有用的”，这个根据不同的目的具有不同的选择。
-</p>
-<blockquote>
-<p>
-如在辨别一个圆形按钮和方形按钮时，边缘(edges)特征将是有用的，而颜色是没有用的。
-</p>
-</blockquote>
+至于那一种特征(feature)的"有用的"，这个根据不同的目的具有不同的选择。
 
-<p>
-而在 <code>H(histogram) O(oriented) G(gradient)</code> 采集器中，选梯度(gradients)的方向
-(oriented)的分布(distribution, histogram)作为特征。选择梯度的原因在于，位于边缘
+> 如在辨别一个圆形按钮和方形按钮时，边缘(edges)特征将是有用的，而颜色是没有用的。
+
+而在 `H(histogram) O(oriented) G(gradient)`{.verbatim}
+采集器中，选梯度(gradients)的方向 (oriented)的分布(distribution,
+histogram)作为特征。选择梯度的原因在于，位于边缘
 或者角落(密度陡增或者陡降的区域)。而且边缘和角落比起其他区域包含更多关于对象形状
 的信息。
-</p>
-</div>
 
-<div id="outline-container-org4faf89f" class="outline-3">
-<h3 id="org4faf89f">How to calculate HOG?</h3>
-<div class="outline-text-3" id="text-org4faf89f">
-<p>
-HOG原始被使用于识别行人(pedestrian detection)。至于关于预处理，由于预处理的对后
+## How to calculate HOG?
+
+HOG原始被使用于识别行人(pedestrian
+detection)。至于关于预处理，由于预处理的对后
 面的结果作用不大，可以跳过。为了方便后面的计算，将图片的高度设为400,(至于图片大
 小，并没有限制，只要求高度与宽度成比例1:2)
-</p>
 
-<p>
-<a href="https://pixabay.com/photos/person-human-female-girl-face-864804/">图片来源</a>
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">female = plt.imread("/home/luhuaei/blog/src/posts/images/images-extract-features-female.jpg")
+[图片来源](https://pixabay.com/photos/person-human-female-girl-face-864804/)
+
+```python
+female = plt.imread("/home/luhuaei/blog/src/posts/images/images-extract-features-female.jpg")
 female = female[:400, :, :]
 plt.figure(figsize=(9.0, 6.0))
 plt.imshow(female)
 plt.axis('off')
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-305110.png)
 
-<figure id="orgba7566d">
-<img src="./images/image-extract-features-305110.png" alt="image-extract-features-305110.png">
+下面对上面的图片计算梯度。使用 `np.pad()`{.verbatim}
+函数对矩阵进行扩充。其中 `((2, 2))`{.verbatim} 参
+数表示左上角扩充2行、右下角扩充2行。 `np.pad(np.zeros((2, 2)), ((2, 2)),
+mode = 'constant', constant_values = 1)`{.verbatim}
+。使用两个卷积核计算对应x和y的梯度。
 
-</figure>
-
-<p>
-下面对上面的图片计算梯度。使用 <code>np.pad()</code> 函数对矩阵进行扩充。其中 <code>((2, 2))</code> 参
-数表示左上角扩充2行、右下角扩充2行。 <code>np.pad(np.zeros((2, 2)), ((2, 2)),
-mode = 'constant', constant_values = 1)</code> 。使用两个卷积核计算对应x和y的梯度。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">kernel_x = np.array([  [+1, 0, -1],
+``` {.python session="py" results="output silent" exports="both"}
+kernel_x = np.array([  [+1, 0, -1],
                        [+1, 0, -1],
                        [+1, 0, -1]])
 kernel_y = np.array([  [+1, +1, +1],
@@ -170,11 +82,10 @@ kernel_y = np.array([  [+1, +1, +1],
                        [-1, -1, -1]])
 def rgb2gray(image):
       return np.dot(image, [0.299, 0.587, 0.144])
-</pre>
-</div>
+```
 
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def convolution2d(image, kernel, zero_padding=0, stride=1, grayscale=True, keep_channel=False):
+``` {.python session="py" results="output silent" exports="both"}
+def convolution2d(image, kernel, zero_padding=0, stride=1, grayscale=True, keep_channel=False):
     '''
     image: The array is 3 dimensional.(channel, height, width)
     kernel: The kenels.
@@ -214,16 +125,13 @@ def rgb2gray(image):
 
 def computer_oriented(gx, gy):
     return np.arctan2(gy, (gx + 1e-15)) * (180 / np.pi) + 90
-</pre>
-</div>
+```
 
-
-<p>
 下面，我们对图片计算卷积后的梯度，灰色度、颜色(但只取最大的channel)，保留三层
 channel的。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">female_gx = convolution2d(female.transpose(2, 0, 1), kernel_x)
+
+``` {.python session="py" results="output silent" exports="both"}
+female_gx = convolution2d(female.transpose(2, 0, 1), kernel_x)
 female_gy = convolution2d(female.transpose(2, 0, 1), kernel_y)
 female_gradient = np.sqrt(np.square(female_gx) + np.square(female_gy))
 female_oriented = computer_oriented(female_gy, female_gx)
@@ -237,14 +145,12 @@ female_gxcc = convolution2d(female.transpose(2, 0, 1), kernel_x, grayscale=False
 female_gycc = convolution2d(female.transpose(2, 0, 1), kernel_y, grayscale=False, keep_channel=True)
 female_gradientcc = np.sqrt(np.square(female_gxcc) + np.square(female_gycc))
 female_orientedcc = computer_oriented(female_gycc, female_gxcc)
-</pre>
-</div>
+```
 
-<p>
 对梯度进行可视化，梯度大的地方代表着亮度越大。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 10.0))
+
+``` {.python session="py" results="output graphic" file="./images/image-extract-features-72804.png" exports="both"}
+plt.figure(figsize=(15.0, 10.0))
 plt.subplot(1, 3, 1)
 plt.imshow(female_gx[0].astype('uint8'))
 plt.title('gx')
@@ -259,29 +165,23 @@ plt.subplot(1, 3, 3)
 plt.imshow(female_gradient[0].astype('uint8'))
 plt.title('combine x and y')
 plt.axis('off')
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-72804.png)
 
-<figure id="orgf640f29">
-<img src="./images/image-extract-features-72804.png" alt="image-extract-features-72804.png">
+第一张为 `gx`{.verbatim} 为x方向的梯度，第二张为 `gy`{.verbatim}
+为y轴方向的梯度。从图片中可以看出 `gx`{.verbatim}
+对于垂直的线比较明显，而 `gy`{.verbatim}
+对于水平的线比较明显。而第三张可以看出很好的描绘出 整个人的轮廓。
 
-</figure>
-
-<p>
-第一张为 <code>gx</code> 为x方向的梯度，第二张为 <code>gy</code> 为y轴方向的梯度。从图片中可以看出 <code>gx</code>
-对于垂直的线比较明显，而 <code>gy</code> 对于水平的线比较明显。而第三张可以看出很好的描绘出
-整个人的轮廓。
-</p>
-
-<p>
 对于一个具有颜色的图片来说，将具有三个channel的梯度，选择最大的即代表最大梯度。
-梯度中的值为[-255, 255]之间，需要转变成[0, 255]之间，而使用 <code>uint8</code> 可以将负的转
-变成无符号的 <code>int8</code> 类型确保为正数。而将其加上255,再除以2,可以将负的元素都变成
-[0, 125]之间，而0-125就是表示成灰色度。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 15.0))
+梯度中的值为\[-255, 255\]之间，需要转变成\[0, 255\]之间，而使用
+`uint8`{.verbatim} 可以将负的转 变成无符号的 `int8`{.verbatim}
+类型确保为正数。而将其加上255,再除以2,可以将负的元素都变成 \[0,
+125\]之间，而0-125就是表示成灰色度。
+
+``` {.python session="py" results="output graphic" file="./images/image-extract-features-705320.png" exports="both"}
+plt.figure(figsize=(15.0, 15.0))
 plt.subplot(1, 3, 1)
 plt.imshow((female_gxc[0] + 255)/2)
 plt.title('gx')
@@ -296,20 +196,14 @@ plt.subplot(1, 3, 3)
 plt.imshow((female_gradientc[0] + 255)/2)
 plt.title('combine x and y')
 plt.axis('off')
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-705320.png)
 
-<figure id="org79cb439">
-<img src="./images/image-extract-features-705320.png" alt="image-extract-features-705320.png">
-
-</figure>
-
-<p>
 具有颜色的梯度可视化。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">plt.figure(figsize=(15.0, 15.0))
+
+``` {.python session="py" results="output graphic" file="./images/image-extract-features-682212.png" exports="both"}
+plt.figure(figsize=(15.0, 15.0))
 plt.subplot(1, 3, 1)
 plt.imshow(female_gxcc.transpose(1, 2, 0).astype('uint8'))
 plt.title('gx')
@@ -324,60 +218,45 @@ plt.subplot(1, 3, 3)
 plt.imshow(female_gradientcc.transpose(1, 2, 0).astype('uint8'))
 plt.title('magnitude')
 plt.axis('off')
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-682212.png)
 
-<figure id="org0b0387c">
-<img src="./images/image-extract-features-682212.png" alt="image-extract-features-682212.png">
+## Calculate gradient of histogram in 8 x 8 cells
 
-</figure>
-</div>
-</div>
-
-<div id="outline-container-org967155d" class="outline-3">
-<h3 id="org967155d">Calculate gradient of histogram in 8 x 8 cells</h3>
-<div class="outline-text-3" id="text-org967155d">
-<p>
 将图片分成8x8的单元块(block)，计算从每一个单元中计算出一个直方值(histogram)。为什么需要就
-图片分成8x8的单元块(block)呢？根据维基上的说明，对于人的检测中， 将方向分为9个(bins)通道的效果
+图片分成8x8的单元块(block)呢？根据维基上的说明，对于人的检测中，
+将方向分为9个(bins)通道的效果
 最好。如果梯度具有负的，选择0-360度方向，如果梯度为正的，可以选择0-180度。
-</p>
 
-<p>
 将图片分割成单元块的原因在于：
-</p>
-<ul class="org-ul">
-<li>更加简洁、方便。</li>
-<li>如在分为8x8x3=192，一个区块中具有192个元素单元，每一个元素单元具有两个值：
-magnitude(female<sub>gradient</sub>) 和 oriented(direction)。所以一共具有8x8x2=128个值。</li>
-<li>单元梯度可以具有噪点，而结合一个区块将减少对噪点的敏感度。令模型更健壮
-(robust).</li>
-</ul>
 
-<p>
+-   更加简洁、方便。
+-   如在分为8x8x3=192，一个区块中具有192个元素单元，每一个元素单元具有两个值：
+    magnitude(female~gradient~) 和
+    oriented(direction)。所以一共具有8x8x2=128个值。
+-   单元梯度可以具有噪点，而结合一个区块将减少对噪点的敏感度。令模型更健壮
+    (robust).
+
 至于将图片切割成8x8单元块的原因是，这个根据不同的情形具有不同的选择，如对于一个
 仅仅为64x128的图片来说，在行人检测实验中，用来提取特征是足够的。
-</p>
 
-<p>
-使用0-180度还是使用0-360度？0-180度的被称为无符号梯度(unsigned gradient)，因为带
+使用0-180度还是使用0-360度？0-180度的被称为无符号梯度(unsigned
+gradient)，因为带
 不带符号表示的梯度大小都是一样的。也就是说，0度与180度被视为是相同的。根据经验，
 在行人预测实验中，无符号的比带符号的效果更好。
-</p>
 
-<p>
-在使用0-180度中，直方图(histogram)被分为9个通道(bins)，分别对应0, 20, 40, &#x2026;,
+在使用0-180度中，直方图(histogram)被分为9个通道(bins)，分别对应0, 20,
+40, ...,
 160。一个区块中的元素单元(这里是8x8的单元块)落(select)在那个分箱取决于区块的方向
-(oriented)，而对落(select)在的分箱投票(vote)的值取决于区块的 magnitude 。
-</p>
+(oriented)，而对落(select)在的分箱投票(vote)的值取决于区块的 magnitude
+。
 
-<p>
 有趣的是，在投票的过程中(vote)如果一个角度为10度(degree)，其将会处于0-20之间，因此按照10
 到两边的距离比例，对其进行切割(split)，分别对两个分箱(bins)进行投票(vote)。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def split_block(arr, cell_num):
+
+``` {.python session="py" results="output silent" exports="both"}
+def split_block(arr, cell_num):
     a_channel, a_height, a_width = arr.shape
     o_height = int(a_height / cell_num)
     o_width = int(a_width / cell_num)
@@ -391,16 +270,14 @@ magnitude(female<sub>gradient</sub>) 和 oriented(direction)。所以一共具�
 
 female_gradient_block = split_block(female_gradient, 8)
 female_oriented_block = split_block(female_oriented, 8)
-</pre>
-</div>
+```
 
-<p>
-描绘第(20, 50)个区块的梯度图，在图中可以看出，在该区块中，梯度大的点分布不均匀，其中
-心区域的梯度(颜色衰减方向)的方向大部分为[90-180]之间。而在第(20, 70)图片中看出，大
-部分的梯度突变方向为水平[0, 180]方向。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">
+描绘第(20,
+50)个区块的梯度图，在图中可以看出，在该区块中，梯度大的点分布不均匀，其中
+心区域的梯度(颜色衰减方向)的方向大部分为\[90-180\]之间。而在第(20,
+70)图片中看出，大 部分的梯度突变方向为水平\[0, 180\]方向。
+
+``` {.python session="py" results="output graphic" file="./images/image-extract-features-272857.png" exports="both"}
 plt.figure(figsize=(9.0, 6.0))
 plt.subplot(1, 2, 1)
 plt.imshow(female_gradient_block[0, 20, 50, :, :].astype('uint8'))
@@ -411,24 +288,18 @@ plt.subplot(1, 2, 2)
 plt.imshow(female_gradient_block[0, 20, 70, :, :].astype('uint8'))
 plt.axis('off')
 plt.title('(20, 70)')
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-272857.png)
 
-<figure id="orgb49864b">
-<img src="./images/image-extract-features-272857.png" alt="image-extract-features-272857.png">
-
-</figure>
-
-<p>
 计算各个方块对应的直方图分布。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def magnitude_vote(magnitude_block, oriented_block, method='count'):
+
+``` {.python session="py" results="output silent" exports="both"}
+def magnitude_vote(magnitude_block, oriented_block, method='count'):
     oriented_block = np.where(np.isnan(oriented_block), 0, oriented_block)
-    oriented_block = np.where(oriented_block &gt;= 180, oriented_block - 180, oriented_block)
-    oriented_block = np.where(oriented_block &lt; -180, oriented_block + 360, oriented_block)
-    oriented_block = np.where(oriented_block &lt; 0, oriented_block + 180, oriented_block)
+    oriented_block = np.where(oriented_block >= 180, oriented_block - 180, oriented_block)
+    oriented_block = np.where(oriented_block < -180, oriented_block + 360, oriented_block)
+    oriented_block = np.where(oriented_block < 0, oriented_block + 180, oriented_block)
     channel, height, width = magnitude_block.shape
 
     rest = np.zeros((channel, 9))
@@ -454,14 +325,12 @@ def computer_histogram(magn, orie):
     return rest
 
 female_histogram = computer_histogram(female_gradient_block, female_oriented_block)
-</pre>
-</div>
+```
 
-<p>
 第(20, 50)个方块和(20, 70)方块对应的直方图形。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def plot_female_hist(arr, ax_index=1, method='max'):
+
+``` {.python session="py" results="output graphic" file="./images/image-extract-features-296443.png" exports="both"}
+def plot_female_hist(arr, ax_index=1, method='max'):
     if method == 'max':
         x = np.max(arr, axis=0)
     else:
@@ -476,30 +345,25 @@ plot_female_hist(female_histogram[:, 20, 50, :], 0, 'max')
 plot_female_hist(female_histogram[:, 20, 70, :], 1, 'max')
 
 female_oriented.max()
-</pre>
-</div>
+```
 
+![](./images/image-extract-features-296443.png)
 
-<figure id="orgd9840ed">
-<img src="./images/image-extract-features-296443.png" alt="image-extract-features-296443.png">
-
-</figure>
-
-<p>
-图片的梯度对光线是敏感的。在一个图片中， <code>RGB</code> 处于[0, 255]之间，数值越大，代表
+图片的梯度对光线是敏感的。在一个图片中， `RGB`{.verbatim} 处于\[0,
+255\]之间，数值越大，代表
 的亮度越大，如果想将图片的亮度调暗一倍，可以将数值除以2。然后对其卷积求值后的梯
-度也会减少一半。因此导致直方图中的(magnitude values)也会减少一半。但是，我们渴望
+度也会减少一半。因此导致直方图中的(magnitude
+values)也会减少一半。但是，我们渴望
 得到的是，无论光线如何，最后得到的结果都是一样的。所以我们需要最其进行归一化
 (normalize)，消除不同亮度带来的影响。
-</p>
 
-<p>
-进行区间归一化的方法有多种，比如 L2、L1 范式等。根据 \(L2 = \sqrt{gx^2 + gy^2}\)
-可以直接将 <code>8x8</code> 的方格进行归一化，但更好的方式将一个区域的4个区块连结起来一起归
-一化。将结合成4个方块后，将具有 <code>4x9=36</code> 个直方图值。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def hog_normalize(hist):
+进行区间归一化的方法有多种，比如 L2、L1 范式等。根据
+$L2 = \sqrt{gx^2 + gy^2}$ 可以直接将 `8x8`{.verbatim}
+的方格进行归一化，但更好的方式将一个区域的4个区块连结起来一起归
+一化。将结合成4个方块后，将具有 `4x9=36`{.verbatim} 个直方图值。
+
+``` {.python session="py" results="output silent" exports="both"}
+def hog_normalize(hist):
     channel, height, width = hist.shape[:3]
     o_height, o_width = (height - 2) + 1, (width - 2) + 1
 
@@ -512,19 +376,14 @@ female_oriented.max()
     return rest
 
 female_normalize_histogram = hog_normalize(female_histogram)
-</pre>
-</div>
-</div>
-</div>
+```
 
-<div id="outline-container-org764d7a4" class="outline-3">
-<h3 id="org764d7a4">对提取特征用 Supports Vectors Machine 分类</h3>
-<div class="outline-text-3" id="text-org764d7a4">
-<p>
+## 对提取特征用 Supports Vectors Machine 分类
+
 这里使用前面定义的线性模型分类中的类函数。也可以使用ANN模型提取的特征建立模型。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def img_hog_feature(img):
+
+``` {.python session="py" results="output silent" exports="both"}
+def img_hog_feature(img):
     img_conv_gx = convolution2d(img, kernel_x, zero_padding=1)
     img_conv_gy = convolution2d(img, kernel_y, zero_padding=1)
 
@@ -547,16 +406,16 @@ def cifar_extract_hog(arr):
         if n % 100 == 0:
             print("execute (%d / %d) %f" %(n, N, n / N))
     return rest
-</pre>
-</div>
+```
 
-<p>
-对 <code>CIFAR</code> 中提取49000张图片作为训练集，10000张为测试集和1000张图片为验证集。并
-对图片进行中心化和标准化， 并为其添加偏差列(最后一列)。 <code>np.hstack(),
-np.vstack(), np.dstack()</code> 对列表进行合并，分别为(horizontal, vertical, depth)。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">X_train_hog = cifar_extract_hog(X_train)
+对 `CIFAR`{.verbatim}
+中提取49000张图片作为训练集，10000张为测试集和1000张图片为验证集。并
+对图片进行中心化和标准化， 并为其添加偏差列(最后一列)。 `np.hstack(),
+np.vstack(), np.dstack()`{.verbatim} 对列表进行合并，分别为(horizontal,
+vertical, depth)。
+
+``` {.python session="py" results="output silent" exports="both"}
+X_train_hog = cifar_extract_hog(X_train)
 X_test_hog = cifar_extract_hog(X_test)
 X_vali_hog = cifar_extract_hog(X_vali)
 
@@ -578,14 +437,12 @@ X_mean_rhog = np.mean(np.array(X_train_rhog), axis=0, keepdims=True)
 # X_train_rhog = np.hstack([X_train_rhog, np.ones((X_train_rhog.shape[0], 1))])
 # X_test_rhog = np.hstack([X_test_rhog, np.ones((X_test_rhog.shape[0], 1))])
 # X_vali_rhog = np.hstack([X_vali_rhog, np.ones((X_vali_rhog.shape[0], 1))])
-</pre>
-</div>
+```
 
-<p>
 使用支持向量机对提取的特征进行建模。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">learning_rates = [1e-9, 1e-8, 1e-7]
+
+``` {.python session="py" results="output silent" exports="both"}
+learning_rates = [1e-9, 1e-8, 1e-7]
 regularization_lambdas = [5e4, 5e5, 5e6]
 
 svm_mode_acc = -1
@@ -599,32 +456,27 @@ for lr in learning_rates:
                   regularization=reg, num_iters=1500, verbose=False)
         val_acc = np.mean(svm.predict(X_vali_rhog) == Y_vali)
         print("current validation accurary: %s" %(val_acc, ))
-        if val_acc &gt; svm_mode_acc:
+        if val_acc > svm_mode_acc:
             svm_mode_acc = val_acc
             test_acc = np.mean(svm.predict(X_test_rhog) == Y_test)
-</pre>
-</div>
+```
 
-<div class="org-src-container">
-<pre class="src src-jupyter-python">print('predict test accuracy: ', test_acc)
-</pre>
-</div>
+``` {.python session="py" results="output" exports="both"}
+print('predict test accuracy: ', test_acc)
+```
 
-<pre class="example">
+``` {.example}
 predict test accuracy:  0.1674
-</pre>
-</div>
-</div>
+```
 
-<div id="outline-container-org4c472eb" class="outline-3">
-<h3 id="org4c472eb">CS231N 中给出的提出特征的函数</h3>
-<div class="outline-text-3" id="text-org4c472eb">
-<p>
-这里直接使用 <code>diff</code> 计算差分。利用差分计算卷积的速度快很多，根据上面的提示，说如
+## CS231N 中给出的提出特征的函数
+
+这里直接使用 `diff`{.verbatim}
+计算差分。利用差分计算卷积的速度快很多，根据上面的提示，说如
 果寻找到合理的分箱值，验证集准确率可能达到44%。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">from scipy.ndimage import uniform_filter
+
+``` {.python session="py" results="output silent" exports="both"}
+from scipy.ndimage import uniform_filter
 
 def extract_features(imgs, feature_fns, verbose=False):
     """
@@ -731,12 +583,12 @@ def hog_feature(im):
     for i in range(orientations):
         # create new integral image for this orientation
         # isolate orientations in this range
-        temp_ori = np.where(grad_ori &lt; 180 / orientations * (i + 1),
+        temp_ori = np.where(grad_ori < 180 / orientations * (i + 1),
                             grad_ori, 0)
-        temp_ori = np.where(grad_ori &gt;= 180 / orientations * i,
+        temp_ori = np.where(grad_ori >= 180 / orientations * i,
                             temp_ori, 0)
         # select magnitudes for those orientations
-        cond2 = temp_ori &gt; 0
+        cond2 = temp_ori > 0
         temp_mag = np.where(cond2, grad_mag, 0)
         orientation_histogram[:,:,i] = uniform_filter(temp_mag, size=(cx, cy))[round(cx/2)::cx, round(cy/2)::cy].T
 
@@ -765,14 +617,12 @@ def color_histogram_hsv(im, nbin=10, xmin=0, xmax=255, normalized=True):
 
     # return histogram
     return imhist
-</pre>
-</div>
+```
 
-<p>
 寻找最优的分箱值。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">def hog_and_svm(lrs, regs, bins=9, num_iters=1500):
+
+``` {.python session="py" results="output silent" exports="both"}
+def hog_and_svm(lrs, regs, bins=9, num_iters=1500):
     res = {}
 
     num_color_bins = bins       # used the features functions
@@ -792,7 +642,7 @@ def color_histogram_hsv(im, nbin=10, xmin=0, xmax=255, normalized=True):
             res[(lr, reg)] = loss_history
 
             val_acc = np.mean(svm.predict(rv) == Y_vali)
-            if val_acc &gt; best_val_acc:
+            if val_acc > best_val_acc:
                 best_val_acc = val_acc
                 res['best_val_acc'] = val_acc
                 res['best_test_acc'] = np.mean(svm.predict(rte) == Y_test)
@@ -805,94 +655,56 @@ best_bin = None
 best_val_acc = -1
 for b in [10]:
     r = hog_and_svm(learning_rates, regularization_lambdas, b)
-    if r['best_val_acc'] &gt; best_val_acc:
+    if r['best_val_acc'] > best_val_acc:
         best_val_acc = r['best_val_acc']
         best_bins_results = r
         best_bin = b
-</pre>
-</div>
+```
 
-<p>
 还是没有达到提示中44%验证集准确率。
-</p>
-<div class="org-src-container">
-<pre class="src src-jupyter-python">print('best_bin: %s, best_val_acc: %s, best_test_acc: %s' %(best_bin, best_val_acc, best_bins_results['best_test_acc']))
-</pre>
-</div>
 
-<pre class="example">
+``` {.python session="py" results="output" exports="both"}
+print('best_bin: %s, best_val_acc: %s, best_test_acc: %s' %(best_bin, best_val_acc, best_bins_results['best_test_acc']))
+```
+
+``` {.example}
 best_bin: 10, best_val_acc: 0.235, best_test_acc: 0.2227
-</pre>
-</div>
-</div>
-<div id="outline-container-org928d085" class="outline-3">
-<h3 id="org928d085">conclusion</h3>
-<div class="outline-text-3" id="text-org928d085">
-<p>
-从最后的结果来看，经过提取特征的分类效果并没有单纯使用 SVM 的准确率高。但从HOG的
+```
+
+## conclusion
+
+从最后的结果来看，经过提取特征的分类效果并没有单纯使用 SVM
+的准确率高。但从HOG的
 思路来思考：一张图片中，人们所能观察到的轮廓往往是轮廓旁边由两种色差比较大的元素
 组成。就像拿一支黑色签字笔在白纸上画，你能清晰得看出黑色的轮廓。至于这种色差的程
 度是大小该怎样量化？
-</p>
 
-<p>
 我们知道图片在电脑上显示出来的原因就在于，其由很多的小方格组成，每一个方格中含有
-RGB 三个值，用来表示当前方格展示的颜色。那么色差就可以通过两个邻近的方格相减进行
+RGB
+三个值，用来表示当前方格展示的颜色。那么色差就可以通过两个邻近的方格相减进行
 计算。但按照相减的方法只能计算x轴方向与y轴方向的色差，而从图片中，一个居中的元素
-方格不可能仅仅具有这两个方向的色差。在二维的图形中，我们知道斜率方向是\(tan(degree) =
-\frac{\delta y}{\delta x}\)。那么\(degree = arctan(\frac{ \delta y}{ \delta
-x})\)表示的就是色差的方向。而梯度的大小可以通过勾股定理计算出来。
-</p>
+方格不可能仅仅具有这两个方向的色差。在二维的图形中，我们知道斜率方向是$tan(degree) =
+\frac{\delta y}{\delta x}$。那么$degree = arctan(\frac{ \delta y}{ \delta
+x})$表示的就是色差的方向。而梯度的大小可以通过勾股定理计算出来。
 
-<p>
 对于x轴与y轴来说，梯度大小就是斜率大小，就直接等于一阶差分的结果。利用差分就直接
 避免了卷积采集图片在x与y轴方向的梯度大小
-</p>
 
-<p>
 噪点，表示为与大部分数据点隔离或者与旁边的数据点趋势不同。噪点的存在，会很影响计
 算结果。而通过将各小方格连接成一个方格块，不仅仅可以消除噪点，同时还可以减少相对
 应的计算量。分块后，如何衡量每一个方格的方向与长度？这就是需要各个方格进行投票决
 定。而所谓的投票就是将所有的可能的方向进行分箱，判断各个小方格的方向，将对应的值
 落在匹配的分箱中。最后可以得出一个直方图。而这个直方图就表示着小方块的各方向和大
 小。
-</p>
-</div>
-</div>
-</div>
-<div id="outline-container-org64ada9a" class="outline-2">
-<h2 id="org64ada9a">Color histogram</h2>
-<div class="outline-text-2" id="text-org64ada9a">
-<blockquote>
-<p>
-represents the color of input images while ignoring the texture.
-</p>
-</blockquote>
-</div>
-</div>
 
-<div id="outline-container-org4538a34" class="outline-2">
-<h2 id="org4538a34">reference</h2>
-<div class="outline-text-2" id="text-org4538a34">
-<ol class="org-ol">
-<li><a href="https://www.learnopencv.com/histogram-of-oriented-gradients/">Learn Open CV </a></li>
-<li><a href="https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE">HogWiki</a></li>
-<li><a href="http://cs231n.github.io/convolutional-networks/">CS231N</a></li>
-<li><a href="https://lilianweng.github.io/lil-log/2017/10/29/object-recognition-for-dummies-part-1.html">Lil'Log</a></li>
-</ol>
-</div>
-</div>
-</div>
-<div id="postamble" class="status">
-<footer class="footer">
-      <!-- Footer Definition -->
-   </footer>
+# Color histogram
 
-  <!-- Google Analytics Js --><!-- Disqua JS -->
-</div>
+> represents the color of input images while ignoring the texture.
 
-</div>
-<div class="col"></div></div>
-</div>
-</body>
-</html>
+# reference
+
+1.  [Learn Open CV
+    ](https://www.learnopencv.com/histogram-of-oriented-gradients/)
+2.  [HogWiki](https://zh.wikipedia.org/wiki/%E6%96%B9%E5%90%91%E6%A2%AF%E5%BA%A6%E7%9B%B4%E6%96%B9%E5%9B%BE)
+3.  [CS231N](http://cs231n.github.io/convolutional-networks/)
+4.  [Lil\'Log](https://lilianweng.github.io/lil-log/2017/10/29/object-recognition-for-dummies-part-1.html)

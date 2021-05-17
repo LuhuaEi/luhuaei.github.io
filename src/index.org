@@ -1,3 +1,0 @@
-#+BEGIN_QUOTE
-Happy Hack!
-#+END_QUOTE
