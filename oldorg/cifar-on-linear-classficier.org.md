@@ -56,9 +56,9 @@ $L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta) $
 
 ### 算法实现
 
-`np.reshape(a, newshape`{.verbatim}-1)=
+`np.reshape(a, newshape`-1)=
 其中-1代表根据给出的值，推断出后面的值。下面函数用
-来计算数据损失部分。整个 `SVM`{.verbatim}
+来计算数据损失部分。整个 `SVM`
 计算出来的损失函数值，并计算梯度。
 
 ``` {.python session="py" results="output silent" exports="both"}

@@ -174,11 +174,11 @@ f_plot(f_maxout, x)
 # 前向传播
 
 前向传播就是平时看到的传播模式，就是一个一个接着往下传播。简单的前向传播实现，主
-要用于理解前向传播的思想。神经网络中的 `channel`{.verbatim}
-是指每一个样本中的第三维度，就 图片来说，一般具有 `RGB`{.verbatim}
-三层。而 `depth`{.verbatim} 是指隐藏层的个数，一般也称为内核个数。
+要用于理解前向传播的思想。神经网络中的 `channel`
+是指每一个样本中的第三维度，就 图片来说，一般具有 `RGB`
+三层。而 `depth` 是指隐藏层的个数，一般也称为内核个数。
 
-添加 `zero padding`{.verbatim}
+添加 `zero padding`
 是为了保持输出的采集结果维度与原来的相同。
 
 采集结果的矩阵的维度计算：
@@ -186,7 +186,7 @@ f_plot(f_maxout, x)
 -   $height = (X_{height} - W_{height} + 2 * ZeroPadding) // stride + 1$
 -   $wight = (X_{width} - W_{width} + 2 * ZeroPadding)$
 
-`np.pad()`{.verbatim} 对一个矩阵进行填补。
+`np.pad()` 对一个矩阵进行填补。
 
 ## 卷积前向传播算法
 
@@ -263,17 +263,17 @@ relative_error:  2.2121476417505994e-08
 
 # 通过卷积处理图片
 
-读取图片，在原来的 `scipy`{.verbatim} 包中，可以使用
-`scipy.misc.imread`{.verbatim} 来对图片进行读取， 而后来的
-`scipy`{.verbatim} 包中可以使用 `scipy.imageio.imread`{.verbatim}
-来取代，但是 `scipy.imageio.imread`{.verbatim} 返回的数组类型是
-`scipy.imageio.core.util.Array`{.verbatim} ，而不是 常用的
-`numpy.ndarray`{.verbatim} 数组，因此可以使用
-`matplotlib.pyplot.imread`{.verbatim} 对图片进行读取并返 回
-`numpy.ndarray`{.verbatim} 格式。但是最新的 `scipy`{.verbatim}
-版本中，也没有了 `imageio`{.verbatim} 模块；而
-`matplotlib.pyplot.imread`{.verbatim} 支持的格式并不是很多，需要可以使用
-`pillow`{.verbatim} 。
+读取图片，在原来的 `scipy` 包中，可以使用
+`scipy.misc.imread` 来对图片进行读取， 而后来的
+`scipy` 包中可以使用 `scipy.imageio.imread`
+来取代，但是 `scipy.imageio.imread` 返回的数组类型是
+`scipy.imageio.core.util.Array` ，而不是 常用的
+`numpy.ndarray` 数组，因此可以使用
+`matplotlib.pyplot.imread` 对图片进行读取并返 回
+`numpy.ndarray` 格式。但是最新的 `scipy`
+版本中，也没有了 `imageio` 模块；而
+`matplotlib.pyplot.imread` 支持的格式并不是很多，需要可以使用
+`pillow` 。
 
 ## 图片预览
 
@@ -392,7 +392,7 @@ plt.show()
 # 两层神经网络
 
 `input -> fully connected layer -> ReLU(no linear) -> fully connected
-layer(class scores) -> softmax(loss function).`{.verbatim}
+layer(class scores) -> softmax(loss function).`
 
 通过线性（全连接层）计算出来的得分，经过处理（分类中，寻找最大的得分的类作为预测
 结果）后，将所预测的结果与实际的目标进行比较，如果差异很小，则代表当前的参数很好。
@@ -405,9 +405,9 @@ layer(class scores) -> softmax(loss function).`{.verbatim}
 -   可以通过求导知道权重更新的方向(可导)
 -   如果当前"差异"很小，应当保持前面的权重不变。
 
-在下面的例子中使用的损失函数是 `Softmax`{.verbatim} 函数。$L_i =
+在下面的例子中使用的损失函数是 `Softmax` 函数。$L_i =
 -log(\frac{f_{y_j}}{\sum_j e^{f_j}})$，
-其中$f_{y_i}$代表着目前的正确类的 `scores`{.verbatim} 。
+其中$f_{y_i}$代表着目前的正确类的 `scores` 。
 
 ## 模型
 
@@ -588,7 +588,7 @@ val accurary: 0.248000
 # 调整参数
 
 通过前面的训练过程中，我们记录了 `loss_history, train_acc_history,
-val_acc_history`{.verbatim} 加上从模型的对象中可以获得模型的权重信息。
+val_acc_history` 加上从模型的对象中可以获得模型的权重信息。
 
 ``` {.python session="py" results="output graphic" file="./images/cifar-on-ann-602007.png" exports="both"}
 plt.figure(figsize=(9.0, 6.0))

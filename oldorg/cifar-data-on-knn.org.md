@@ -22,7 +22,7 @@ def relative_error(x, y):
 # 数据加载
 
 由于CIFAR默认的格式为二进制格式，不能使用常规的文件读取进行解码。
-`np.concatenate()`{.verbatim} 类似于 `np.c_ or np.r_`{.verbatim}
+`np.concatenate()` 类似于 `np.c_ or np.r_`
 用来合并数据。
 
 ## 数据加载函数
@@ -110,7 +110,7 @@ def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=1000,
 ## 加载数据
 
 将数据集变成一个2维的矩阵。选取前面的5000作为训练集，1000作为验证集，1000作为测
-试集。一些模型需要用到2维的数据形式。 `np.prod()`{.verbatim}
+试集。一些模型需要用到2维的数据形式。 `np.prod()`
 为将元素累积。
 
 ``` {.python session="py" results="output silent" exports="both"}
@@ -128,7 +128,7 @@ X_vali2d = X_vali.reshape(X_vali.shape[0], -1)
 
 # 可视化数据
 
-`np.flatnonzero()`{.verbatim} 将函数变平，并返回非零元素的索引。
+`np.flatnonzero()` 将函数变平，并返回非零元素的索引。
 
 ``` {.python session="py" results="output graphic" file="./images/cifar-data-on-knn-630170.png" exports="both"}
 classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']

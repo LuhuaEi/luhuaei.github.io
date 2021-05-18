@@ -27,8 +27,8 @@ TensorFlow中的Tensor具有三个属性：
 -   维度：形状
 -   数据类型：tensorflow将会自动的判断所对应的类型。
 
-当没有制定名字的时候，会默认基于 `"const_x"`{.verbatim} 命名。使用
-`tf.constant`{.verbatim} 创建一个常 量。
+当没有制定名字的时候，会默认基于 `"const_x"` 命名。使用
+`tf.constant` 创建一个常 量。
 
 ``` {.python session="py" results="output" exports="both"}
 import tensorflow as tf
@@ -61,7 +61,7 @@ Tensor("Add:0", shape=(1, 2), dtype=float16)
 我们需要用一个变量实时更新结果，可以使用=tf.get~variable~=
 创建变量或者获取变量。
 
-Note: TensorFlow中默认是不允许重复定义同一 `name`{.verbatim} 的变量。
+Note: TensorFlow中默认是不允许重复定义同一 `name` 的变量。
 
 ``` {.python session="py" results="output" exports="both"}
 var_int_1 = tf.get_variable("tensor_var_1", shape=[1, 2], dtype=tf.int32, initializer=tf.zeros_initializer)
@@ -72,8 +72,8 @@ print(var_int_1.shape)
 (1, 2)
 ```
 
-使用 `tf.placeholder`{.verbatim} 与 `tf.feed_ditc`{.verbatim}
-来定义占位符和提供占位符所需的数据。提供 `name`{.verbatim}
+使用 `tf.placeholder` 与 `tf.feed_ditc`
+来定义占位符和提供占位符所需的数据。提供 `name`
 的一个好处就是会在输出的结构图(或者流程图flowchart)中将name显示为名称。
 
 ``` {.python session="py" results="output" exports="both"}
@@ -85,7 +85,7 @@ print(data_place_holder_1)
 Tensor("data_place_holder_1:0", shape=(1, 2), dtype=int16)
 ```
 
-`tf.session`{.verbatim}
+`tf.session`
 当整个模型的网络构建完后，TensorFlow将会创建一个会话对网络按照各个
 节点的操作函数进行求值。
 

@@ -1,7 +1,7 @@
 > Q: How do you eat an elephant? A: One bite at a time.
 
 先从图片中提取特征，再根据这些特征用线性分类器进行分类。从前面的文章中，我们可以
-知道使用 `SVM`{.verbatim} 对图片进行分类，准确率仅仅35%。
+知道使用 `SVM` 对图片进行分类，准确率仅仅35%。
 
 在深度学习还没有发展起来的时候，人们使用图像识别的主要途径(pipeline):
 
@@ -34,15 +34,15 @@
 集细胞单元中各个像素点的梯度或者边缘的方向直方图。最后将这些直方图组合起来就可以
 构成特征采集器(descriptor)。
 
-一个采集器，就是从一个 `width x height x channel`{.verbatim}
-的图片中，输出一个长度为 `n`{.verbatim} 的向量或者数据，
-`HOG`{.verbatim} 采集的结果维度并不是固定不变的。
+一个采集器，就是从一个 `width x height x channel`
+的图片中，输出一个长度为 `n` 的向量或者数据，
+`HOG` 采集的结果维度并不是固定不变的。
 
 至于那一种特征(feature)的"有用的"，这个根据不同的目的具有不同的选择。
 
 > 如在辨别一个圆形按钮和方形按钮时，边缘(edges)特征将是有用的，而颜色是没有用的。
 
-而在 `H(histogram) O(oriented) G(gradient)`{.verbatim}
+而在 `H(histogram) O(oriented) G(gradient)`
 采集器中，选梯度(gradients)的方向 (oriented)的分布(distribution,
 histogram)作为特征。选择梯度的原因在于，位于边缘
 或者角落(密度陡增或者陡降的区域)。而且边缘和角落比起其他区域包含更多关于对象形状
@@ -67,10 +67,10 @@ plt.axis('off')
 
 ![](./images/image-extract-features-305110.png)
 
-下面对上面的图片计算梯度。使用 `np.pad()`{.verbatim}
-函数对矩阵进行扩充。其中 `((2, 2))`{.verbatim} 参
+下面对上面的图片计算梯度。使用 `np.pad()`
+函数对矩阵进行扩充。其中 `((2, 2))` 参
 数表示左上角扩充2行、右下角扩充2行。 `np.pad(np.zeros((2, 2)), ((2, 2)),
-mode = 'constant', constant_values = 1)`{.verbatim}
+mode = 'constant', constant_values = 1)`
 。使用两个卷积核计算对应x和y的梯度。
 
 ``` {.python session="py" results="output silent" exports="both"}
@@ -169,14 +169,14 @@ plt.axis('off')
 
 ![](./images/image-extract-features-72804.png)
 
-第一张为 `gx`{.verbatim} 为x方向的梯度，第二张为 `gy`{.verbatim}
-为y轴方向的梯度。从图片中可以看出 `gx`{.verbatim}
-对于垂直的线比较明显，而 `gy`{.verbatim}
+第一张为 `gx` 为x方向的梯度，第二张为 `gy`
+为y轴方向的梯度。从图片中可以看出 `gx`
+对于垂直的线比较明显，而 `gy`
 对于水平的线比较明显。而第三张可以看出很好的描绘出 整个人的轮廓。
 
 对于一个具有颜色的图片来说，将具有三个channel的梯度，选择最大的即代表最大梯度。
 梯度中的值为\[-255, 255\]之间，需要转变成\[0, 255\]之间，而使用
-`uint8`{.verbatim} 可以将负的转 变成无符号的 `int8`{.verbatim}
+`uint8` 可以将负的转 变成无符号的 `int8`
 类型确保为正数。而将其加上255,再除以2,可以将负的元素都变成 \[0,
 125\]之间，而0-125就是表示成灰色度。
 
@@ -349,7 +349,7 @@ female_oriented.max()
 
 ![](./images/image-extract-features-296443.png)
 
-图片的梯度对光线是敏感的。在一个图片中， `RGB`{.verbatim} 处于\[0,
+图片的梯度对光线是敏感的。在一个图片中， `RGB` 处于\[0,
 255\]之间，数值越大，代表
 的亮度越大，如果想将图片的亮度调暗一倍，可以将数值除以2。然后对其卷积求值后的梯
 度也会减少一半。因此导致直方图中的(magnitude
@@ -358,9 +358,9 @@ values)也会减少一半。但是，我们渴望
 (normalize)，消除不同亮度带来的影响。
 
 进行区间归一化的方法有多种，比如 L2、L1 范式等。根据
-$L2 = \sqrt{gx^2 + gy^2}$ 可以直接将 `8x8`{.verbatim}
+$L2 = \sqrt{gx^2 + gy^2}$ 可以直接将 `8x8`
 的方格进行归一化，但更好的方式将一个区域的4个区块连结起来一起归
-一化。将结合成4个方块后，将具有 `4x9=36`{.verbatim} 个直方图值。
+一化。将结合成4个方块后，将具有 `4x9=36` 个直方图值。
 
 ``` {.python session="py" results="output silent" exports="both"}
 def hog_normalize(hist):
@@ -408,10 +408,10 @@ def cifar_extract_hog(arr):
     return rest
 ```
 
-对 `CIFAR`{.verbatim}
+对 `CIFAR`
 中提取49000张图片作为训练集，10000张为测试集和1000张图片为验证集。并
 对图片进行中心化和标准化， 并为其添加偏差列(最后一列)。 `np.hstack(),
-np.vstack(), np.dstack()`{.verbatim} 对列表进行合并，分别为(horizontal,
+np.vstack(), np.dstack()` 对列表进行合并，分别为(horizontal,
 vertical, depth)。
 
 ``` {.python session="py" results="output silent" exports="both"}
@@ -471,7 +471,7 @@ predict test accuracy:  0.1674
 
 ## CS231N 中给出的提出特征的函数
 
-这里直接使用 `diff`{.verbatim}
+这里直接使用 `diff`
 计算差分。利用差分计算卷积的速度快很多，根据上面的提示，说如
 果寻找到合理的分箱值，验证集准确率可能达到44%。
 

@@ -24,4 +24,4 @@ flow](https://stackoverflow.com/questions/23740932/warning-vboxdrv-kernel-module
     66 of file VBoxManageHostonly.cpp
 
 这个问题是host地址的引起的错误，在linux系统下面执行
-`sudo vboxreload`{.verbatim}
+`sudo vboxreload`
