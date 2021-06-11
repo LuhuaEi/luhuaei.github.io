@@ -66,7 +66,7 @@ Networks)或者多层感应器(MLP, Multi-Layer Perceptrons).
 
 # 预加载
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -105,7 +105,7 @@ plt.tight_layout(pad=0.0)
 
 # 初始化参数
 
-``` {.python session="py" results="output silent"}
+```python
 W = 0.01 * np.random.randn(D, K)
 B = np.zeros((1, K))
 ```
@@ -115,7 +115,7 @@ B = np.zeros((1, K))
 将所有输入乘以权重累加后，再加上偏差。计算出每一个样本，对应3个类的得分，直观上，
 渴望正确的类获得更高的得分，换句话说，就是正确的类在三个类的占比应该最大。
 
-``` {.python session="py" results="output silent"}
+```python
 def f_scores(X, W, B):
     return np.dot(X, W) + B
 ```
@@ -136,7 +136,7 @@ $，假设以下情况，如果仅仅具有一个类时，那预测就是正确�
 测正确的概率应该为1/3,因此损失值大约为 -log(1/3) =
 1.09，跟计算出来的一样。
 
-``` {.python session="py" results="output silent"}
+```python
 def f_exp_scores(scores, y):
     height = scores.shape[0]
     exp_scores = np.exp(scores)
@@ -155,7 +155,7 @@ def f_loss(correct_logprobs, W, reg_lambda):
 
 根据公式计算得到，可以直接得出损失函数的梯度。
 
-``` {.python session="py" results="output silent"}
+```python
 def f_gradient(X, W, probs, y, reg_lambda):
     dscores = probs.copy()
 
@@ -170,7 +170,7 @@ def f_gradient(X, W, probs, y, reg_lambda):
 
 # 更新权重
 
-``` {.python session="py" results="output silent"}
+```python
 def f_update(W, B, dW, dB, learning_rate):
     weights = W.copy()
     bias = B.copy()
@@ -181,7 +181,7 @@ def f_update(W, B, dW, dB, learning_rate):
 
 # 迭代更新
 
-``` {.python session="py" results="output silent"}
+```python
 def main(X, W, B, y, reg_lambda, learning_rate, iter_num=100, verbose=False):
     for i in range(iter_num):
         scores = f_scores(X, W, B)
@@ -203,7 +203,7 @@ res_w, res_b, res_loss = main(X, W, B, y, 1e-3, 1e-0, iter_num=200, verbose=True
 从上面的线性分类器中，看到准确率仅仅51%。采用神经网络对数据进行拟合，设定一个两
 层的网络，其中第一层网络具有100个节点，而第二层即最后一层具有3个(节点)分类。
 
-``` {.python session="py" results="output silent"}
+```python
 h = 100
 W = 0.01 * np.random.randn(D, h)
 B = np.zeros((1, h))
@@ -217,7 +217,7 @@ reg_lambda = 1e-3
 
 ## 计算得分
 
-``` {.python session="py" results="output silent"}
+```python
 def n_scores(X, W, W2, B, B1):
     hidden_layer_scores = np.dot(X, W) + B # (300, 100)
     # 激励函数 ReLU
@@ -232,7 +232,7 @@ def n_scores(X, W, W2, B, B1):
 
 损失函数同样是使用上面的softmax。根据反向传播算法。
 
-``` {.python session="py" results="output silent"}
+```python
 def n_data_loss(output_scores, y):
     height = y.shape[0]
     exp_scores = np.exp(output_scores)
@@ -252,7 +252,7 @@ def n_regularztion_loss(W, W2, reg_lambda):
 
 对损失函数求导。
 
-``` {.python session="py" results="output silent"}
+```python
 def n_gradient(X, W2, exp_scores_percent, y, hidden_layer_scores):
     # 对softmax函数求导部分，前面已经用公式证明，
     height = y.shape[0]
@@ -278,7 +278,7 @@ def n_gradient(X, W2, exp_scores_percent, y, hidden_layer_scores):
 
 ## 更新函数
 
-``` {.python session="py" results="output silent"}
+```python
 def n_main(X, y, h, W, B, W2, B2, learning_rate=1e-0, reg_lambda=1e-3, iter_num=500, verbose=False):
     W = W.copy()
     B = B.copy()

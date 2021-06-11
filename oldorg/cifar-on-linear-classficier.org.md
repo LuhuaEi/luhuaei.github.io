@@ -15,7 +15,7 @@
 
 ## 线性组合得分
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def forward_scores(x, w, b):
     x = x.reshape(x.shape[0], -1)
     scores = x.dot(w) + b
@@ -25,7 +25,7 @@ def forward_scores(x, w, b):
 
 ## 反向传播
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def backward_scores(dscores, cache):
     x, w, b = cache
     dx = dscores.dot(w.T)
@@ -61,7 +61,7 @@ $L_i = \sum_{j \neq y_i} \max(0, s_j - s_{y-j} + \delta) $
 来计算数据损失部分。整个 `SVM`
 计算出来的损失函数值，并计算梯度。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def svm_loss(scores, y, delta=1):
     N = scores.shape[0]
     correct_class_scores = scores[list(range(N)), y].reshape(N, -1)
@@ -99,7 +99,7 @@ classifier求导的过程中，可以分情况求导$\frac{d L_i}{d score_j}$，
 其进行正规化，对$S_i$方程上下同乘一个常数$C$，C为任意参数，普遍的选择$C =
 -max_j f_j$，使得最大的得分为0。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def softmax_loss(scores, Y):
     N = scores.shape[0]
     scores -= np.max(scores, axis=1, keepdims=True)
@@ -122,7 +122,7 @@ def softmax_loss(scores, Y):
 
 # 线性分类器
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 class LinerClassifier():
     def __init__(self):
         self.W = None
@@ -200,7 +200,7 @@ class LinerSoftmax(LinerClassifier):
 
 # 测试数据
 
-``` {.python session="py" results="output" exports="both"}
+```python
 # 将数据添加一组偏差
 X_train2d_dev = np.hstack([X_train2d, np.ones((X_train2d.shape[0], 1))])
 X_test2d_dev = np.hstack([X_test2d, np.ones((X_test2d.shape[0], 1))])
@@ -226,7 +226,7 @@ svm accurary: 0.33, softmax accurary: 0.26
 
 # 损失函数可视化
 
-``` {.python session="py" results="output graphic" file="./images/cifar-on-linear-classficier-918772.png" exports="both"}
+```python
 plt.figure(figsize=(9.0, 6.0))
 plt.plot(loss_hist)
 plt.plot(softmax_loss_history)

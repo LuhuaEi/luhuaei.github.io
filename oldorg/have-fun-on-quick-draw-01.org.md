@@ -9,7 +9,7 @@
 
 # 依赖加载
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,7 +23,7 @@ import json
 
 先尝试使用baseball~bat数据集~，后面可以只需改变数据集就可以了。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 with open("/home/luhuaei/Data/google-quickdarw/baseball_bat.ndjson", 'r') as f:
     # pandas provice many utils function
     DATA_BASEBALL = pd.DataFrame(ndjson.load(f))
@@ -34,7 +34,7 @@ with open("/home/luhuaei/Data/google-quickdarw/baseball_bat.ndjson", 'r') as f:
 
 这里定义一些经常调用的函数。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def bar_annotate(draw_rect):
     for rect in draw_rect:
         height = rect.get_height()
@@ -51,7 +51,7 @@ def bar_annotate(draw_rect):
 
 ## baseball~bat~
 
-``` {.python session="py" results="output graphic" file="./images/have-fun-on-quick-draw-01-923979.png" exports="both"}
+```python
 count_country = DATA_BASEBALL.countrycode.value_counts()
 
 plt.style.use('ggplot')
@@ -66,7 +66,7 @@ bar_annotate(rect)
 中属于baseball~bat这一项目中就具有56779个用户~。可能的原因是：Google建立于美国
 本地，用户量大。
 
-``` {.python session="py" results="output graphic" file="./images/have-fun-on-quick-draw-01-104983.png" exports="both"}
+```python
 DATA_BASEBALL['count_strokes'] = DATA_BASEBALL.drawing.apply(lambda x: np.array(x).shape[0])
 
 mean_strokes = DATA_BASEBALL.count_strokes.groupby(DATA_BASEBALL.countrycode).mean()
@@ -82,7 +82,7 @@ ax.set_ylim(0, 5)
 笔划都是集中在2.0附近。其中最高的是GB(Great
 Britain)，最低的是DE(Germany).
 
-``` {.python session="py" results="output graphic" file="./images/have-fun-on-quick-draw-01-115375.png" exports="both"}
+```python
 fig, ax = plt.subplots(3, 3, figsize=(9.0, 6.0))
 index = np.random.choice(DATA_BASEBALL.index, 9)
 for i, a in zip(index, ax.flatten()):
@@ -96,7 +96,7 @@ for i, a in zip(index, ax.flatten()):
 
 生成一个动态的gif图，快速浏览100张图片的形状。
 
-``` {.python session="py" results="output graphic" file="./images/have-fun-on-quick-draw-01-221760.gif" var="path = \"./images/have-fun-on-quick-draw-01-221760.gif\"" exports="both"}
+```python
 fig, ax = plt.subplots(figsize=(9.0, 6.0))
 index = np.random.choice(DATA_BASEBALL.index, 100)
 def gif_update(iter_count):
@@ -113,5 +113,5 @@ anim.save(path, fps=60, writer='imagemagick')
 
 # 切割数据
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 ```

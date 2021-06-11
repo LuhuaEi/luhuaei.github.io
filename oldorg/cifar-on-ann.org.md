@@ -49,7 +49,7 @@ f_plot(f_sigmoid, x)
 
 ### 函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def sigmoid_forward(x):
     out = 1.0 / (1.0 + np.exp(-x))
     cache = (x)
@@ -75,7 +75,7 @@ f_plot(f_tanh, x)
 
 ### 函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def tanh_forward(x):
     out, _ = sigmoid_forward(2.0 * x)
     out = 2.0 * out - 1.0
@@ -116,7 +116,7 @@ ReLU很脆弱，如果当具有一个很大的梯度通过一个ReLU神经元时
 
 ### 函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def relu_forward(x):
     out = np.maximum(0, x)
     return out, x
@@ -144,7 +144,7 @@ f_plot(f_leaky_relu, x)
 
 ### 函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def leaky_relu_forward(x):
     out = np.where(x < 0, 0.25*x, x)
     return out, x
@@ -192,7 +192,7 @@ f_plot(f_maxout, x)
 
 这个简单的算法使用的仅仅是线性组合。$f(x_i, W, b) = W x_i + b$
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def forward_pass(input_volumes, input_weights, input_biases, stride=1, zero_padding=0):
     '''
     Inputs:
@@ -232,7 +232,7 @@ def forward_pass(input_volumes, input_weights, input_biases, stride=1, zero_padd
 
 ## 测试数据
 
-``` {.python session="py" results="output" exports="both"}
+```python
 x_shape = (2, 3, 4, 4)
 w_shape = (3, 3, 4, 4)
 x = np.linspace(-0.1, 0.5, num=np.prod(x_shape)).reshape(x_shape)
@@ -317,7 +317,7 @@ plt.axis('off')
 
 选择一个更小的图片进行试验。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 img_size = 200
 kieen_small = kieen.resize((img_size, img_size))
 puppy_small = puppy.resize((img_size, img_size))
@@ -332,7 +332,7 @@ x[1, :, :, :] = puppy_array.transpose((2, 0, 1))
 
 ## 生成权重矩阵（过滤器）
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 # 一共两个过滤器，每一个为3x3x3
 w = np.zeros((2, 3, 3, 3))
 
@@ -411,7 +411,7 @@ layer(class scores) -> softmax(loss function).`
 
 ## 模型
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 class TwoLayerNN(object):
     def __init__(self, input_size, hidden_size, output_size, std=1e-4):
         '''
@@ -544,7 +544,7 @@ class TwoLayerNN(object):
 
 ## 测试
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 input_size = 4                  # 单个样本的维度
 output_size = 3                 # 输出的类个数
 hidden_size = 10                # 隐藏层中节点个数
@@ -568,7 +568,7 @@ abs(net_loss - float(1.30378789133))
 
 # 训练模型
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 cifar_net = TwoLayerNN(X_train2d.shape[1], 50, 10)
 cifar_stats = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
                               learning_rate=1e-4, learning_rate_decay=0.95,
@@ -577,7 +577,7 @@ cifar_stats = cifar_net.train(X_train2d, Y_train, X_vali2d, Y_vali,
 
 查看模型的准确率。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 print("val accurary: %f" %((cifar_net.predict(X_vali2d) == Y_vali).mean()))
 ```
 
@@ -602,7 +602,7 @@ plt.ylabel('loss')
 
 将前面训练的过程结合起来，根据输出结果进行调整参数，寻找最高的准确率。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 hidden_size = list(range(100, 1000, 100))
 learning_rate = [1e-3, 1e-4, 1e-5, 2e-3, 2e-4, 2e-5, 3e-3, 3e-4, 3e-5]
 reg = np.arange(0, 1, 0.2)
@@ -623,7 +623,7 @@ for h in hidden_size:
             print("h: %d, l: %f, r: %f, acc: %f" %(h, l, r, acc, ))
 ```
 
-``` {.python session="py" results="output" exports="both"}
+```python
 print("The best accurary: %f" %cifar_model_acc)
 
 y_pred = cifar_model.predict(X_test2d)

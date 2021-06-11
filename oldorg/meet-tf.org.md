@@ -30,7 +30,7 @@ TensorFlow中的Tensor具有三个属性：
 当没有制定名字的时候，会默认基于 `"const_x"` 命名。使用
 `tf.constant` 创建一个常 量。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 import tensorflow as tf
 
 type_float = tf.constant(3.141519, tf.float32)
@@ -47,7 +47,7 @@ Tensor("float_to_int:0", shape=(), dtype=int32)
 TensorFlow中内置许多基本操作函数，像绝对值、指数、对数、开方等。值得注意的是，这
 些操作函数也并不是返回一个结果，而是创建一个占位符，表示相关元素需要进行该操作。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 tensor_a = tf.constant([[1, 2]], dtype=tf.float16)
 tensor_b = tf.constant([[3, 4]], dtype=tf.float16)
 tensor_add = tf.add(tensor_a, tensor_b)
@@ -63,7 +63,7 @@ Tensor("Add:0", shape=(1, 2), dtype=float16)
 
 Note: TensorFlow中默认是不允许重复定义同一 `name` 的变量。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 var_int_1 = tf.get_variable("tensor_var_1", shape=[1, 2], dtype=tf.int32, initializer=tf.zeros_initializer)
 print(var_int_1.shape)
 ```
@@ -76,7 +76,7 @@ print(var_int_1.shape)
 来定义占位符和提供占位符所需的数据。提供 `name`
 的一个好处就是会在输出的结构图(或者流程图flowchart)中将name显示为名称。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 data_place_holder_1 = tf.placeholder(tf.int16, shape=[1, 2], name="data_place_holder_1")
 print(data_place_holder_1)
 ```
@@ -89,7 +89,7 @@ Tensor("data_place_holder_1:0", shape=(1, 2), dtype=int16)
 当整个模型的网络构建完后，TensorFlow将会创建一个会话对网络按照各个
 节点的操作函数进行求值。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 x = tf.constant([2])
 y = tf.constant([4])
 multiply = tf.multiply(x, y)

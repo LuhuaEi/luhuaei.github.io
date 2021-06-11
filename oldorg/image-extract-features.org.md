@@ -73,7 +73,7 @@ plt.axis('off')
 mode = 'constant', constant_values = 1)`
 。使用两个卷积核计算对应x和y的梯度。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 kernel_x = np.array([  [+1, 0, -1],
                        [+1, 0, -1],
                        [+1, 0, -1]])
@@ -84,7 +84,7 @@ def rgb2gray(image):
       return np.dot(image, [0.299, 0.587, 0.144])
 ```
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def convolution2d(image, kernel, zero_padding=0, stride=1, grayscale=True, keep_channel=False):
     '''
     image: The array is 3 dimensional.(channel, height, width)
@@ -130,7 +130,7 @@ def computer_oriented(gx, gy):
 下面，我们对图片计算卷积后的梯度，灰色度、颜色(但只取最大的channel)，保留三层
 channel的。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 female_gx = convolution2d(female.transpose(2, 0, 1), kernel_x)
 female_gy = convolution2d(female.transpose(2, 0, 1), kernel_y)
 female_gradient = np.sqrt(np.square(female_gx) + np.square(female_gy))
@@ -255,7 +255,7 @@ gradient)，因为带
 有趣的是，在投票的过程中(vote)如果一个角度为10度(degree)，其将会处于0-20之间，因此按照10
 到两边的距离比例，对其进行切割(split)，分别对两个分箱(bins)进行投票(vote)。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def split_block(arr, cell_num):
     a_channel, a_height, a_width = arr.shape
     o_height = int(a_height / cell_num)
@@ -294,7 +294,7 @@ plt.title('(20, 70)')
 
 计算各个方块对应的直方图分布。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def magnitude_vote(magnitude_block, oriented_block, method='count'):
     oriented_block = np.where(np.isnan(oriented_block), 0, oriented_block)
     oriented_block = np.where(oriented_block >= 180, oriented_block - 180, oriented_block)
@@ -362,7 +362,7 @@ $L2 = \sqrt{gx^2 + gy^2}$ 可以直接将 `8x8`
 的方格进行归一化，但更好的方式将一个区域的4个区块连结起来一起归
 一化。将结合成4个方块后，将具有 `4x9=36` 个直方图值。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def hog_normalize(hist):
     channel, height, width = hist.shape[:3]
     o_height, o_width = (height - 2) + 1, (width - 2) + 1
@@ -382,7 +382,7 @@ female_normalize_histogram = hog_normalize(female_histogram)
 
 这里使用前面定义的线性模型分类中的类函数。也可以使用ANN模型提取的特征建立模型。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def img_hog_feature(img):
     img_conv_gx = convolution2d(img, kernel_x, zero_padding=1)
     img_conv_gy = convolution2d(img, kernel_y, zero_padding=1)
@@ -414,7 +414,7 @@ def cifar_extract_hog(arr):
 np.vstack(), np.dstack()` 对列表进行合并，分别为(horizontal,
 vertical, depth)。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 X_train_hog = cifar_extract_hog(X_train)
 X_test_hog = cifar_extract_hog(X_test)
 X_vali_hog = cifar_extract_hog(X_vali)
@@ -441,7 +441,7 @@ X_mean_rhog = np.mean(np.array(X_train_rhog), axis=0, keepdims=True)
 
 使用支持向量机对提取的特征进行建模。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 learning_rates = [1e-9, 1e-8, 1e-7]
 regularization_lambdas = [5e4, 5e5, 5e6]
 
@@ -461,7 +461,7 @@ for lr in learning_rates:
             test_acc = np.mean(svm.predict(X_test_rhog) == Y_test)
 ```
 
-``` {.python session="py" results="output" exports="both"}
+```python
 print('predict test accuracy: ', test_acc)
 ```
 
@@ -475,7 +475,7 @@ predict test accuracy:  0.1674
 计算差分。利用差分计算卷积的速度快很多，根据上面的提示，说如
 果寻找到合理的分箱值，验证集准确率可能达到44%。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 from scipy.ndimage import uniform_filter
 
 def extract_features(imgs, feature_fns, verbose=False):
@@ -621,7 +621,7 @@ def color_histogram_hsv(im, nbin=10, xmin=0, xmax=255, normalized=True):
 
 寻找最优的分箱值。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def hog_and_svm(lrs, regs, bins=9, num_iters=1500):
     res = {}
 
@@ -663,7 +663,7 @@ for b in [10]:
 
 还是没有达到提示中44%验证集准确率。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 print('best_bin: %s, best_val_acc: %s, best_test_acc: %s' %(best_bin, best_val_acc, best_bins_results['best_test_acc']))
 ```
 

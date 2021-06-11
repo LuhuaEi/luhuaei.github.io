@@ -2,7 +2,7 @@
 
 # 依赖加载
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 import numpy as np
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -27,7 +27,7 @@ def relative_error(x, y):
 
 ## 数据加载函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def unpickle(file_name):
     '''解码数据'''
     with open(file_name, 'rb') as f:
@@ -113,7 +113,7 @@ def get_CIFAR_data(num_training=49000, num_validation=1000, num_test=1000,
 试集。一些模型需要用到2维的数据形式。 `np.prod()`
 为将元素累积。
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 DATA = get_CIFAR_data()
 X_train = DATA['x_train']
 Y_train = DATA['y_train']
@@ -130,7 +130,7 @@ X_vali2d = X_vali.reshape(X_vali.shape[0], -1)
 
 `np.flatnonzero()` 将函数变平，并返回非零元素的索引。
 
-``` {.python session="py" results="output graphic" file="./images/cifar-data-on-knn-630170.png" exports="both"}
+```python
 classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
 num_classes = len(classes)
 sample_per_class = 7
@@ -162,7 +162,7 @@ plt.show()
 相减后取绝对值(L1)或者是相减后取平方在开方，对结果矩阵元素进行相加，得到两者之间
 的距离。
 
-``` {.python session="py" results="output silent"}
+```python
 class NearesNeighbor():
     def __init__(self, method="L1"):
         self.method = method
@@ -217,7 +217,7 @@ set)。使用验证集进行调参，得到 最终模型后，再用于测试集
 将数据进行切割，返回一个列表，在python中，两个列表进行相加求值为将两个列表进行合
 并。
 
-``` {.python session="py" results="output silent"}
+```python
 def cross_validation(Xtr, Ytr, ks, folds, classifier):
     xtrf = np.split(Xtr, folds)
     ytrf = np.split(Ytr, folds)
@@ -239,7 +239,7 @@ def cross_validation(Xtr, Ytr, ks, folds, classifier):
 
 ## 算法实现
 
-``` {.python session="py" results="output silent"}
+```python
 class KNearesNeighbor():
     def __init__(self, method='L2', loop_way=0):
         self.method = method
@@ -335,7 +335,7 @@ class KNearesNeighbor():
 
 不使用循环速度真的提升很多。
 
-``` {.python session="py" results="output" exports="both"}
+```python
 nn = NearesNeighbor("L2")
 nn.train(X_train2d, Y_train)
 nn_pred = nn.predict(X_test2d)
@@ -352,7 +352,7 @@ NN: 0.27, KNN: 0.29
 
 ## 使用交叉验证选择最优的k
 
-``` {.python session="py" results="output silent"}
+```python
 num_folds = 5
 k_choices = [1, 3, 5, 7, 10, 25, 50, 100]
 

@@ -61,7 +61,7 @@
 特点为：速度慢，但是容易操作。用泰勒表达式可以验证用一个h的误差项比2h的误差项大。
 所以推荐使用2h求导。$g = \frac{f(x + h) - f(x - h)}{2h}$
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 def eval_gradient_numerical(f, x, verbose=True, h=0.00001):
       '''
       Inputs:
@@ -185,7 +185,7 @@ learning_rate * grad`
 
 ## 加载数据
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -196,7 +196,7 @@ DATA = np.array(np.genfromtxt("data/gd-line-regression.csv", delimiter=','))
 
 ## 数据预览
 
-``` {.python session="py" results="output graphic" file="./images/use-gradient-descent-for-line-regression-945387.png" exports="both"}
+```python
 x = DATA[:, 0]
 y = DATA[:, 1]
 plt.figure(figsize=(9.0, 6.0))
@@ -210,7 +210,7 @@ plt.tight_layout(pad=0.0)
 
 ## 梯度下降函数
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 class LinearRegression():
     def __init__(self):
         self.weights_list = []
@@ -290,7 +290,7 @@ class LinearRegression():
 
 这里已经将截距项合并到x中以及weights中。
 
-``` {.python session="py" results="output graphic" file="./images/use-gradient-descent-for-line-regression-134697.png" exports="both"}
+```python
 # 在数据前面添加一列，用来计算截距项
 xt = np.c_[np.ones((x.shape[0])), x]
 yt = y.reshape(y.shape[0], -1)
@@ -307,7 +307,7 @@ linear.plot(linear.weights)
 
 ## 优化过程
 
-``` {.python session="py" results="output silent" exports="both"}
+```python
 fig, ax = plt.subplots(figsize=(9.0, 6.0))
 ax.scatter(x, y)
 line, = ax.plot(x, np.dot(xt, weights), 'r-', lw=3)
