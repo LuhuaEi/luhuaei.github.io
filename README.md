@@ -1,6 +1,10 @@
 
 [Home](README.md)
 
+# MD
+
+[怎样去掉PDF白边距](md/trim_pdf_white_margin/doc.md)
+
 
 # org
 
