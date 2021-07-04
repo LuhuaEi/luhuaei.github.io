@@ -3,6 +3,8 @@
 
 # MD
 
+[尝试 darling 安装 WeChat](md/arch_install_darling/doc.md)
+
 [怎样去掉PDF白边距](md/trim_pdf_white_margin/doc.md)
 
 
